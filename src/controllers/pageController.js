@@ -544,7 +544,9 @@ exports.getInvoiceDetail = async (req, res, next) => {
     const invoice = await prisma.invoice.findUnique({
       where: { invoiceNumber },
       include: {
-        property: true,
+        property: {
+          include: { category: true }
+        },
         user: true
       }
     });

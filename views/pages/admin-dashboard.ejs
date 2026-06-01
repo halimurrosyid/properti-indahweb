@@ -197,7 +197,7 @@
                         <% invoices.forEach(inv => { %>
                             <tr class="hover:bg-surface-bright/50 transition-all text-body-md text-on-surface">
                                 <td class="p-4 font-mono font-bold">
-                                    <a href="/invoice/<%= inv.invoiceNumber %>" target="_blank" class="text-primary hover:underline"><%= inv.invoiceNumber %></a>
+                                    <a href="/invoice/<%= inv.invoiceNumber %>" target="_blank" class="text-primary hover:underline font-mono"><%= inv.invoiceNumber %></a>
                                     <span class="block text-label-xs text-outline mt-0.5"><%= new Date(inv.createdAt).toLocaleDateString('id-ID') %></span>
                                 </td>
                                 <td class="p-4">
