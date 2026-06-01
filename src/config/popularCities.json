@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Bandung",
+    "province": "Jawa Barat",
+    "imageUrl": "https://images.unsplash.com/photo-1626266848245-a131b73e51f6?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    "name": "Jakarta",
+    "province": "DKI Jakarta",
+    "imageUrl": "https://images.unsplash.com/photo-1505964261154-5743b693e22d?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    "name": "Surabaya",
+    "province": "Jawa Timur",
+    "imageUrl": "https://images.unsplash.com/photo-1601999109332-542b18dbec57?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    "name": "Tangerang",
+    "province": "Banten",
+    "imageUrl": "https://images.unsplash.com/photo-1611606063065-ee7946f0787a?auto=format&fit=crop&w=600&q=80"
+  }
+]

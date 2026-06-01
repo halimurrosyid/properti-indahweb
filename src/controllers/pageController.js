@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const popularCities = require('../config/popularCities.json');
 
 exports.getHome = async (req, res, next) => {
   try {
@@ -39,7 +40,8 @@ exports.getHome = async (req, res, next) => {
       description: 'Portal jual beli dan sewa properti lokal Indonesia yang cepat, ringan, dan gratis biaya pasang iklan.',
       categories,
       featuredProperties,
-      latestProperties
+      latestProperties,
+      popularCities
     });
   } catch (error) {
     next(error);
