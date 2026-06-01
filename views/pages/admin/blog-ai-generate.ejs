@@ -1,0 +1,192 @@
+<div class="max-w-4xl mx-auto px-container-margin md:px-stack-lg py-10 space-y-8">
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center gap-2 text-label-sm text-outline">
+        <a href="/admin/dashboard" class="hover:text-primary transition-colors">Admin Panel</a>
+        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+        <a href="/admin/blog" class="hover:text-primary transition-colors">Manajemen Blog</a>
+        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+        <span class="text-on-surface">Generate AI Artikel</span>
+    </nav>
+
+    <!-- Header Section -->
+    <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm flex justify-between items-center">
+        <div>
+            <h1 class="text-headline-md font-bold text-on-surface">Generate AI Artikel SEO</h1>
+            <p class="text-body-sm text-on-surface-variant mt-1">Gunakan kecerdasan buatan Anthropic Claude untuk membuat artikel berkualitas secara massal.</p>
+        </div>
+    </div>
+
+    <!-- API Config Check Alert -->
+    <% if (!isApiConfigured) { %>
+        <div class="bg-red-50 text-red-800 border border-red-200 p-6 rounded-2xl space-y-3">
+            <div class="flex items-center gap-2 font-bold text-title-md text-error">
+                <span class="material-symbols-outlined text-[24px]">warning</span>
+                API Key Anthropic Belum Dikonfigurasi
+            </div>
+            <p class="text-body-sm leading-relaxed text-on-surface-variant">
+                Kunci API Anthropic (<code class="font-mono bg-red-100 px-1 rounded text-error">ANTHROPIC_API_KEY</code>) kosong atau tidak terdaftar di file konfigurasi <code class="font-mono bg-red-100 px-1 rounded text-error">.env</code> server Anda. Fitur pembuatan artikel otomatis dinonaktifkan sementara sampai konfigurasi ini dilengkapi.
+            </p>
+        </div>
+    <% } %>
+
+    <!-- Form -->
+    <div class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm overflow-hidden p-6 md:p-8">
+        <form action="/admin/blog/ai-generate" method="POST" enctype="multipart/form-data" class="space-y-6" id="ai-generate-form">
+            <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+
+            <!-- Batch Name -->
+            <div class="space-y-2">
+                <label for="batch_name" class="text-label-md font-bold text-on-surface block">Nama Batch / Job (Opsional)</label>
+                <input type="text" id="batch_name" name="batch_name" placeholder="Contoh: Batch Artikel Tips KPR Juni 2026" 
+                       class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all">
+            </div>
+
+            <!-- Titles text (One per line) -->
+            <div class="space-y-2">
+                <label for="titles_text" class="text-label-md font-bold text-on-surface block">Daftar Judul Artikel <span class="text-error">*</span></label>
+                <span class="text-body-xs text-outline block mb-1">Ketik atau tempelkan daftar judul artikel yang ingin dibuat. Tuliskan <strong>satu judul per baris</strong>. Batas maksimum 50 judul per batch.</span>
+                <textarea id="titles_text" name="titles_text" required rows="8" placeholder="Contoh:&#10;5 Keuntungan Membeli Rumah Dekat Stasiun MRT&#10;Syarat Terbaru Pengajuan KPR Syariah 2026&#10;Cara Mudah Mengecek Keaslian Sertifikat SHM"
+                          class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all font-mono"></textarea>
+                <span class="text-body-xs text-outline block" id="title-counter-label">Jumlah judul: 0 / 50</span>
+            </div>
+
+            <!-- Category -->
+            <div class="space-y-2">
+                <label for="category_id" class="text-label-md font-bold text-on-surface block">Kategori Hasil Artikel <span class="text-error">*</span></label>
+                <select id="category_id" name="category_id" required
+                        class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all cursor-pointer">
+                    <option value="">-- Pilih Kategori --</option>
+                    <% categories.forEach(cat => { %>
+                        <option value="<%= cat.id %>"><%= cat.name %></option>
+                    <% }) %>
+                </select>
+            </div>
+
+            <!-- Default Featured Image -->
+            <div class="space-y-2">
+                <label for="featured_image" class="text-label-md font-bold text-on-surface block">Default Featured Image (Opsional)</label>
+                <input type="file" id="featured_image" name="featured_image" accept="image/*"
+                       class="w-full text-body-sm text-outline border border-border-light rounded-xl px-4 py-3 bg-surface-container-low focus:outline-none file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-label-sm file:font-semibold file:bg-primary file:text-on-primary hover:file:bg-surface-tint file:cursor-pointer transition-all">
+                <span class="text-body-xs text-outline block">Gambar ini akan dipasang sebagai cover default untuk semua artikel hasil generate batch ini.</span>
+            </div>
+
+            <!-- Knowledge Base -->
+            <div class="space-y-2">
+                <label for="knowledge_base" class="text-label-md font-bold text-on-surface block">Basis Pengetahuan Tambahan / Knowledge Base (Opsional)</label>
+                <span class="text-body-xs text-outline block mb-1">Tulis informasi/acuan khusus seputar lokasi, aturan KPR bank terkait, data riset internal, atau profil perusahan Anda agar isi artikel AI lebih akurat.</span>
+                <textarea id="knowledge_base" name="knowledge_base" rows="4" placeholder="Contoh:&#10;- Bunga KPR Indahweb Bank saat ini adalah 4.5% fixed 3 tahun.&#10;- Kantor Cabang Properti Indahweb terletak di Sudirman Central Business District."
+                          class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all"></textarea>
+            </div>
+
+            <!-- Status Mode Result -->
+            <div class="space-y-2">
+                <label for="status_mode" class="text-label-md font-bold text-on-surface block">Pengaturan Status Terbit Hasil AI</label>
+                <select id="status_mode" name="status_mode" required
+                        class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all cursor-pointer">
+                    <option value="draft">Simpan Sebagai Draft (Semua masuk draft)</option>
+                    <option value="published">Langsung Terbit (Semua langsung tayang publik)</option>
+                    <option value="scheduled">Scheduled Otomatis (Penjadwalan berantai/berkala)</option>
+                </select>
+            </div>
+
+            <!-- Scheduled chaining logic parameters (Conditional) -->
+            <div class="bg-surface-container-low p-6 rounded-2xl border border-border-light space-y-4 hidden" id="scheduled-options-container">
+                <h4 class="text-title-sm font-bold text-on-surface flex items-center gap-1">
+                    <span class="material-symbols-outlined text-primary text-[18px]">calendar_month</span> Parameter Penjadwalan Berantai
+                </h4>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Start Publish Date -->
+                    <div class="space-y-2">
+                        <label for="publish_start_at" class="text-label-sm font-bold text-on-surface block">Tanggal Mulai Rantai Publish</label>
+                        <input type="datetime-local" id="publish_start_at" name="publish_start_at" 
+                               class="w-full bg-surface-container-lowest text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all">
+                    </div>
+                    
+                    <!-- Interval Hours -->
+                    <div class="space-y-2">
+                        <label for="interval_hours" class="text-label-sm font-bold text-on-surface block">Interval Publikasi (Dalam Jam)</label>
+                        <input type="number" id="interval_hours" name="interval_hours" min="1" value="12"
+                               class="w-full bg-surface-container-lowest text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Publishing window start -->
+                    <div class="space-y-2">
+                        <label for="publish_window_start" class="text-label-sm font-bold text-on-surface block">Mulai Rentang Jam Publikasi (Format HH:MM)</label>
+                        <input type="text" id="publish_window_start" name="publish_window_start" value="08:00" placeholder="08:00"
+                               class="w-full bg-surface-container-lowest text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all">
+                    </div>
+                    
+                    <!-- Publishing window end -->
+                    <div class="space-y-2">
+                        <label for="publish_window_end" class="text-label-sm font-bold text-on-surface block">Selesai Rentang Jam Publikasi (Format HH:MM)</label>
+                        <input type="text" id="publish_window_end" name="publish_window_end" value="22:00" placeholder="22:00"
+                               class="w-full bg-surface-container-lowest text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all">
+                    </div>
+                </div>
+                <span class="text-body-xs text-outline block">Jika waktu terjadwal jatuh di luar rentang jam ini, sistem otomatis akan menggesernya ke waktu window terdekat di hari berikutnya.</span>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="pt-6 border-t border-border-light flex items-center justify-end gap-3">
+                <a href="/admin/blog" class="text-label-md font-bold text-on-surface-variant hover:bg-surface-container-high px-5 py-3 rounded-full border border-border-light transition-all">
+                    Batal
+                </a>
+                <button type="submit" id="submit-btn" 
+                        class="bg-primary hover:bg-surface-tint text-on-primary text-label-md font-bold px-6 py-3 rounded-full transition-all shadow-sm cursor-pointer disabled:bg-outline/30 disabled:text-outline disabled:cursor-not-allowed"
+                        <%= !isApiConfigured ? 'disabled' : '' %>>
+                    Mulai Generate Batch AI
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Toggle scheduled options visibility
+    const statusSelect = document.getElementById('status_mode');
+    const scheduledOptions = document.getElementById('scheduled-options-container');
+    const pubStartInput = document.getElementById('publish_start_at');
+    const intervalInput = document.getElementById('interval_hours');
+
+    statusSelect.addEventListener('change', function() {
+        if (this.value === 'scheduled') {
+            scheduledOptions.classList.remove('hidden');
+            pubStartInput.setAttribute('required', 'true');
+            intervalInput.setAttribute('required', 'true');
+            
+            // Set default date to now if empty
+            if (!pubStartInput.value) {
+                const now = new Date();
+                pubStartInput.value = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            }
+        } else {
+            scheduledOptions.classList.add('hidden');
+            pubStartInput.removeAttribute('required');
+            intervalInput.removeAttribute('required');
+        }
+    });
+
+    // Titles counter
+    const titlesText = document.getElementById('titles_text');
+    const titleCounterLabel = document.getElementById('title-counter-label');
+    const submitBtn = document.getElementById('submit-btn');
+    const isApiConfigured = <%= isApiConfigured %>;
+
+    titlesText.addEventListener('input', function() {
+        const list = this.value.split('\n').map(t => t.trim()).filter(t => t.length > 0);
+        titleCounterLabel.textContent = `Jumlah judul: ${list.length} / 50`;
+        
+        if (list.length > 50) {
+            titleCounterLabel.classList.add('text-error');
+            submitBtn.setAttribute('disabled', 'true');
+        } else {
+            titleCounterLabel.classList.remove('text-error');
+            if (isApiConfigured && list.length > 0) {
+                submitBtn.removeAttribute('disabled');
+            }
+        }
+    });
+</script>

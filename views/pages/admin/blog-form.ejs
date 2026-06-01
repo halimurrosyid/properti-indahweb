@@ -1,0 +1,271 @@
+<%
+  const isEdit = typeof post !== 'undefined' && post !== null;
+  const formAction = isEdit ? `/admin/blog/${post.id}/edit` : '/admin/blog/create';
+  const pageTitle = isEdit ? 'Edit Artikel Blog' : 'Tulis Artikel Manual';
+%>
+
+<div class="max-w-4xl mx-auto px-container-margin md:px-stack-lg py-10 space-y-8">
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center gap-2 text-label-sm text-outline">
+        <a href="/admin/dashboard" class="hover:text-primary transition-colors">Admin Panel</a>
+        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+        <a href="/admin/blog" class="hover:text-primary transition-colors">Manajemen Blog</a>
+        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+        <span class="text-on-surface"><%= pageTitle %></span>
+    </nav>
+
+    <!-- Header Section -->
+    <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm flex justify-between items-center">
+        <div>
+            <h1 class="text-headline-md font-bold text-on-surface"><%= pageTitle %></h1>
+            <p class="text-body-sm text-on-surface-variant mt-1">Publikasikan konten yang informatif untuk meningkatkan jangkauan SEO organik portal properti Anda.</p>
+        </div>
+    </div>
+
+    <!-- Error notice -->
+    <% if (error) { %>
+        <div class="bg-red-50 text-red-800 border border-red-200 p-4 rounded-xl text-body-md font-medium flex items-center gap-2">
+            <span class="material-symbols-outlined text-red-600">error</span>
+            <%= error %>
+        </div>
+    <% } %>
+
+    <!-- Form -->
+    <div class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm overflow-hidden p-6 md:p-8">
+        <form action="<%= formAction %>" method="POST" enctype="multipart/form-data" class="space-y-6" id="blog-form">
+            <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+
+            <!-- Title -->
+            <div class="space-y-2">
+                <label for="title" class="text-label-md font-bold text-on-surface block">Judul Artikel <span class="text-error">*</span></label>
+                <input type="text" id="title" name="title" required placeholder="Contoh: Panduan Lengkap Hukum Waris Tanah Adat di Bali" 
+                       value="<%= isEdit ? post.title : '' %>"
+                       class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all">
+            </div>
+
+            <!-- Slug -->
+            <div class="space-y-2">
+                <label for="slug" class="text-label-md font-bold text-on-surface block">URL Slug <span class="text-error">*</span></label>
+                <input type="text" id="slug" name="slug" required placeholder="contoh-judul-artikel-waris-bali" 
+                       value="<%= isEdit ? post.slug : '' %>"
+                       class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all font-mono">
+                <span class="text-body-xs text-outline block">URL akan mengarah ke: /artikel/<span id="slug-preview" class="font-bold"><%= isEdit ? post.slug : 'slug-artikel' %></span></span>
+            </div>
+
+            <!-- Grid: Category & Status -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Category selection -->
+                <div class="space-y-2">
+                    <label for="category_id" class="text-label-md font-bold text-on-surface block">Kategori Artikel</label>
+                    <select id="category_id" name="category_id" 
+                            class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all cursor-pointer">
+                        <option value="">-- Pilih Kategori --</option>
+                        <% categories.forEach(cat => { %>
+                            <option value="<%= cat.id %>" <%= (isEdit && post.category_id === cat.id) ? 'selected' : '' %>><%= cat.name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+
+                <!-- Publication Status -->
+                <div class="space-y-2">
+                    <label for="status" class="text-label-md font-bold text-on-surface block">Status Publikasi <span class="text-error">*</span></label>
+                    <select id="status" name="status" required
+                            class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all cursor-pointer">
+                        <option value="draft" <%= (isEdit && post.status === 'draft') ? 'selected' : '' %>>Draft (Simpan sebagai draf)</option>
+                        <option value="published" <%= (isEdit && post.status === 'published') ? 'selected' : '' %>>Published (Langsung terbit di publik)</option>
+                        <option value="scheduled" <%= (isEdit && post.status === 'scheduled') ? 'selected' : '' %>>Scheduled (Jadwalkan terbit otomatis)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Scheduled publish date (Conditional) -->
+            <div class="space-y-2 <%= (isEdit && post.status === 'scheduled') ? '' : 'hidden' %>" id="schedule-date-container">
+                <label for="scheduled_at" class="text-label-md font-bold text-on-surface block">Tanggal & Jam Publish Otomatis <span class="text-error">*</span></label>
+                <input type="datetime-local" id="scheduled_at" name="scheduled_at" 
+                       value="<%= (isEdit && post.scheduled_at) ? new Date(new Date(post.scheduled_at).getTime() - new Date(post.scheduled_at).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '' %>"
+                       class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all">
+                <span class="text-body-xs text-outline block">Artikel akan otomatis beralih status ke "published" saat jam ini terlewati (pastikan worker scheduler berjalan).</span>
+            </div>
+
+            <!-- Featured Image -->
+            <div class="space-y-2">
+                <label for="featured_image" class="text-label-md font-bold text-on-surface block">Gambar Utama (Featured Image)</label>
+                <% if (isEdit && post.featured_image) { %>
+                    <div class="mb-3 space-y-2">
+                        <span class="text-body-xs text-outline block">Gambar Saat Ini:</span>
+                        <img src="<%= post.featured_image %>" alt="Featured Cover" class="w-48 aspect-[16/10] object-cover rounded-lg border border-border-light bg-surface-container-low">
+                    </div>
+                <% } %>
+                <input type="file" id="featured_image" name="featured_image" accept="image/*"
+                       class="w-full text-body-sm text-outline border border-border-light rounded-xl px-4 py-3 bg-surface-container-low focus:outline-none file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-label-sm file:font-semibold file:bg-primary file:text-on-primary hover:file:bg-surface-tint file:cursor-pointer transition-all">
+                <span class="text-body-xs text-outline block">Format file: JPG, JPEG, PNG, WEBP. Maksimal ukuran file 3MB.</span>
+            </div>
+
+            <!-- Excerpt -->
+            <div class="space-y-2">
+                <label for="excerpt" class="text-label-md font-bold text-on-surface block">Ringkasan Artikel (Excerpt)</label>
+                <textarea id="excerpt" name="excerpt" rows="2" placeholder="Masukkan 1-2 kalimat ringkasan artikel yang akan tampil di halaman arsip daftar blog."
+                          class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all"><%= isEdit ? post.excerpt : '' %></textarea>
+            </div>
+
+            <!-- Content Area (HTML Textarea) -->
+            <div class="space-y-2">
+                <label for="content" class="text-label-md font-bold text-on-surface block">Isi Artikel / Konten HTML <span class="text-error">*</span></label>
+                <span class="text-body-xs text-outline block mb-1">Mendukung format HTML dasar seperti &lt;h2&gt;, &lt;h3&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;, &lt;strong&gt;.</span>
+                <textarea id="content" name="content" required rows="15" placeholder="Tuliskan materi artikel lengkap di sini..."
+                          class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all font-mono leading-relaxed"><%= isEdit ? post.content : '' %></textarea>
+            </div>
+
+            <!-- SEO OPTIMIZATIONS -->
+            <div class="border-t border-border-light pt-6 space-y-6">
+                <h3 class="text-title-lg font-bold text-on-surface flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-primary">search</span> Pengoptimalan SEO & Meta Tag
+                </h3>
+
+                <!-- Focus Keyword & Canonical -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="focus_keyword" class="text-label-md font-bold text-on-surface block">Kata Kunci Utama (Focus Keyword)</label>
+                        <input type="text" id="focus_keyword" name="focus_keyword" placeholder="Contoh: hukum waris bali" 
+                               value="<%= isEdit ? post.focus_keyword : '' %>"
+                               class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label for="canonical_url" class="text-label-md font-bold text-on-surface block">Canonical URL Override (Opsional)</label>
+                        <input type="url" id="canonical_url" name="canonical_url" placeholder="https://website-lain.com/artikel-asli" 
+                               value="<%= isEdit ? post.canonical_url : '' %>"
+                               class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all">
+                    </div>
+                </div>
+
+                <!-- Meta Title (with counter validation) -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label for="meta_title" class="text-label-md font-bold text-on-surface block">Meta Title (SEO Title)</label>
+                        <span class="text-body-xs font-semibold text-outline" id="meta-title-counter">0 / 60 karakter</span>
+                    </div>
+                    <input type="text" id="meta_title" name="meta_title" placeholder="Maksimal 60 karakter agar optimal di mesin pencari Google" 
+                           value="<%= isEdit ? post.meta_title : '' %>"
+                           class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all">
+                    <span id="meta-title-warning" class="text-body-xs text-error hidden font-bold">⚠️ Panjang Meta Title melebihi batas ideal 60 karakter! Terpotong di Google SERP.</span>
+                </div>
+
+                <!-- Meta Description (with counter validation) -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label for="meta_description" class="text-label-md font-bold text-on-surface block">Meta Description</label>
+                        <span class="text-body-xs font-semibold text-outline" id="meta-description-counter">0 / 160 karakter</span>
+                    </div>
+                    <textarea id="meta_description" name="meta_description" rows="3" placeholder="Tulis deskripsi rangkuman artikel maksimal 160 karakter untuk snippet hasil pencarian Google..."
+                              class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all"><%= isEdit ? post.meta_description : '' %></textarea>
+                    <span id="meta-description-warning" class="text-body-xs text-error hidden font-bold">⚠️ Panjang Meta Description melebihi batas ideal 160 karakter! Terpotong di Google SERP.</span>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="pt-6 border-t border-border-light flex items-center justify-end gap-3">
+                <a href="/admin/blog" class="text-label-md font-bold text-on-surface-variant hover:bg-surface-container-high px-5 py-3 rounded-full border border-border-light transition-all">
+                    Batal
+                </a>
+                <button type="submit" class="bg-primary hover:bg-surface-tint text-on-primary text-label-md font-bold px-6 py-3 rounded-full transition-all shadow-sm cursor-pointer">
+                    <%= isEdit ? 'Simpan Perubahan' : 'Buat Artikel' %>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // 1. Interactive Slug Generation
+    const titleInput = document.getElementById('title');
+    const slugInput = document.getElementById('slug');
+    const slugPreview = document.getElementById('slug-preview');
+    let userEditedSlug = <%= isEdit ? 'true' : 'false' %>;
+
+    const slugify = (text) => {
+        return text.toString().toLowerCase().trim()
+            .replace(/\s+/g, '-')
+            .replace(/[^\w\-]+/g, '')
+            .replace(/\-\-+/g, '-')
+            .replace(/^-+/, '')
+            .replace(/-+$/, '');
+    };
+
+    titleInput.addEventListener('input', function() {
+        if (!userEditedSlug) {
+            const generated = slugify(this.value);
+            slugInput.value = generated;
+            slugPreview.textContent = generated || 'slug-artikel';
+        }
+    });
+
+    slugInput.addEventListener('input', function() {
+        userEditedSlug = true;
+        const generated = slugify(this.value);
+        this.value = generated;
+        slugPreview.textContent = generated || 'slug-artikel';
+    });
+
+    // 2. Publication Status change handler (Toggle Scheduled Date)
+    const statusSelect = document.getElementById('status');
+    const scheduleContainer = document.getElementById('schedule-date-container');
+    const scheduledAtInput = document.getElementById('scheduled_at');
+
+    statusSelect.addEventListener('change', function() {
+        if (this.value === 'scheduled') {
+            scheduleContainer.classList.remove('hidden');
+            scheduledAtInput.setAttribute('required', 'true');
+        } else {
+            scheduleContainer.classList.add('hidden');
+            scheduledAtInput.removeAttribute('required');
+        }
+    });
+
+    // 3. Counter & Limits warnings for Meta Title and Meta Description
+    const metaTitleInput = document.getElementById('meta_title');
+    const metaTitleCounter = document.getElementById('meta-title-counter');
+    const metaTitleWarning = document.getElementById('meta-title-warning');
+
+    const metaDescInput = document.getElementById('meta_description');
+    const metaDescCounter = document.getElementById('meta-description-counter');
+    const metaDescWarning = document.getElementById('meta-description-warning');
+
+    function updateTitleCounter() {
+        const len = metaTitleInput.value.length;
+        metaTitleCounter.textContent = `${len} / 60 karakter`;
+        if (len > 60) {
+            metaTitleWarning.classList.remove('hidden');
+            metaTitleCounter.classList.add('text-error');
+        } else {
+            metaTitleWarning.classList.add('hidden');
+            metaTitleCounter.classList.remove('text-error');
+        }
+    }
+
+    function updateDescCounter() {
+        const len = metaDescInput.value.length;
+        metaDescCounter.textContent = `${len} / 160 karakter`;
+        if (len > 160) {
+            metaDescWarning.classList.remove('hidden');
+            metaDescCounter.classList.add('text-error');
+        } else {
+            metaDescWarning.classList.add('hidden');
+            metaDescCounter.classList.remove('text-error');
+        }
+    }
+
+    metaTitleInput.addEventListener('input', updateTitleCounter);
+    metaDescInput.addEventListener('input', updateDescCounter);
+
+    // Initial counter triggers
+    updateTitleCounter();
+    updateDescCounter();
+
+    // Form submit check: validate scheduled date
+    document.getElementById('blog-form').addEventListener('submit', function(e) {
+        if (statusSelect.value === 'scheduled' && !scheduledAtInput.value) {
+            alert('Silakan tentukan tanggal dan jam publish jika memilih status Scheduled!');
+            e.preventDefault();
+        }
+    });
+</script>

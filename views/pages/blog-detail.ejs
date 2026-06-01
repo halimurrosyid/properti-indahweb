@@ -1,0 +1,152 @@
+<div class="max-w-7xl mx-auto px-container-margin md:px-stack-lg py-8 space-y-8">
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center gap-2 text-label-sm text-outline">
+        <a href="/" class="hover:text-primary transition-colors flex items-center">
+            <span class="material-symbols-outlined text-[16px] mr-1">home</span> Home
+        </a>
+        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+        <a href="/artikel" class="hover:text-primary transition-colors font-semibold">Artikel</a>
+        
+        <% if (post.category) { %>
+            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+            <a href="/artikel/kategori/<%= post.category.slug %>" class="hover:text-primary transition-colors font-semibold"><%= post.category.name %></a>
+        <% } %>
+        
+        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+        <span class="text-on-surface truncate max-w-[200px] md:max-w-xs"><%= post.title %></span>
+    </nav>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        
+        <!-- Post Reader Container -->
+        <article class="lg:col-span-2 bg-surface-container-lowest rounded-3xl border border-border-light shadow-sm overflow-hidden p-6 md:p-10 space-y-6">
+            
+            <!-- Metadata & Status -->
+            <div class="space-y-4">
+                <div class="flex flex-wrap gap-2 items-center">
+                    <% if (post.category) { %>
+                        <a href="/artikel/kategori/<%= post.category.slug %>" class="bg-primary/10 text-primary font-bold text-label-xs px-3 py-1.5 rounded-full border border-primary/20 hover:bg-primary/20 transition-all">
+                            <%= post.category.name %>
+                        </a>
+                    <% } %>
+                    <% if (post.status !== 'published') { %>
+                        <span class="bg-yellow-100 text-yellow-800 text-label-xs font-bold px-2.5 py-1 rounded border border-yellow-200">Mode Pratinjau Admin</span>
+                    <% } %>
+                </div>
+
+                <h1 class="text-headline-md md:text-headline-lg font-black text-on-surface leading-tight tracking-tight">
+                    <%= post.title %>
+                </h1>
+
+                <div class="flex flex-wrap items-center gap-4 text-label-sm text-outline font-semibold">
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[16px]">calendar_today</span>
+                        <%= new Date(post.published_at || post.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+                    </span>
+                    <span>•</span>
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[16px]">schedule</span>
+                        <%= Math.max(2, Math.ceil((post.content || '').split(' ').length / 200)) %> mnt baca
+                    </span>
+                    <span>•</span>
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[16px]">person</span>
+                        Oleh: Redaksi Indahweb
+                    </span>
+                </div>
+            </div>
+
+            <!-- Excerpt / Summary -->
+            <% if (post.excerpt) { %>
+                <div class="border-l-4 border-primary bg-surface-container-low/50 p-4 rounded-r-xl text-body-md text-on-surface-variant font-medium leading-relaxed italic">
+                    <%= post.excerpt %>
+                </div>
+            <% } %>
+
+            <!-- Featured Image -->
+            <% if (post.featured_image) { %>
+                <div class="aspect-[16/9] w-full rounded-2xl overflow-hidden border border-border-light bg-surface-container-low shadow-sm">
+                    <img src="<%= post.featured_image %>" alt="<%= post.title %>" class="w-full h-full object-cover">
+                </div>
+            <% } %>
+
+            <!-- Main Post Body Content -->
+            <div class="prose max-w-none text-on-surface-variant text-body-lg leading-relaxed space-y-6 pt-2 font-sans">
+                <%- post.content %>
+            </div>
+
+            <!-- Social Sharing & Copy Action -->
+            <div class="pt-8 border-t border-border-light flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <span class="text-label-sm text-outline font-bold">Bagikan artikel ini:</span>
+                <div class="flex items-center gap-3">
+                    <a href="https://api.whatsapp.com/send?text=Baca%20artikel%20menarik%20ini:%20<%= encodeURIComponent(canonicalUrl) %>" target="_blank" class="flex items-center gap-1 px-3 py-2 bg-green-50 text-green-600 border border-green-200 hover:bg-green-100/50 rounded-lg text-label-sm font-semibold transition-all">
+                        <span class="material-symbols-outlined text-[16px]">chat</span> WhatsApp
+                    </a>
+                    <button onclick="navigator.clipboard.writeText('<%= canonicalUrl %>'); alert('Tautan berhasil disalin ke clipboard!');" class="flex items-center gap-1 px-3 py-2 bg-primary/5 text-primary border border-primary/20 hover:bg-primary/10 rounded-lg text-label-sm font-semibold transition-all cursor-pointer">
+                        <span class="material-symbols-outlined text-[16px]">link</span> Salin Tautan
+                    </button>
+                </div>
+            </div>
+        </article>
+
+        <!-- Sidebar Widgets -->
+        <aside class="space-y-6">
+            
+            <!-- CTA: Search Listings -->
+            <div class="bg-gradient-to-br from-primary to-primary/80 text-on-primary p-6 rounded-3xl border border-primary-variant/20 shadow-md space-y-4">
+                <span class="material-symbols-outlined text-[48px]">home_work</span>
+                <h3 class="text-title-lg font-extrabold tracking-tight">Cari Properti Impian Anda</h3>
+                <p class="text-body-sm opacity-90 leading-relaxed">
+                    Temukan ribuan listing rumah murah, tanah kavling strategis, kosan, ruko, apartemen dijual dan disewa di seluruh kota besar Indonesia.
+                </p>
+                <a href="/catalog" class="block text-center bg-surface-container-lowest text-primary text-label-md font-bold py-3 px-4 rounded-xl hover:bg-surface-bright transition-all shadow-sm">
+                    Jelajahi Katalog
+                </a>
+            </div>
+
+            <!-- CTA: Quick Post Ad -->
+            <div class="bg-surface-container-lowest border border-border-light p-6 rounded-3xl shadow-sm space-y-4">
+                <span class="material-symbols-outlined text-primary text-[40px]">add_circle</span>
+                <h3 class="text-title-md font-extrabold text-on-surface">Ingin Pasang Iklan Properti?</h3>
+                <p class="text-body-sm text-on-surface-variant leading-relaxed">
+                    Sistem kami memberikan kemudahan pasang iklan properti gratis dengan langkah praktis. Jangkau ribuan peminat di platform kami.
+                </p>
+                <a href="/pasang-iklan" class="block text-center bg-primary text-on-primary text-label-sm font-bold py-2.5 px-4 rounded-xl hover:bg-surface-tint transition-all shadow-sm">
+                    Pasang Iklan Gratis
+                </a>
+            </div>
+
+            <!-- Back Link -->
+            <a href="/artikel" class="flex items-center justify-center gap-1 py-3 px-4 bg-surface-container-lowest hover:bg-surface-container-low text-on-surface-variant hover:text-primary border border-border-light rounded-2xl text-label-sm font-bold transition-all shadow-sm">
+                <span class="material-symbols-outlined text-[16px]">arrow_back</span> Kembali ke Blog
+            </a>
+        </aside>
+    </div>
+
+    <!-- Related Articles Grid (Below Article) -->
+    <% if (relatedPosts.length > 0) { %>
+        <div class="pt-8 border-t border-border-light space-y-6">
+            <h2 class="text-title-lg font-extrabold text-on-surface flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-primary">dynamic_feed</span> Artikel Terkait
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <% relatedPosts.forEach(rp => { %>
+                    <a href="/artikel/<%= rp.slug %>" class="group bg-surface-container-lowest rounded-2xl border border-border-light overflow-hidden shadow-sm hover:shadow-md hover:border-primary/20 transition-all flex flex-col">
+                        <% if (rp.featured_image) { %>
+                            <img src="<%= rp.featured_image %>" alt="" class="aspect-[16/10] w-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        <% } else { %>
+                            <div class="aspect-[16/10] w-full bg-surface-container-low flex items-center justify-center text-outline text-primary/30">
+                                <span class="material-symbols-outlined text-[36px]">article</span>
+                            </div>
+                        <% } %>
+                        <div class="p-4 flex-grow flex flex-col justify-between">
+                            <h3 class="text-body-md font-bold text-on-surface group-hover:text-primary transition-colors leading-snug line-clamp-2"><%= rp.title %></h3>
+                            <span class="text-body-xs text-outline block mt-2"><%= new Date(rp.published_at || rp.created_at).toLocaleDateString('id-ID') %></span>
+                        </div>
+                    </a>
+                <% }) %>
+            </div>
+        </div>
+    <% } %>
+</div>

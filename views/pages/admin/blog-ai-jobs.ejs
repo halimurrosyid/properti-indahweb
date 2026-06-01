@@ -1,0 +1,174 @@
+<div class="max-w-7xl mx-auto px-container-margin md:px-stack-lg py-10 space-y-8">
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center gap-2 text-label-sm text-outline">
+        <a href="/admin/dashboard" class="hover:text-primary transition-colors">Admin Panel</a>
+        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+        <a href="/admin/blog" class="hover:text-primary transition-colors">Manajemen Blog</a>
+        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+        <span class="text-on-surface">Monitoring AI Jobs</span>
+    </nav>
+
+    <!-- Header Section -->
+    <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <div>
+            <h1 class="text-headline-md font-bold text-on-surface">Monitoring Batch Pekerjaan AI</h1>
+            <p class="text-body-sm text-on-surface-variant mt-1">Pantau status generate artikel masal secara langsung, batalkan pekerjaan, atau coba ulang artikel yang gagal.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="/admin/blog/ai-generate" class="text-secondary hover:text-secondary-variant font-bold text-label-md px-4 py-2.5 rounded-xl border border-secondary/20 bg-secondary/5 flex items-center gap-1.5 transition-all">
+                <span class="material-symbols-outlined text-[18px]">psychology</span> Buat Batch Baru
+            </a>
+            <a href="/admin/blog" class="text-on-surface-variant hover:text-primary font-bold text-label-md px-4 py-2.5 rounded-xl border border-border-light flex items-center gap-1.5 bg-surface-container-lowest">
+                <span class="material-symbols-outlined text-[18px]">article</span> Semua Artikel
+            </a>
+        </div>
+    </div>
+
+    <!-- Feedbacks -->
+    <% if (message) { %>
+        <div class="bg-green-50 text-green-800 border border-green-200 p-4 rounded-xl text-body-md font-medium flex items-center gap-2">
+            <span class="material-symbols-outlined text-green-600">check_circle</span>
+            <%= message %>
+        </div>
+    <% } %>
+    <% if (error) { %>
+        <div class="bg-red-50 text-red-800 border border-red-200 p-4 rounded-xl text-body-md font-medium flex items-center gap-2">
+            <span class="material-symbols-outlined text-red-600">error</span>
+            <%= error %>
+        </div>
+    <% } %>
+
+    <!-- Jobs Monitor List -->
+    <% if (jobs.length === 0) { %>
+        <div class="bg-surface-container-lowest rounded-2xl border border-border-light p-12 text-center space-y-4 shadow-sm">
+            <span class="material-symbols-outlined text-[64px] text-outline">dns</span>
+            <p class="text-body-md text-on-surface-variant max-w-sm mx-auto">Tidak ada riwayat pekerjaan AI yang terdaftar di sistem. Silakan buat batch baru.</p>
+        </div>
+    <% } else { %>
+        <div class="space-y-8">
+            <% jobs.forEach((job, index) => { %>
+                <div class="bg-surface-container-lowest rounded-3xl border border-border-light shadow-sm overflow-hidden">
+                    
+                    <!-- Job Header info bar -->
+                    <div class="p-6 border-b border-border-light bg-surface-container-low/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="text-title-lg font-black text-on-surface"><%= job.batch_name || `Batch ID: ${job.id}` %></h3>
+                                
+                                <% if (job.status === 'completed') { %>
+                                    <span class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200 uppercase">Completed</span>
+                                <% } else if (job.status === 'running') { %>
+                                    <span class="bg-purple-100 text-purple-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-purple-200 uppercase animate-pulse">Running</span>
+                                <% } else if (job.status === 'pending') { %>
+                                    <span class="bg-yellow-100 text-yellow-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-yellow-200 uppercase">Pending</span>
+                                <% } else if (job.status === 'failed') { %>
+                                    <span class="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-red-200 uppercase">Failed</span>
+                                <% } else if (job.status === 'cancelled') { %>
+                                    <span class="bg-gray-100 text-gray-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-gray-200 uppercase">Cancelled</span>
+                                <% } %>
+                            </div>
+                            <p class="text-body-xs text-outline font-semibold">
+                                Dibuat oleh: <%= job.creator?.name %> • Waktu: <%= new Date(job.created_at).toLocaleString('id-ID') %>
+                            </p>
+                        </div>
+
+                        <!-- Progress Bar & Cancel action -->
+                        <div class="flex items-center gap-4 flex-wrap md:flex-nowrap">
+                            <div class="text-body-sm font-semibold space-y-1">
+                                <div class="flex justify-between items-center text-label-xs font-bold text-on-surface-variant">
+                                    <span>Progress Artikel:</span>
+                                    <span><%= job.generated_count + job.failed_count %> / <%= job.total_titles %></span>
+                                </div>
+                                <div class="w-36 h-2 bg-surface-container-high rounded-full overflow-hidden">
+                                    <div class="h-full bg-primary transition-all" style="width: <%= (job.total_titles > 0) ? ((job.generated_count + job.failed_count) / job.total_titles * 100) : 0 %>%"></div>
+                                </div>
+                                <div class="flex gap-2 text-[11px] font-semibold">
+                                    <span class="text-green-600 flex items-center gap-0.5"><span class="material-symbols-outlined text-[12px]">check</span> <%= job.generated_count %> Sukses</span>
+                                    <span class="text-error flex items-center gap-0.5"><span class="material-symbols-outlined text-[12px]">close</span> <%= job.failed_count %> Gagal</span>
+                                </div>
+                            </div>
+
+                            <% if (job.status === 'pending' || job.status === 'running') { %>
+                                <form action="/admin/blog/ai-jobs/<%= job.id %>/cancel" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan batch ini?')">
+                                    <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+                                    <button type="submit" class="bg-red-50 text-error border border-red-200 text-label-xs font-bold px-4 py-2.5 rounded-xl hover:bg-red-100 transition-all cursor-pointer">
+                                        Batalkan Batch
+                                    </button>
+                                </form>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Job Items List (Accordion style or table) -->
+                    <div class="p-6">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-body-md text-on-surface">
+                                <thead>
+                                    <tr class="border-b border-border-light text-label-sm font-bold text-on-surface-variant">
+                                        <th class="pb-3 w-12 text-center">No</th>
+                                        <th class="pb-3">Judul Artikel</th>
+                                        <th class="pb-3">Status Item</th>
+                                        <th class="pb-3">Jadwal Publish</th>
+                                        <th class="pb-3 text-right">Aksi Item</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-border-light">
+                                    <% job.items.forEach((item, idx) => { %>
+                                        <tr class="hover:bg-surface-bright/50 transition-all">
+                                            <td class="py-3 text-center text-outline text-body-sm"><%= idx + 1 %></td>
+                                            <td class="py-3 pr-4">
+                                                <span class="font-semibold block max-w-lg truncate"><%= item.title %></span>
+                                                <% if (item.status === 'completed' && item.slug) { %>
+                                                    <a href="/artikel/<%= item.slug %>" target="_blank" class="text-label-xs text-primary hover:underline font-mono inline-flex items-center gap-0.5 mt-0.5">
+                                                        /artikel/<%= item.slug %> <span class="material-symbols-outlined text-[12px]">open_in_new</span>
+                                                    </a>
+                                                <% } %>
+                                                <% if (item.status === 'failed' && item.error_message) { %>
+                                                    <span class="text-body-xs text-error block mt-0.5 italic">
+                                                        ⚠️ Gagal: <%= item.error_message %>
+                                                    </span>
+                                                <% } %>
+                                            </td>
+                                            <td class="py-3">
+                                                <% if (item.status === 'completed') { %>
+                                                    <span class="text-green-600 font-bold text-label-xs flex items-center gap-0.5"><span class="material-symbols-outlined text-[16px]">check_circle</span> Sukses</span>
+                                                <% } else if (item.status === 'failed') { %>
+                                                    <span class="text-error font-bold text-label-xs flex items-center gap-0.5"><span class="material-symbols-outlined text-[16px]">cancel</span> Gagal</span>
+                                                <% } else if (item.status === 'generating') { %>
+                                                    <span class="text-purple-600 font-bold text-label-xs flex items-center gap-0.5 animate-pulse"><span class="material-symbols-outlined text-[16px]">rotate_right</span> Generating...</span>
+                                                <% } else if (item.status === 'pending') { %>
+                                                    <span class="text-outline font-bold text-label-xs flex items-center gap-0.5"><span class="material-symbols-outlined text-[16px]">hourglass_empty</span> Pending</span>
+                                                <% } else if (item.status === 'skipped') { %>
+                                                    <span class="text-outline font-bold text-label-xs flex items-center gap-0.5"><span class="material-symbols-outlined text-[16px]">block</span> Skipped</span>
+                                                <% } %>
+                                            </td>
+                                            <td class="py-3 text-body-sm text-outline">
+                                                <% if (item.scheduled_at) { %>
+                                                    <%= new Date(item.scheduled_at).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' }) %>
+                                                <% } else { %>
+                                                    -
+                                                <% } %>
+                                            </td>
+                                            <td class="py-3 text-right">
+                                                <% if (item.status === 'failed') { %>
+                                                    <form action="/admin/blog/ai-jobs/items/<%= item.id %>/regenerate" method="POST" class="inline">
+                                                        <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+                                                        <button type="submit" class="bg-secondary/10 hover:bg-secondary/20 text-secondary text-[11px] font-bold px-2.5 py-1.5 rounded-lg border border-secondary/20 transition-all cursor-pointer inline-flex items-center gap-0.5" title="Generate ulang artikel ini">
+                                                            <span class="material-symbols-outlined text-[13px]">refresh</span> Retry
+                                                        </button>
+                                                    </form>
+                                                <% } else { %>
+                                                    <span class="text-outline text-body-sm">-</span>
+                                                <% } %>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    <% } %>
+</div>

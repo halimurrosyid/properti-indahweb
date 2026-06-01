@@ -1,0 +1,122 @@
+<div class="max-w-7xl mx-auto px-container-margin md:px-stack-lg py-10 space-y-8">
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center gap-2 text-label-sm text-outline">
+        <a href="/admin/dashboard" class="hover:text-primary transition-colors">Admin Panel</a>
+        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+        <a href="/admin/blog" class="hover:text-primary transition-colors">Manajemen Blog</a>
+        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+        <span class="text-on-surface">Kategori Blog</span>
+    </nav>
+
+    <!-- Header Section -->
+    <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <div>
+            <h1 class="text-headline-md font-bold text-on-surface">Kelola Kategori Artikel</h1>
+            <p class="text-body-sm text-on-surface-variant mt-1">Klasifikasikan artikel blog untuk menstrukturisasi pencarian pengguna dan perayapan mesin pencari (SEO).</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="/admin/blog" class="text-on-surface-variant hover:text-primary font-bold text-label-md px-4 py-2.5 rounded-xl border border-border-light flex items-center gap-1.5 bg-surface-container-lowest">
+                <span class="material-symbols-outlined text-[18px]">article</span> Semua Artikel
+            </a>
+        </div>
+    </div>
+
+    <!-- Feedbacks -->
+    <% if (message) { %>
+        <div class="bg-green-50 text-green-800 border border-green-200 p-4 rounded-xl text-body-md font-medium flex items-center gap-2">
+            <span class="material-symbols-outlined text-green-600">check_circle</span>
+            <%= message %>
+        </div>
+    <% } %>
+    <% if (error) { %>
+        <div class="bg-red-50 text-red-800 border border-red-200 p-4 rounded-xl text-body-md font-medium flex items-center gap-2">
+            <span class="material-symbols-outlined text-red-600">error</span>
+            <%= error %>
+        </div>
+    <% } %>
+
+    <!-- Grid Layout: Table List & Create Form -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        
+        <!-- Categories Table (Left 2 Columns) -->
+        <div class="lg:col-span-2 bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-border-light bg-surface-container-low/50">
+                <h2 class="text-title-lg font-bold text-on-surface">Kategori Terdaftar</h2>
+            </div>
+            
+            <% if (categories.length === 0) { %>
+                <div class="p-12 text-center text-body-md text-on-surface-variant">
+                    Belum ada kategori yang dibuat. Gunakan form di sebelah kanan untuk menambahkan kategori baru.
+                </div>
+            <% } else { %>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-body-md text-on-surface">
+                        <thead>
+                            <tr class="bg-surface-container-low text-label-sm font-bold text-on-surface-variant border-b border-border-light">
+                                <th class="p-4">Nama Kategori</th>
+                                <th class="p-4">Slug</th>
+                                <th class="p-4">Deskripsi</th>
+                                <th class="p-4 text-center">Jumlah Post</th>
+                                <th class="p-4 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-border-light">
+                            <% categories.forEach(cat => { %>
+                                <tr class="hover:bg-surface-bright/50 transition-all">
+                                    <td class="p-4 font-bold text-primary"><%= cat.name %></td>
+                                    <td class="p-4 font-mono text-body-sm"><%= cat.slug %></td>
+                                    <td class="p-4 text-body-sm text-on-surface-variant max-w-xs truncate" title="<%= cat.description %>">
+                                        <%= cat.description || '-' %>
+                                    </td>
+                                    <td class="p-4 text-center font-bold">
+                                        <%= cat._count?.posts || 0 %>
+                                    </td>
+                                    <td class="p-4 text-right">
+                                        <!-- Only allow deleting category if it has no posts to avoid orphans -->
+                                        <% if ((cat._count?.posts || 0) === 0) { %>
+                                            <form action="/admin/blog/categories/<%= cat.id %>/delete" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kategori ini?')">
+                                                <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+                                                <button type="submit" class="text-outline hover:text-error p-1.5 rounded-lg border border-border-light hover:border-error/20 transition-all cursor-pointer flex items-center justify-center inline-block" title="Hapus Kategori">
+                                                    <span class="material-symbols-outlined text-[16px]">delete</span>
+                                                </button>
+                                            </form>
+                                        <% } else { %>
+                                            <span class="text-body-xs text-outline font-semibold" title="Kategori tidak dapat dihapus karena memiliki artikel aktif.">Terkunci</span>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Add Category Form (Right 1 Column) -->
+        <div class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm p-6 space-y-4">
+            <h3 class="text-title-lg font-bold text-on-surface border-b border-border-light pb-2">Tambah Kategori</h3>
+            
+            <form action="/admin/blog/categories" method="POST" class="space-y-4">
+                <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+                
+                <!-- Category Name -->
+                <div class="space-y-1.5">
+                    <label for="name" class="text-label-sm font-bold text-on-surface block">Nama Kategori <span class="text-error">*</span></label>
+                    <input type="text" id="name" name="name" required placeholder="Contoh: Finansial & KPR" 
+                           class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-2.5 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all">
+                </div>
+
+                <!-- Description -->
+                <div class="space-y-1.5">
+                    <label for="description" class="text-label-sm font-bold text-on-surface block">Deskripsi Kategori</label>
+                    <textarea id="description" name="description" rows="3" placeholder="Deskripsi singkat mengenai jenis pembahasan artikel pada kategori ini..."
+                              class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-2.5 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all"></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-primary hover:bg-surface-tint text-on-primary font-bold text-label-md py-3 px-4 rounded-xl transition-all shadow-sm cursor-pointer">
+                    Simpan Kategori
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

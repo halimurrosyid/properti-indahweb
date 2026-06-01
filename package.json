@@ -10,13 +10,16 @@
     "watch:css": "npx @tailwindcss/cli -i ./tailwind.css -o ./public/css/main.css --watch",
     "prisma:generate": "npx prisma generate",
     "prisma:push": "npx prisma db push",
-    "prisma:seed": "node prisma/seed.js"
+    "prisma:seed": "node prisma/seed.js",
+    "worker:ai-blog": "node src/workers/aiBlogWorker.js",
+    "worker:blog-scheduler": "node src/workers/blogScheduler.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.100.1",
     "@prisma/client": "^5.14.0",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.5",

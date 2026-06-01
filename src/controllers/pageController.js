@@ -529,6 +529,16 @@ exports.getSitemap = async (req, res, next) => {
       xml += `  <url>\n    <loc>${host}/property/${prop.slug}</loc>\n    <lastmod>${prop.updatedAt.toISOString().split('T')[0]}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
     });
 
+    // 5. Detail Blog Article Pages
+    const activeBlogPosts = await prisma.blogPost.findMany({
+      where: { status: 'published' }
+    });
+
+    activeBlogPosts.forEach(post => {
+      const lastmodDate = post.published_at || post.updated_at || new Date();
+      xml += `  <url>\n    <loc>${host}/artikel/${post.slug}</loc>\n    <lastmod>${lastmodDate.toISOString().split('T')[0]}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+    });
+
     xml += `</urlset>`;
 
     res.header('Content-Type', 'application/xml');

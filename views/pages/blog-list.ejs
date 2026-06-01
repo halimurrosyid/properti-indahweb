@@ -1,0 +1,181 @@
+<div class="max-w-7xl mx-auto px-container-margin md:px-stack-lg py-12 space-y-12">
+    <!-- Hero Banner Section -->
+    <div class="relative bg-gradient-to-br from-primary/10 via-surface-container-low to-secondary/10 p-8 md:p-12 rounded-3xl border border-border-light shadow-sm overflow-hidden text-center space-y-4">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_70%_120%,rgba(var(--color-primary-rgb),0.08),transparent_50%)]"></div>
+        <span class="bg-primary/10 text-primary font-bold text-label-sm px-3.5 py-1.5 rounded-full uppercase tracking-wider">Blog Properti Indahweb</span>
+        
+        <% if (activeCategory) { %>
+            <h1 class="text-headline-md md:text-display-sm font-extrabold text-on-surface tracking-tight max-w-2xl mx-auto">
+                Kategori: <%= activeCategory.name %>
+            </h1>
+            <p class="text-body-md md:text-title-medium text-on-surface-variant max-w-lg mx-auto">
+                <%= activeCategory.description || `Membahas seputar artikel ${activeCategory.name} di Indonesia.` %>
+            </p>
+        <% } else { %>
+            <h1 class="text-headline-md md:text-display-sm font-extrabold text-on-surface tracking-tight max-w-2xl mx-auto">
+                Tips, Wawasan & Berita Properti Terkini
+            </h1>
+            <p class="text-body-md md:text-title-medium text-on-surface-variant max-w-lg mx-auto">
+                Temukan panduan lengkap hukum, kiat jual beli sewa rumah, investasi ruko, serta tren interior terpopuler.
+            </p>
+        <% } %>
+    </div>
+
+    <!-- Main Content Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        
+        <!-- Posts List (Left 2 Columns) -->
+        <div class="lg:col-span-2 space-y-8">
+            <% if (posts.length === 0) { %>
+                <div class="bg-surface-container-lowest rounded-2xl border border-border-light p-12 text-center space-y-4 shadow-sm">
+                    <span class="material-symbols-outlined text-[64px] text-outline">description_off</span>
+                    <h3 class="text-title-lg font-bold text-on-surface">Belum Ada Artikel</h3>
+                    <p class="text-body-md text-on-surface-variant max-w-xs mx-auto">
+                        Maaf, tidak ada artikel yang ditemukan di halaman ini. Silakan pilih kategori lain.
+                    </p>
+                    <a href="/artikel" class="inline-flex bg-primary text-on-primary font-semibold text-label-md px-5 py-2.5 rounded-full hover:bg-surface-tint transition-all">
+                        Kembali ke Semua Artikel
+                    </a>
+                </div>
+            <% } else { %>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <% posts.forEach(post => { %>
+                        <article class="group bg-surface-container-lowest rounded-2xl border border-border-light overflow-hidden shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-300 flex flex-col">
+                            
+                            <!-- Featured Image -->
+                            <a href="/artikel/<%= post.slug %>" class="block aspect-[16/10] overflow-hidden bg-surface-container-high relative">
+                                <% if (post.featured_image) { %>
+                                    <img src="<%= post.featured_image %>" alt="<%= post.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                <% } else { %>
+                                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 text-primary/30">
+                                        <span class="material-symbols-outlined text-[48px]">article</span>
+                                    </div>
+                                <% } %>
+                                
+                                <% if (post.category) { %>
+                                    <span class="absolute top-4 left-4 bg-ink-dark/80 text-white font-bold text-label-xs px-2.5 py-1 rounded shadow-sm">
+                                        <%= post.category.name %>
+                                    </span>
+                                <% } %>
+                            </a>
+
+                            <!-- Card Details -->
+                            <div class="p-5 flex-grow flex flex-col justify-between space-y-4">
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-2 text-label-xs text-outline font-semibold">
+                                        <span class="flex items-center gap-0.5">
+                                            <span class="material-symbols-outlined text-[13px]">calendar_today</span>
+                                            <%= new Date(post.published_at || post.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+                                        </span>
+                                        <span>•</span>
+                                        <span class="flex items-center gap-0.5">
+                                            <span class="material-symbols-outlined text-[13px]">schedule</span>
+                                            <%= Math.max(2, Math.ceil((post.content || '').split(' ').length / 200)) %> mnt baca
+                                        </span>
+                                    </div>
+
+                                    <h2 class="text-title-md font-bold text-on-surface leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                                        <a href="/artikel/<%= post.slug %>"><%= post.title %></a>
+                                    </h2>
+
+                                    <p class="text-body-sm text-on-surface-variant line-clamp-3">
+                                        <%= post.excerpt || post.content.replace(/<[^>]*>/g, '').substring(0, 140) + '...' %>
+                                    </p>
+                                </div>
+
+                                <div class="pt-4 border-t border-border-light flex items-center justify-between">
+                                    <span class="text-body-xs font-medium text-outline">Oleh: Redaksi</span>
+                                    <a href="/artikel/<%= post.slug %>" class="text-label-sm font-extrabold text-primary flex items-center gap-0.5 group-hover:underline">
+                                        Baca Artikel <span class="material-symbols-outlined text-[15px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </article>
+                    <% }) %>
+                </div>
+
+                <!-- Pagination controls -->
+                <% if (totalPages > 1) { %>
+                    <div class="flex items-center justify-center gap-2 pt-6">
+                        <% if (currentPage > 1) { %>
+                            <a href="?page=<%= currentPage - 1 %>" class="p-2 bg-surface-container-lowest hover:bg-surface-container-low border border-border-light rounded-lg text-on-surface transition-all flex items-center">
+                                <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+                            </a>
+                        <% } %>
+
+                        <% for (let i = 1; i <= totalPages; i++) { %>
+                            <a href="?page=<%= i %>" class="w-10 h-10 flex items-center justify-center font-bold text-label-md rounded-lg border transition-all <%= currentPage === i ? 'bg-primary text-on-primary border-primary shadow-sm' : 'bg-surface-container-lowest hover:bg-surface-container-low border-border-light text-on-surface-variant' %>">
+                                <%= i %>
+                            </a>
+                        <% } %>
+
+                        <% if (currentPage < totalPages) { %>
+                            <a href="?page=<%= currentPage + 1 %>" class="p-2 bg-surface-container-lowest hover:bg-surface-container-low border border-border-light rounded-lg text-on-surface transition-all flex items-center">
+                                <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+                            </a>
+                        <% } %>
+                    </div>
+                <% } %>
+            <% } %>
+        </div>
+
+        <!-- Sidebar Section (Right 1 Column) -->
+        <aside class="space-y-8">
+            
+            <!-- Categories Widget -->
+            <div class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm p-6 space-y-4">
+                <h3 class="text-title-md font-bold text-on-surface border-b border-border-light pb-2 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-primary text-[20px]">category</span> Kategori
+                </h3>
+                <nav class="flex flex-col gap-1">
+                    <a href="/artikel" class="flex justify-between items-center py-2 px-3 rounded-lg text-body-sm font-semibold hover:bg-surface-container-low transition-all <%= !activeCategory ? 'bg-primary/5 text-primary' : 'text-on-surface-variant' %>">
+                        <span>Semua Kategori</span>
+                    </a>
+                    <% categories.forEach(cat => { %>
+                        <a href="/artikel/kategori/<%= cat.slug %>" class="flex justify-between items-center py-2 px-3 rounded-lg text-body-sm font-semibold hover:bg-surface-container-low transition-all <%= activeCategory && activeCategory.id === cat.id ? 'bg-primary/5 text-primary' : 'text-on-surface-variant' %>">
+                            <span><%= cat.name %></span>
+                            <span class="bg-surface-container-high text-outline text-[11px] px-2 py-0.5 rounded-full font-bold"><%= cat._count?.posts || 0 %></span>
+                        </a>
+                    <% }) %>
+                </nav>
+            </div>
+
+            <!-- Recent Posts Widget -->
+            <div class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm p-6 space-y-4">
+                <h3 class="text-title-md font-bold text-on-surface border-b border-border-light pb-2 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-primary text-[20px]">history</span> Artikel Terbaru
+                </h3>
+                <div class="flex flex-col gap-4">
+                    <% latestPosts.forEach(lp => { %>
+                        <a href="/artikel/<%= lp.slug %>" class="group flex gap-3 items-start">
+                            <% if (lp.featured_image) { %>
+                                <img src="<%= lp.featured_image %>" alt="" class="w-16 h-12 object-cover rounded-lg border border-border-light flex-shrink-0 bg-surface-container-low">
+                            <% } else { %>
+                                <div class="w-16 h-12 rounded-lg border border-border-light bg-surface-container-low flex items-center justify-center text-outline flex-shrink-0">
+                                    <span class="material-symbols-outlined text-[18px]">article</span>
+                                </div>
+                            <% } %>
+                            <div class="min-w-0">
+                                <h4 class="text-body-sm font-bold text-on-surface group-hover:text-primary transition-colors leading-snug line-clamp-2"><%= lp.title %></h4>
+                                <span class="text-body-xs text-outline block mt-0.5"><%= new Date(lp.published_at || lp.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+                            </div>
+                        </a>
+                    <% }) %>
+                </div>
+            </div>
+
+            <!-- Promotion Widget -->
+            <div class="bg-gradient-to-br from-primary to-primary/80 text-on-primary p-6 rounded-2xl border border-primary-variant/20 shadow-md space-y-4 text-center">
+                <span class="material-symbols-outlined text-[48px]">campaign</span>
+                <h3 class="text-title-md font-extrabold tracking-tight">Ingin Menjual Properti Lebih Cepat?</h3>
+                <p class="text-body-xs opacity-90 leading-relaxed">
+                    Pasang iklan properti Anda di Properti Indahweb sekarang juga. Gratis, mudah, dan langsung dilihat ribuan calon pembeli potensial.
+                </p>
+                <a href="/pasang-iklan" class="block text-center bg-surface-container-lowest text-primary text-label-sm font-bold py-2.5 px-4 rounded-xl hover:bg-surface-bright transition-all shadow-sm">
+                    Pasang Iklan Sekarang
+                </a>
+            </div>
+            
+        </aside>
+    </div>
+</div>

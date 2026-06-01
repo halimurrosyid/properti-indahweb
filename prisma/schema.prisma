@@ -16,6 +16,8 @@ model User {
   role       String     @default("user") // super_admin, admin, agent, user
   properties Property[]
   invoices   Invoice[]
+  blogPosts  BlogPost[]
+  blogJobs   AiBlogJob[]
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 }
@@ -99,14 +101,91 @@ model Invoice {
   paidAt        DateTime?
 }
 
-model Article {
-  id          Int      @id @default(autoincrement())
-  title       String
-  slug        String   @unique
-  content     String   @db.Text
-  excerpt     String?  @db.Text
-  coverImage  String?  // Relative file path to cover image
-  isPublished Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model BlogPost {
+  id               Int            @id @default(autoincrement())
+  title            String
+  slug             String         @unique
+  excerpt          String?        @db.Text
+  content          String         @db.Text
+  featured_image   String?
+  category_id      Int?
+  category         BlogCategory?  @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  author_id        Int
+  author           User           @relation(fields: [author_id], references: [id])
+  status           String         @default("draft") // draft, published, scheduled, archived, deleted
+  source           String         @default("manual") // manual, ai
+  meta_title       String?
+  meta_description String?        @db.Text
+  focus_keyword    String?
+  canonical_url    String?
+  scheduled_at     DateTime?
+  published_at     DateTime?
+  archived_at      DateTime?
+  deleted_at       DateTime?
+  ai_job_id        Int?
+  ai_job           AiBlogJob?     @relation(fields: [ai_job_id], references: [id], onDelete: SetNull)
+  job_items        AiBlogJobItem[]
+  created_at       DateTime       @default(now())
+  updated_at       DateTime       @updatedAt
+
+  @@index([status])
+  @@index([scheduled_at])
+  @@index([published_at])
+  @@index([category_id])
+  @@index([author_id])
+}
+
+model BlogCategory {
+  id          Int        @id @default(autoincrement())
+  name        String
+  slug        String     @unique
+  description String?    @db.Text
+  posts       BlogPost[]
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+}
+
+model AiBlogJob {
+  id                   Int             @id @default(autoincrement())
+  batch_name           String?
+  titles_text          String          @db.Text
+  total_titles         Int             @default(0)
+  generated_count      Int             @default(0)
+  failed_count         Int             @default(0)
+  status               String          @default("pending") // pending, running, completed, failed, cancelled
+  publish_mode         String          @default("draft") // draft, published, scheduled
+  interval_hours       Int?
+  publish_start_at     DateTime?
+  publish_window_start String? // e.g. "08:00"
+  publish_window_end   String? // e.g. "22:00"
+  prompt_template      String?         @db.Text
+  knowledge_base       String?         @db.Text
+  featured_image       String?
+  created_by           Int
+  creator              User            @relation(fields: [created_by], references: [id])
+  started_at           DateTime?
+  completed_at         DateTime?
+  items                AiBlogJobItem[]
+  posts                BlogPost[]
+  created_at           DateTime        @default(now())
+  updated_at           DateTime        @updatedAt
+
+  @@index([status])
+}
+
+model AiBlogJobItem {
+  id            Int       @id @default(autoincrement())
+  ai_job_id     Int
+  ai_job        AiBlogJob @relation(fields: [ai_job_id], references: [id], onDelete: Cascade)
+  title         String
+  slug          String?
+  blog_post_id  Int?
+  blog_post     BlogPost? @relation(fields: [blog_post_id], references: [id], onDelete: SetNull)
+  status        String    @default("pending") // pending, generating, completed, failed, skipped
+  error_message String?   @db.Text
+  scheduled_at  DateTime?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  @@index([status])
 }

@@ -9,7 +9,8 @@ require('dotenv').config();
 const pageRouter = require('./routers/pageRouter');
 const authRouter = require('./routers/authRouter');
 const listingRouter = require('./routers/listingRouter');
-const articleRouter = require('./routers/articleRouter');
+const publicBlogRouter = require('./routers/publicBlogRouter');
+const adminBlogRouter = require('./routers/adminBlogRouter');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -103,7 +104,8 @@ app.use((req, res, next) => {
 app.use('/', pageRouter);
 app.use('/auth', authLimiter, authRouter);   // Apply stricter rate limiting to auth
 app.use('/property', listingRouter);
-app.use('/artikel', articleRouter);
+app.use('/artikel', publicBlogRouter);
+app.use('/admin/blog', adminBlogRouter);
 
 // ====================================================
 // 404 Handler (must be after all routes)
