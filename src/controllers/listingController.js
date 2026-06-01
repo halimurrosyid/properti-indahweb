@@ -79,7 +79,7 @@ exports.postQuickPost = async (req, res, next) => {
         return res.status(400).send('Batas posting tercapai: Akun gratis dibatasi maksimal 1 iklan aktif. Silakan hubungi admin atau aktifkan Paket Agen untuk menambah properti.');
       }
     } else if (currentUser && currentUser.role === 'agent') {
-      const agentLimit = 50;
+      const agentLimit = 20;
       if (activeCount >= agentLimit) {
         return res.status(400).send(`Batas posting tercapai: Paket Agen dibatasi maksimal ${agentLimit} iklan aktif untuk mencegah spam.`);
       }
