@@ -26,6 +26,10 @@ services:
       - SESSION_SECRET=properti_indahweb_session_secret_key_123456
       - NODE_ENV=production
       - PORT=3000
+      - SUPER_ADMIN_EMAIL=admin@properti.indahweb.com
+      - SUPER_ADMIN_PASSWORD=adminindahweb
+      - SUPER_ADMIN_NAME=Super Admin Indahweb
+      - SUPER_ADMIN_WHATSAPP=628123456789
     volumes:
       - uploads_data:/usr/src/app/public/uploads
 

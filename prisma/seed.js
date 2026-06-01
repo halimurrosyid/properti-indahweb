@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 
@@ -26,23 +27,25 @@ async function main() {
     console.log(`Upserted category: ${upserted.name}`);
   }
 
-  // 2. Create Default Admin User
-  const adminEmail = 'admin@properti.indahweb.com';
-  const adminWhatsapp = '628123456789';
-  const hashedPassword = await bcrypt.hash('adminindahweb', 10);
+  // 2. Create Default Admin User from Environment Variables
+  const adminEmail = process.env.SUPER_ADMIN_EMAIL || 'admin@properti.indahweb.com';
+  const adminWhatsapp = process.env.SUPER_ADMIN_WHATSAPP || '628123456789';
+  const adminPassword = process.env.SUPER_ADMIN_PASSWORD || 'adminindahweb';
+  const adminName = process.env.SUPER_ADMIN_NAME || 'Super Admin Indahweb';
+  const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
   const adminUser = await prisma.user.upsert({
     where: { email: adminEmail },
     update: {
       password: hashedPassword,
-      name: 'Super Admin Indahweb',
+      name: adminName,
       whatsapp: adminWhatsapp,
       role: 'super_admin'
     },
     create: {
       email: adminEmail,
       password: hashedPassword,
-      name: 'Super Admin Indahweb',
+      name: adminName,
       whatsapp: adminWhatsapp,
       role: 'super_admin'
     }
