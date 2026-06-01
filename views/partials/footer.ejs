@@ -1,42 +1,77 @@
-<footer class="bg-surface-container-highest w-full border-t border-border-light py-12 px-container-margin md:px-stack-lg mt-auto">
-    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-stack-lg">
-        <!-- Brand Column -->
-        <div class="md:col-span-2 space-y-4">
-            <a href="/" class="text-headline-sm font-bold text-primary flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">real_estate_agent</span>
-                <span class="font-display-lg text-[22px] tracking-tight">Properti Indahweb</span>
-            </a>
-            <p class="text-body-sm text-on-surface-variant max-w-sm leading-relaxed">
-                Portal properti lokal terpercaya di Indonesia. Menghubungkan pembeli, penyewa, dan agen dengan cara yang cepat, mudah, dan transparan.
-            </p>
-            <p class="text-label-sm text-outline">
+<footer class="bg-surface-container-highest w-full border-t border-border-light pt-16 pb-12 px-container-margin md:px-stack-lg mt-auto relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.01] to-primary/[0.02] pointer-events-none"></div>
+    <div class="max-w-7xl mx-auto space-y-12 relative z-10">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12">
+            <!-- Brand Column -->
+            <div class="md:col-span-5 space-y-5">
+                <a href="/" class="text-headline-sm font-bold text-primary flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[28px]" style="font-variation-settings: 'FILL' 1;">real_estate_agent</span>
+                    <span class="font-display-lg text-[24px] font-black tracking-tight">Properti Indahweb</span>
+                </a>
+                <p class="text-body-md text-on-surface-variant max-w-md leading-relaxed">
+                    Portal properti lokal terpercaya di Indonesia. Menghubungkan pembeli, penyewa, dan agen properti secara instan, transparan, dan tanpa biaya pasang iklan tersembunyi.
+                </p>
+                <div class="flex items-center gap-3">
+                    <a href="https://wa.me/628123456789" target="_blank" rel="noopener noreferrer" 
+                       class="w-10 h-10 bg-whatsapp-green/10 text-whatsapp-green rounded-full hover:bg-whatsapp-green hover:text-white transition-all flex items-center justify-center shadow-sm"
+                       title="Hubungi Admin WhatsApp">
+                        <span class="material-symbols-outlined text-[20px]">chat</span>
+                    </a>
+                    <a href="mailto:support@properti.indahweb.com" 
+                       class="w-10 h-10 bg-primary/10 text-primary rounded-full hover:bg-primary hover:text-white transition-all flex items-center justify-center shadow-sm"
+                       title="Kirim Email Dukungan">
+                        <span class="material-symbols-outlined text-[20px]">mail</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Quick Links -->
+            <div class="md:col-span-2 space-y-4">
+                <h4 class="text-label-md font-extrabold text-on-surface uppercase tracking-wider">Jelajahi</h4>
+                <ul class="space-y-2.5">
+                    <li><a href="/catalog?listingType=SALE" class="text-body-md text-on-surface-variant hover:text-primary transition-all flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">sell</span> Beli Properti</a></li>
+                    <li><a href="/catalog?listingType=RENT" class="text-body-md text-on-surface-variant hover:text-primary transition-all flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">rent</span> Sewa Properti</a></li>
+                    <li><a href="/packages" class="text-body-md text-on-surface-variant hover:text-primary transition-all flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">redeem</span> Paket Premium</a></li>
+                </ul>
+            </div>
+            
+            <!-- Legal & Information -->
+            <div class="md:col-span-2 space-y-4">
+                <h4 class="text-label-md font-extrabold text-on-surface uppercase tracking-wider">Informasi Hukum</h4>
+                <ul class="space-y-2.5">
+                    <li><a href="/disclaimer" class="text-body-md text-on-surface-variant hover:text-primary transition-all flex items-center gap-1 font-semibold text-error"><span class="material-symbols-outlined text-[16px]">gavel</span> Disclaimer Web</a></li>
+                    <li><a href="/packages" class="text-body-md text-on-surface-variant hover:text-primary transition-all flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">verified_user</span> Pasang Iklan</a></li>
+                </ul>
+            </div>
+            
+            <!-- Contact Info -->
+            <div class="md:col-span-3 space-y-4">
+                <h4 class="text-label-md font-extrabold text-on-surface uppercase tracking-wider">Layanan Hub</h4>
+                <div class="space-y-3 text-body-md text-on-surface-variant">
+                    <p class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-outline text-[18px]">domain</span>
+                        <span>properti.indahweb.com</span>
+                    </p>
+                    <p class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-outline text-[18px]">mail</span>
+                        <a href="mailto:support@properti.indahweb.com" class="hover:underline">support@properti.indahweb.com</a>
+                    </p>
+                    <p class="flex items-start gap-2">
+                        <span class="material-symbols-outlined text-outline text-[18px] mt-0.5">location_on</span>
+                        <span>Sudirman Central Business District (SCBD), Jakarta, Indonesia</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom Bar -->
+        <div class="pt-8 border-t border-border-light flex flex-col md:flex-row justify-between items-center gap-4 text-label-sm text-outline">
+            <p>
                 © <%= new Date().getFullYear() %> Properti Indahweb. Semua Hak Cipta Dilindungi.
             </p>
-        </div>
-        
-        <!-- Quick Links -->
-        <div>
-            <h4 class="text-label-md font-bold text-on-surface mb-4 uppercase tracking-wider">Navigasi</h4>
-            <ul class="space-y-2">
-                <li><a href="/catalog?listingType=SALE" class="text-body-sm text-on-surface-variant hover:text-primary transition-colors">Properti Dijual</a></li>
-                <li><a href="/catalog?listingType=RENT" class="text-body-sm text-on-surface-variant hover:text-primary transition-colors">Properti Disewa</a></li>
-                <li><a href="/pasang-iklan" class="text-body-sm text-on-surface-variant hover:text-primary transition-colors">Pasang Iklan Gratis</a></li>
-            </ul>
-        </div>
-        
-        <!-- Contacts info -->
-        <div>
-            <h4 class="text-label-md font-bold text-on-surface mb-4 uppercase tracking-wider">Hubungi Kami</h4>
-            <p class="text-body-sm text-on-surface-variant mb-2">
-                Email: support@properti.indahweb.com
-            </p>
-            <p class="text-body-sm text-on-surface-variant mb-4">
-                Domain Resmi: properti.indahweb.com
-            </p>
-            <div class="flex gap-3">
-                <a href="https://wa.me/628123456789" target="_blank" rel="noopener noreferrer" class="bg-whatsapp-green text-white p-2 rounded-full hover:opacity-90 transition-all flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[20px]">chat</span>
-                </a>
+            <div class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[14px] text-error" style="font-variation-settings: 'FILL' 1;">favorite</span>
+                <span>Portal Properti Terpercaya Indonesia</span>
             </div>
         </div>
     </div>

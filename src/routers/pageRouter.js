@@ -36,4 +36,7 @@ router.get('/agen/:id', pageController.getAgentProfile);
 // Favorites JSON API
 router.get('/api/properties/favorites', pageController.getFavoritesApi);
 
+// Disclaimer Page
+router.get('/disclaimer', pageController.getDisclaimer);
+
 module.exports = router;

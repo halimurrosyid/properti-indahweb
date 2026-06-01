@@ -196,12 +196,12 @@
                     <div class="space-y-1.5">
                         <label class="text-label-sm font-bold text-on-surface-variant">Ganti Foto Utama</label>
                         <input type="file" name="mainImage" accept="image/*" class="w-full px-3 py-2 rounded-lg border border-border-light text-body-sm outline-none bg-surface-bright">
-                        <p class="text-label-xs text-outline">JPG/PNG/WebP, maks 5MB.</p>
+                        <p class="text-label-xs text-outline">JPG/PNG/WebP, maks <%= process.env.UPLOAD_MAX_SIZE_MB || 5 %>MB.</p>
                     </div>
                     <div class="space-y-1.5">
                         <label class="text-label-sm font-bold text-on-surface-variant">Ganti Foto Galeri (maks 6)</label>
                         <input type="file" name="galleryImages" accept="image/*" multiple class="w-full px-3 py-2 rounded-lg border border-border-light text-body-sm outline-none bg-surface-bright">
-                        <p class="text-label-xs text-outline">JPG/PNG/WebP, maks 5MB per foto.</p>
+                        <p class="text-label-xs text-outline">JPG/PNG/WebP, maks <%= process.env.UPLOAD_MAX_SIZE_MB || 5 %>MB per foto.</p>
                     </div>
                 </div>
             </div>

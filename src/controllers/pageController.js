@@ -480,7 +480,7 @@ exports.getSitemap = async (req, res, next) => {
     xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
 
     // 1. Static Pages
-    const staticUrls = ['/', '/catalog', '/pasang-iklan'];
+    const staticUrls = ['/', '/catalog', '/pasang-iklan', '/disclaimer'];
     staticUrls.forEach(url => {
       xml += `  <url>\n    <loc>${host}${url}</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
     });
@@ -660,3 +660,16 @@ exports.getFavoritesApi = async (req, res, next) => {
     next(error);
   }
 };
+
+// GET /disclaimer
+exports.getDisclaimer = async (req, res, next) => {
+  try {
+    res.render('pages/disclaimer', {
+      title: 'Pernyataan Penyangkal (Disclaimer) | Properti Indahweb',
+      description: 'Pernyataan Penyangkal (Disclaimer) penggunaan portal informasi Properti Indahweb.'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+

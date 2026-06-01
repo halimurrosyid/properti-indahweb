@@ -21,9 +21,10 @@ const storage = multer.diskStorage({
   }
 });
 
+const maxMB = parseInt(process.env.UPLOAD_MAX_SIZE_MB) || 5;
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 } // Limit files to 5MB
+  limits: { fileSize: maxMB * 1024 * 1024 }
 });
 
 // Configure Multer fields
