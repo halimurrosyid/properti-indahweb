@@ -39,11 +39,37 @@ async function checkScheduledPosts() {
   }
 }
 
+async function checkExpiredFeaturedProperties() {
+  const now = new Date();
+  
+  try {
+    // Find and update properties whose premium duration has ended
+    const expired = await prisma.property.updateMany({
+      where: {
+        isFeatured: true,
+        featuredUntil: {
+          lt: now
+        }
+      },
+      data: {
+        isFeatured: false
+      }
+    });
+
+    if (expired.count > 0) {
+      console.log(`[Property Scheduler] Deactivated ${expired.count} expired premium (Featured) listings.`);
+    }
+  } catch (error) {
+    console.error('[Property Scheduler] Error checking expired premium listings:', error);
+  }
+}
+
 async function runScheduler() {
-  console.log('[Blog Scheduler] Automated Publish Scheduler started and polling database...');
+  console.log('[Blog Scheduler] Automated Publish & Premium Listing Scheduler started and polling database...');
   
   while (true) {
     await checkScheduledPosts();
+    await checkExpiredFeaturedProperties();
     // Check every 30 seconds
     await sleep(30000);
   }
