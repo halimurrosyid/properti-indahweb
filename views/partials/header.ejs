@@ -1,0 +1,75 @@
+<header class="bg-surface-container-lowest w-full border-b border-border-light shadow-sm sticky top-0 z-50">
+    <div class="flex justify-between items-center w-full px-container-margin md:px-stack-lg max-w-7xl mx-auto h-16">
+        <!-- Brand Logo -->
+        <a href="/" class="text-headline-sm font-bold text-primary flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">real_estate_agent</span>
+            <span class="font-display-lg text-[22px] tracking-tight">Properti Indahweb</span>
+        </a>
+        
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden md:flex items-center gap-6">
+            <a href="/catalog?listingType=SALE" class="text-on-surface-variant hover:text-primary transition-colors text-label-md font-semibold">Dijual</a>
+            <a href="/catalog?listingType=RENT" class="text-on-surface-variant hover:text-primary transition-colors text-label-md font-semibold">Disewa</a>
+            <a href="/catalog" class="text-on-surface-variant hover:text-primary transition-colors text-label-md font-semibold">Semua Katalog</a>
+        </nav>
+
+        <!-- Action Controls -->
+        <div class="hidden md:flex items-center gap-3">
+            <% if (typeof user !== 'undefined' && user) { %>
+                <% if (user.role === 'super_admin' || user.role === 'admin') { %>
+                    <a href="/admin/dashboard" class="text-on-surface-variant hover:text-primary transition-colors text-label-md font-semibold px-3 py-2 rounded-lg">Panel Admin</a>
+                <% } %>
+                <a href="/dashboard" class="text-on-surface-variant hover:text-primary transition-colors text-label-md font-semibold px-3 py-2 rounded-lg">Dashboard</a>
+                <a href="/auth/logout" class="text-on-surface-variant hover:text-error transition-colors text-label-md font-semibold px-3 py-2 rounded-lg">Keluar</a>
+            <% } else { %>
+                <a href="/auth/login" class="text-on-surface-variant hover:text-primary transition-colors text-label-md font-semibold px-3 py-2 rounded-lg">Masuk / Daftar</a>
+            <% } %>
+            <a href="/pasang-iklan" class="bg-primary text-on-primary text-label-md font-semibold px-5 py-2.5 rounded-full hover:bg-surface-tint transition-colors shadow-sm flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[18px]">add_circle</span> Pasang Iklan Gratis
+            </a>
+        </div>
+
+        <!-- Mobile menu trigger -->
+        <div class="flex md:hidden items-center gap-2">
+            <button id="mobile-menu-btn" class="p-2 text-on-surface-variant hover:text-primary focus:outline-none">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Drawer Menu -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-border-light bg-surface-container-lowest py-4 px-container-margin space-y-4 shadow-md">
+        <nav class="flex flex-col gap-3">
+            <a href="/catalog?listingType=SALE" class="text-on-surface-variant hover:text-primary text-body-md font-semibold py-1">Dijual</a>
+            <a href="/catalog?listingType=RENT" class="text-on-surface-variant hover:text-primary text-body-md font-semibold py-1">Disewa</a>
+            <a href="/catalog" class="text-on-surface-variant hover:text-primary text-body-md font-semibold py-1">Semua Katalog</a>
+            <hr class="border-border-light my-1" />
+            <% if (typeof user !== 'undefined' && user) { %>
+                <% if (user.role === 'super_admin' || user.role === 'admin') { %>
+                    <a href="/admin/dashboard" class="text-on-surface-variant hover:text-primary text-body-md font-semibold py-1">Panel Admin</a>
+                <% } %>
+                <a href="/dashboard" class="text-on-surface-variant hover:text-primary text-body-md font-semibold py-1">Dashboard (<%= user.name %>)</a>
+                <a href="/auth/logout" class="text-on-surface-variant hover:text-error text-body-md font-semibold py-1">Keluar</a>
+            <% } else { %>
+                <a href="/auth/login" class="text-on-surface-variant hover:text-primary text-body-md font-semibold py-1">Masuk / Daftar</a>
+            <% } %>
+            <a href="/pasang-iklan" class="bg-primary text-on-primary text-label-md font-semibold px-4 py-2.5 rounded-full hover:bg-surface-tint transition-colors shadow-sm flex items-center justify-center gap-1.5 w-full">
+                <span class="material-symbols-outlined text-[18px]">add_circle</span> Pasang Iklan Gratis
+            </a>
+        </nav>
+    </div>
+</header>
+
+<script>
+    document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+        var menu = document.getElementById('mobile-menu');
+        var icon = this.querySelector('.material-symbols-outlined');
+        if (menu.classList.contains('hidden')) {
+            menu.classList.remove('hidden');
+            icon.textContent = 'close';
+        } else {
+            menu.classList.add('hidden');
+            icon.textContent = 'menu';
+        }
+    });
+</script>

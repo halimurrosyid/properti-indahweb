@@ -1,0 +1,100 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id         Int        @id @default(autoincrement())
+  email      String?    @unique
+  password   String
+  name       String
+  whatsapp   String     @unique
+  role       String     @default("user") // super_admin, admin, agent, user
+  properties Property[]
+  invoices   Invoice[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model Category {
+  id         Int        @id @default(autoincrement())
+  name       String     @unique
+  slug       String     @unique
+  properties Property[]
+}
+
+model Property {
+  id             Int             @id @default(autoincrement())
+  title          String
+  slug           String          @unique
+  description    String          @db.Text
+  price          Decimal         @db.Decimal(15, 2)
+  listingType    String          // SALE, RENT
+  categoryId     Int
+  category       Category        @relation(fields: [categoryId], references: [id])
+  landSize       Int
+  buildingSize   Int
+  bedrooms       Int
+  bathrooms      Int
+  certificate    String          // SHM, HGB, AJB, dll.
+  electricity    String?
+  waterSource    String?
+  garage         Int             @default(0)
+  facilities     String?         // Comma separated e.g. "AC, Taman, Keamanan 24 Jam"
+  province       String
+  city           String
+  district       String
+  shortAddress   String
+  contactName    String
+  whatsappNumber String
+  isFeatured     Boolean         @default(false)
+  featuredUntil  DateTime?
+  status         String          @default("AVAILABLE") // AVAILABLE, SOLD, RENTED, PENDING
+  userId         Int
+  user           User            @relation(fields: [userId], references: [id])
+  images         PropertyImage[]
+  tracks         WhatsappTrack[]
+  invoices       Invoice[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model PropertyImage {
+  id         Int      @id @default(autoincrement())
+  propertyId Int
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  url        String   // Relative URL file path
+  isMain     Boolean  @default(false)
+}
+
+model WhatsappTrack {
+  id         Int      @id @default(autoincrement())
+  propertyId Int
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  ipHash     String   // SHA-256 IP hash
+  userAgent  String?
+  referrer   String?
+  device     String?
+  clickedAt  DateTime @default(now())
+}
+
+model Invoice {
+  id            Int       @id @default(autoincrement())
+  invoiceNumber String    @unique
+  userId        Int
+  user          User      @relation(fields: [userId], references: [id])
+  propertyId    Int?
+  property      Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  packageCode   String    // GRATIS, FEATURED_7, FEATURED_30, AGEN_BULANAN
+  packageName   String
+  amount        Decimal   @db.Decimal(15, 2)
+  status        String    @default("PENDING") // PENDING, PAID, REJECTED
+  paymentProof  String?   // Relative file path to uploaded payment proof image
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  paidAt        DateTime?
+}

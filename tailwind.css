@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface: #f9f9ff;
+  --color-surface-dim: #d3daea;
+  --color-surface-bright: #f9f9ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f0f3ff;
+  --color-surface-container: #e7eefe;
+  --color-surface-container-high: #e2e8f8;
+  --color-surface-container-highest: #dce2f3;
+  --color-on-surface: #151c27;
+  --color-on-surface-variant: #444653;
+  --color-inverse-surface: #2a313d;
+  --color-inverse-on-surface: #ebf1ff;
+  --color-outline: #757684;
+  --color-outline-variant: #c4c5d5;
+  --color-surface-tint: #3755c3;
+  --color-primary: #00288e;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #1e40af;
+  --color-on-primary-container: #a8b8ff;
+  --color-inverse-primary: #b8c4ff;
+  --color-secondary: #006e2f;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #6bff8f;
+  --color-on-secondary-container: #007432;
+  --color-tertiary: #611e00;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #872d00;
+  --color-on-tertiary-container: #ffa583;
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+  --color-primary-fixed: #dde1ff;
+  --color-primary-fixed-dim: #b8c4ff;
+  --color-on-primary-fixed: #001453;
+  --color-on-primary-fixed-variant: #173bab;
+  --color-secondary-fixed: #6bff8f;
+  --color-secondary-fixed-dim: #4ae176;
+  --color-on-secondary-fixed: #002109;
+  --color-on-secondary-fixed-variant: #005321;
+  --color-tertiary-fixed: #ffdbce;
+  --color-tertiary-fixed-dim: #ffb59a;
+  --color-on-tertiary-fixed: #380d00;
+  --color-on-tertiary-fixed-variant: #802a00;
+  --color-background: #f9f9ff;
+  --color-on-background: #151c27;
+  --color-surface-variant: #dce2f3;
+  --color-surface-subtle: #F9FAFB;
+  --color-border-light: #E5E7EB;
+  --color-whatsapp-green: #22C55E;
+  --color-ink-dark: #111827;
+
+  --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  
+  --spacing-container-margin: 16px;
+  --spacing-gutter: 16px;
+  --spacing-stack-sm: 8px;
+  --spacing-stack-md: 16px;
+  --spacing-stack-lg: 24px;
+  --spacing-section-gap: 48px;
+  
+  --animate-fade-in: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Material Symbols alignment fix */
+.material-symbols-outlined {
+  font-display: block;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+/* Pagination styles */
+.pagination-links ul {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+}
+.pagination-links li a, .pagination-links li span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 6px;
+  border-radius: 8px;
+  border: 1px solid #E5E7EB;
+  font-weight: 600;
+  color: #444653;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.pagination-links li a:hover {
+  border-color: #00288e;
+  color: #00288e;
+  background-color: #f0f3ff;
+}
+.pagination-links li span.current {
+  background-color: #00288e;
+  border-color: #00288e;
+  color: #ffffff;
+}

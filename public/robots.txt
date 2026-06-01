@@ -1,0 +1,12 @@
+User-agent: *
+Disallow: /dashboard
+Disallow: /admin/dashboard
+Disallow: /auth/
+Disallow: /property/quick-post
+Disallow: /property/*/status
+Disallow: /property/*/delete
+Disallow: /property/*/approve
+Disallow: /property/*/reject
+Disallow: /go/whatsapp/
+
+Sitemap: https://properti.indahweb.com/sitemap.xml

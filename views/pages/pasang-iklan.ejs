@@ -1,0 +1,436 @@
+<% 
+const isLoggedIn = typeof user !== 'undefined' && user;
+%>
+<div class="max-w-3xl mx-auto px-container-margin md:px-stack-lg py-12">
+    <div class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm p-6 md:p-8 space-y-8">
+        
+        <!-- Header Title -->
+        <div class="text-center space-y-2">
+            <span class="text-primary text-label-md font-bold tracking-widest uppercase">Gratis Tanpa Biaya</span>
+            <h1 class="text-headline-md md:text-headline-lg font-bold text-on-surface">Pasang Iklan Properti Anda</h1>
+            <p class="text-body-sm md:text-body-md text-on-surface-variant max-w-lg mx-auto">
+                Isi detail properti Anda secara lengkap. Iklan Anda akan langsung ditinjau oleh Admin dan tayang secara luas.
+            </p>
+        </div>
+
+        <!-- Step Indicator -->
+        <div class="relative flex justify-between items-center max-w-md mx-auto">
+            <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-border-light -z-10"></div>
+            <div id="step-progress-bar" class="absolute left-0 top-1/2 -translate-y-1/2 w-0 h-0.5 bg-primary -z-10 transition-all duration-300"></div>
+            
+            <div class="step-indicator-dot flex items-center justify-center w-8 h-8 rounded-full bg-primary text-on-primary text-label-md font-bold border border-primary transition-all shadow-sm" data-step="1">1</div>
+            <div class="step-indicator-dot flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-high text-outline text-label-md font-bold border border-border-light transition-all" data-step="2">2</div>
+            <div class="step-indicator-dot flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-high text-outline text-label-md font-bold border border-border-light transition-all" data-step="3">3</div>
+            <div class="step-indicator-dot flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-high text-outline text-label-md font-bold border border-border-light transition-all" data-step="4">4</div>
+            <div class="step-indicator-dot flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-high text-outline text-label-md font-bold border border-border-light transition-all" data-step="5">5</div>
+            <div class="step-indicator-dot flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-high text-outline text-label-md font-bold border border-border-light transition-all" data-step="6">6</div>
+        </div>
+
+        <!-- Main Form -->
+        <form action="/property/quick-post" method="POST" enctype="multipart/form-data" id="quick-listing-form" class="space-y-6">
+            
+            <!-- STEP 1: Informasi Dasar -->
+            <div class="form-step space-y-4" data-step="1">
+                <h3 class="text-headline-sm font-bold text-on-surface">Langkah 1: Informasi Utama</h3>
+                
+                <div class="space-y-1.5">
+                    <label class="text-label-sm font-bold text-on-surface-variant">Judul Iklan Properti <span class="text-error">*</span></label>
+                    <input type="text" name="title" required placeholder="Contoh: Rumah Minimalis Modern Dekat ITB Bandung" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Kategori <span class="text-error">*</span></label>
+                        <select name="categoryId" required class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md">
+                            <option value="">Pilih Kategori</option>
+                            <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                                <% categories.forEach(cat => { %>
+                                    <option value="<%= cat.id %>"><%= cat.name %></option>
+                                <% }) %>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Tipe Listing <span class="text-error">*</span></label>
+                        <select name="listingType" required class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md">
+                            <option value="SALE">Dijual</option>
+                            <option value="RENT">Disewa</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-label-sm font-bold text-on-surface-variant">Harga Penawaran (Rp) <span class="text-error">*</span></label>
+                    <input type="number" name="price" required placeholder="Contoh: 850000000" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md">
+                    <p class="text-label-xs text-outline">Masukkan nominal angka saja tanpa titik/koma.</p>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-label-sm font-bold text-on-surface-variant">Deskripsi Lengkap <span class="text-error">*</span></label>
+                    <textarea name="description" rows="5" required placeholder="Ceritakan detail kelebihan properti Anda, akses jalan, kedekatan dengan fasilitas umum, dll..." class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md"></textarea>
+                </div>
+            </div>
+
+            <!-- STEP 2: Spesifikasi Detail -->
+            <div class="form-step hidden space-y-4" data-step="2">
+                <h3 class="text-headline-sm font-bold text-on-surface">Langkah 2: Spesifikasi & Fasilitas</h3>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Luas Tanah (m²) <span class="text-error">*</span></label>
+                        <input type="number" name="landSize" required placeholder="e.g. 120" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Luas Bangunan (m²) <span class="text-error">*</span></label>
+                        <input type="number" name="buildingSize" required placeholder="e.g. 90" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Sertifikat <span class="text-error">*</span></label>
+                        <input type="text" name="certificate" required placeholder="SHM / HGB / AJB" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Kamar Tidur <span class="text-error">*</span></label>
+                        <input type="number" name="bedrooms" required placeholder="0" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Kamar Mandi <span class="text-error">*</span></label>
+                        <input type="number" name="bathrooms" required placeholder="0" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Kapasitas Garasi</label>
+                        <input type="number" name="garage" placeholder="0" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Daya Listrik (VA)</label>
+                        <input type="text" name="electricity" placeholder="e.g. 1300" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-label-sm font-bold text-on-surface-variant">Sumber Air</label>
+                    <input type="text" name="waterSource" placeholder="PDAM / Jetpump" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md">
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-label-sm font-bold text-on-surface-variant">Fasilitas Tambahan</label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <% 
+                        const facilityOptions = ['AC', 'Kolam Renang', 'Carport', 'Taman', 'Keamanan 24 Jam', 'Balkon', 'Dapur', 'Akses Jalan Mobil', 'Furnished', 'Kitchen Set'];
+                        facilityOptions.forEach(fac => { 
+                        %>
+                            <label class="flex items-center gap-2 bg-surface-subtle p-3 rounded-lg border border-border-light cursor-pointer hover:border-primary transition-all">
+                                <input type="checkbox" name="facilities[]" value="<%= fac %>" class="accent-primary w-4 h-4">
+                                <span class="text-label-sm text-on-surface-variant"><%= fac %></span>
+                            </label>
+                        <% }) %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: Lokasi Properti -->
+            <div class="form-step hidden space-y-4" data-step="3">
+                <h3 class="text-headline-sm font-bold text-on-surface">Langkah 3: Lokasi Properti</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Provinsi <span class="text-error">*</span></label>
+                        <input type="text" name="province" required value="Jawa Barat" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Kota / Kabupaten <span class="text-error">*</span></label>
+                        <input type="text" name="city" required value="Bandung" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Kecamatan <span class="text-error">*</span></label>
+                        <input type="text" name="district" required placeholder="Contoh: Coblong" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Alamat Singkat (Nama Jalan/Perumahan) <span class="text-error">*</span></label>
+                        <input type="text" name="shortAddress" required placeholder="Contoh: Jl. Dago Elok No. 15" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 4: Media/Foto -->
+            <div class="form-step hidden space-y-4" data-step="4">
+                <h3 class="text-headline-sm font-bold text-on-surface">Langkah 4: Foto Properti</h3>
+
+                <div class="space-y-1.5">
+                    <label class="text-label-sm font-bold text-on-surface-variant">Foto Utama Properti <span class="text-error">*</span></label>
+                    <input type="file" name="mainImage" accept="image/*" required class="w-full px-4 py-2.5 rounded-lg border border-border-light outline-none bg-surface-bright text-body-md">
+                    <p class="text-label-xs text-outline">Foto utama akan muncul sebagai thumbnail pencarian dan slider depan.</p>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-label-sm font-bold text-on-surface-variant">Foto Galeri Pendukung (Bisa pilih beberapa sekaligus)</label>
+                    <input type="file" name="galleryImages" accept="image/*" multiple class="w-full px-4 py-2.5 rounded-lg border border-border-light outline-none bg-surface-bright text-body-md">
+                    <p class="text-label-xs text-outline">Unggah beberapa foto interior, toilet, garasi, maupun jalan depan rumah.</p>
+                </div>
+            </div>
+
+            <!-- STEP 5: Akun Pengguna -->
+            <div class="form-step hidden space-y-4" data-step="5">
+                <h3 class="text-headline-sm font-bold text-on-surface">Langkah 5: Informasi Akun Anda</h3>
+
+                <% if (isLoggedIn) { %>
+                    <div class="bg-primary/5 border border-primary/10 rounded-xl p-5 space-y-2">
+                        <p class="text-body-md text-on-surface font-semibold">Anda terdaftar sebagai:</p>
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-[36px] text-primary">account_circle</span>
+                            <div>
+                                <h4 class="text-title-md font-bold text-on-surface"><%= user.name %></h4>
+                                <p class="text-body-sm text-outline">Email: <%= user.email %></p>
+                            </div>
+                        </div>
+                        <p class="text-body-xs text-outline pt-2 border-t border-border-light">Properti ini akan dipasang langsung di bawah akun aktif Anda.</p>
+                    </div>
+                <% } else { %>
+                    <div class="bg-surface-subtle p-5 rounded-xl border border-border-light space-y-4">
+                        <div class="flex items-center gap-2 text-primary font-bold text-title-md">
+                            <span class="material-symbols-outlined">person_add</span> Buat Akun Agen Baru
+                        </div>
+                        <p class="text-body-sm text-on-surface-variant">Akun akan dibuat secara otomatis agar Anda dapat mengedit atau menghapus listing ini nanti di dashboard.</p>
+
+                        <div class="space-y-1.5">
+                            <label class="text-label-sm font-bold text-on-surface-variant">Nama Lengkap Anda <span class="text-error">*</span></label>
+                            <input type="text" name="guestName" id="guestName" placeholder="Contoh: Rian Hidayat" class="w-full px-4 py-2.5 rounded-lg border border-border-light outline-none bg-surface-bright text-body-md">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-label-sm font-bold text-on-surface-variant">Nomor WhatsApp Aktif <span class="text-error">*</span></label>
+                            <input type="text" name="guestWhatsapp" id="guestWhatsapp" placeholder="Contoh: 628123456789" class="w-full px-4 py-2.5 rounded-lg border border-border-light outline-none bg-surface-bright text-body-md">
+                            <p class="text-label-xs text-outline">Juga akan digunakan sebagai username login Anda.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-1.5">
+                                <label class="text-label-sm font-bold text-on-surface-variant">Alamat Email <span class="text-outline font-normal">(Opsional)</span></label>
+                                <input type="email" name="guestEmail" id="guestEmail" placeholder="Contoh: rian@email.com" class="w-full px-4 py-2.5 rounded-lg border border-border-light outline-none bg-surface-bright text-body-md">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-label-sm font-bold text-on-surface-variant">Kata Sandi Akun <span class="text-error">*</span></label>
+                                <input type="password" name="guestPassword" id="guestPassword" placeholder="Minimal 6 karakter" class="w-full px-4 py-2.5 rounded-lg border border-border-light outline-none bg-surface-bright text-body-md">
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- STEP 6: Paket Iklan -->
+            <div class="form-step hidden space-y-4" data-step="6">
+                <h3 class="text-headline-sm font-bold text-on-surface">Langkah 6: Pilih Paket Iklan</h3>
+                <p class="text-body-sm text-on-surface-variant">Pilih jenis paket tayang untuk memaksimalkan penjualan properti Anda.</p>
+                
+                <input type="hidden" name="packageCode" id="selectedPackageCode" value="GRATIS">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                    <!-- Card 1: Gratis -->
+                    <div class="package-card border-2 border-primary bg-primary/5 p-5 rounded-2xl cursor-pointer transition-all hover:shadow-md relative" data-code="GRATIS" onclick="selectPackage('GRATIS')">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="text-title-lg font-bold text-on-surface">Paket Gratis</h4>
+                                <p class="text-body-sm text-outline mt-1">Iklan standard, tayang selamanya.</p>
+                            </div>
+                            <span class="bg-surface-container-high text-on-surface-variant font-bold text-label-xs px-2.5 py-1 rounded">Rp 0</span>
+                        </div>
+                        <ul class="text-body-sm text-on-surface-variant mt-4 space-y-1.5 border-t border-border-light pt-3">
+                            <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span> Tayang di katalog publik</li>
+                            <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span> Hubungi via WhatsApp</li>
+                        </ul>
+                    </div>
+
+                    <!-- Card 2: Featured 7 Hari -->
+                    <div class="package-card border-2 border-border-light p-5 rounded-2xl cursor-pointer transition-all hover:shadow-md relative" data-code="FEATURED_7" onclick="selectPackage('FEATURED_7')">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="text-title-lg font-bold text-on-surface">Featured 7 Hari</h4>
+                                <p class="text-body-sm text-outline mt-1">Tampil menonjol & premium selama 7 hari.</p>
+                            </div>
+                            <span class="bg-primary text-on-primary font-bold text-label-xs px-2.5 py-1 rounded">Rp 50.000</span>
+                        </div>
+                        <ul class="text-body-sm text-on-surface-variant mt-4 space-y-1.5 border-t border-border-light pt-3">
+                            <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span> Muncul di banner slider utama</li>
+                            <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span> Lencana Premium khusus</li>
+                        </ul>
+                    </div>
+
+                    <!-- Card 3: Featured 30 Hari -->
+                    <div class="package-card border-2 border-border-light p-5 rounded-2xl cursor-pointer transition-all hover:shadow-md relative" data-code="FEATURED_30" onclick="selectPackage('FEATURED_30')">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="text-title-lg font-bold text-on-surface">Featured 30 Hari</h4>
+                                <p class="text-body-sm text-outline mt-1">Tampil di halaman teratas selama 30 hari.</p>
+                            </div>
+                            <span class="bg-primary text-on-primary font-bold text-label-xs px-2.5 py-1 rounded">Rp 150.000</span>
+                        </div>
+                        <ul class="text-body-sm text-on-surface-variant mt-4 space-y-1.5 border-t border-border-light pt-3">
+                            <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span> Prioritas di pencarian katalog</li>
+                            <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span> Support marketing khusus</li>
+                        </ul>
+                    </div>
+
+                    <!-- Card 4: Paket Agen Bulanan -->
+                    <div class="package-card border-2 border-border-light p-5 rounded-2xl cursor-pointer transition-all hover:shadow-md relative" data-code="AGEN_BULANAN" onclick="selectPackage('AGEN_BULANAN')">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="text-title-lg font-bold text-on-surface">Paket Agen Bulanan</h4>
+                                <p class="text-body-sm text-outline mt-1">Posting properti unlimited selama 30 hari.</p>
+                            </div>
+                            <span class="bg-primary text-on-primary font-bold text-label-xs px-2.5 py-1 rounded">Rp 250.000</span>
+                        </div>
+                        <ul class="text-body-sm text-on-surface-variant mt-4 space-y-1.5 border-t border-border-light pt-3">
+                            <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span> Posting properti tanpa batas</li>
+                            <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span> Label Agen Terverifikasi</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Button Navigation Control -->
+            <div class="flex justify-between items-center pt-6 border-t border-border-light">
+                <button type="button" id="prev-step-btn" class="hidden px-5 py-2.5 rounded-lg border border-border-light text-label-md font-bold text-on-surface hover:bg-surface-subtle transition-all cursor-pointer">
+                    Kembali
+                </button>
+                <div class="ml-auto">
+                    <button type="button" id="next-step-btn" class="px-6 py-2.5 bg-primary text-on-primary rounded-lg text-label-md font-bold hover:bg-surface-tint transition-all cursor-pointer shadow-sm">
+                        Selanjutnya
+                    </button>
+                    <button type="submit" id="submit-property-btn" class="hidden px-6 py-2.5 bg-primary text-on-primary rounded-lg text-label-md font-bold hover:bg-surface-tint transition-all cursor-pointer shadow-sm flex items-center gap-1.5">
+                        Pasang Iklan Sekarang <span class="material-symbols-outlined text-[18px]">publish</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let currentStep = 1;
+    const totalSteps = 6;
+    const isLoggedIn = <%= isLoggedIn ? 'true' : 'false' %>;
+
+    const formSteps = document.querySelectorAll('.form-step');
+    const indicatorDots = document.querySelectorAll('.step-indicator-dot');
+    const progressBar = document.getElementById('step-progress-bar');
+    
+    const prevBtn = document.getElementById('prev-step-btn');
+    const nextBtn = document.getElementById('next-step-btn');
+    const submitBtn = document.getElementById('submit-property-btn');
+    const formObj = document.getElementById('quick-listing-form');
+
+    function updateStepUI() {
+        // Update Step Views Visibility
+        formSteps.forEach(step => {
+            if (parseInt(step.getAttribute('data-step')) === currentStep) {
+                step.classList.remove('hidden');
+            } else {
+                step.classList.add('hidden');
+            }
+        });
+
+        // Update Dots styling
+        indicatorDots.forEach(dot => {
+            const stepNum = parseInt(dot.getAttribute('data-step'));
+            if (stepNum < currentStep) {
+                // Completed steps
+                dot.className = 'step-indicator-dot flex items-center justify-center w-8 h-8 rounded-full bg-primary/20 text-primary text-label-md font-bold border border-primary/30 transition-all';
+            } else if (stepNum === currentStep) {
+                // Active step
+                dot.className = 'step-indicator-dot flex items-center justify-center w-8 h-8 rounded-full bg-primary text-on-primary text-label-md font-bold border border-primary transition-all shadow-sm';
+            } else {
+                // Upcoming steps
+                dot.className = 'step-indicator-dot flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-high text-outline text-label-md font-bold border border-border-light transition-all';
+            }
+        });
+
+        // Progress line length
+        const progressPercentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
+        progressBar.style.width = progressPercentage + '%';
+
+        // Buttons display
+        if (currentStep === 1) {
+            prevBtn.classList.add('hidden');
+        } else {
+            prevBtn.classList.remove('hidden');
+        }
+
+        if (currentStep === totalSteps) {
+            nextBtn.classList.add('hidden');
+            submitBtn.classList.remove('hidden');
+        } else {
+            nextBtn.classList.remove('hidden');
+            submitBtn.classList.add('hidden');
+        }
+    }
+
+    function validateCurrentStepInputs() {
+        const activeStep = document.querySelector(`.form-step[data-step="${currentStep}"]`);
+        const requiredInputs = activeStep.querySelectorAll('[required]');
+        
+        for (let input of requiredInputs) {
+            if (!input.value.trim()) {
+                input.reportValidity();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    nextBtn.addEventListener('click', function() {
+        if (validateCurrentStepInputs()) {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateStepUI();
+                window.scrollTo({ top: 100, behavior: 'smooth' });
+            }
+        }
+    });
+
+    prevBtn.addEventListener('click', function() {
+        if (currentStep > 1) {
+            currentStep--;
+            updateStepUI();
+            window.scrollTo({ top: 100, behavior: 'smooth' });
+        }
+    });
+
+    formObj.addEventListener('submit', function(e) {
+        if (!isLoggedIn) {
+            // Verify guest details
+            const name = document.getElementById('guestName').value.trim();
+            const wa = document.getElementById('guestWhatsapp').value.trim();
+            const pass = document.getElementById('guestPassword').value.trim();
+
+            if (!name || !wa || !pass) {
+                e.preventDefault();
+                alert('Lengkapi detail pendaftaran wajib (Nama, WhatsApp, Kata Sandi).');
+                return false;
+            }
+        }
+        return true;
+    });
+
+    // Initialize layout status
+    updateStepUI();
+});
+
+function selectPackage(code) {
+    document.getElementById('selectedPackageCode').value = code;
+    document.querySelectorAll('.package-card').forEach(card => {
+        if (card.getAttribute('data-code') === code) {
+            card.classList.add('border-primary', 'bg-primary/5');
+            card.classList.remove('border-border-light');
+        } else {
+            card.classList.remove('border-primary', 'bg-primary/5');
+            card.classList.add('border-border-light');
+        }
+    });
+}
+</script>

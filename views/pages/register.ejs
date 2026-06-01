@@ -1,0 +1,72 @@
+<div class="max-w-md mx-auto px-container-margin py-12">
+    <div class="bg-surface-container-lowest p-6 md:p-8 rounded-2xl border border-border-light shadow-md space-y-6">
+        <div class="text-center space-y-2">
+            <h1 class="text-headline-md font-bold text-on-surface font-display-lg">Daftar Akun Agen</h1>
+            <p class="text-body-sm text-on-surface-variant">Buat akun untuk mulai memasang iklan properti gratis Anda.</p>
+        </div>
+
+        <!-- Alert Error -->
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="bg-error-container text-on-error-container border border-error/20 p-3 rounded-lg text-body-sm font-medium">
+                <%= error %>
+            </div>
+        <% } %>
+
+        <form action="/auth/register" method="POST" class="space-y-4">
+            <div class="space-y-1.5">
+                <label class="text-label-sm font-bold text-on-surface-variant">Nama Lengkap</label>
+                <input 
+                    type="text" 
+                    name="name" 
+                    required 
+                    placeholder="Contoh: Rian Hidayat" 
+                    class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md"
+                />
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="text-label-sm font-bold text-on-surface-variant">Nomor WhatsApp Aktif</label>
+                <input 
+                    type="text" 
+                    name="whatsapp" 
+                    required 
+                    placeholder="Contoh: 628123456789" 
+                    class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md"
+                />
+                <p class="text-label-xs text-outline">Gunakan format angka saja diawali kode negara, contoh: 62812xxxxxx.</p>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="text-label-sm font-bold text-on-surface-variant">Alamat Email <span class="text-outline font-normal">(Opsional)</span></label>
+                <input 
+                    type="email" 
+                    name="email" 
+                    placeholder="Contoh: rian@email.com" 
+                    class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md"
+                />
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="text-label-sm font-bold text-on-surface-variant">Kata Sandi</label>
+                <input 
+                    type="password" 
+                    name="password" 
+                    required 
+                    placeholder="Minimal 6 karakter..." 
+                    class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md"
+                />
+            </div>
+
+            <button 
+                type="submit" 
+                class="w-full bg-primary text-on-primary py-3 rounded-lg text-label-md font-semibold hover:bg-surface-tint transition-all shadow-sm cursor-pointer mt-2"
+            >
+                Daftar Akun Baru
+            </button>
+        </form>
+
+        <p class="text-body-sm text-center text-on-surface-variant">
+            Sudah punya akun? <a href="/auth/login" class="text-primary font-bold hover:underline">Masuk Di sini</a>
+        </p>
+    </div>
+</div>

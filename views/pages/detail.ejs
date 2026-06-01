@@ -1,0 +1,217 @@
+<div class="max-w-7xl mx-auto px-container-margin md:px-stack-lg py-8 space-y-8 pb-24">
+    <!-- JSON-LD Schema Script -->
+    <script type="application/ld+json">
+        <%- jsonLd %>
+    </script>
+
+    <!-- Breadcrumbs Navigation -->
+    <nav class="text-body-sm text-outline flex items-center gap-1.5">
+        <a href="/" class="hover:text-primary transition-colors">Home</a>
+        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+        <a href="/catalog" class="hover:text-primary transition-colors">Properti</a>
+        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+        <span class="text-on-surface-variant font-medium line-clamp-1"><%= property.title %></span>
+    </nav>
+
+    <!-- Header Info -->
+    <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+        <div>
+            <span class="bg-primary/10 text-primary text-label-md font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                <%= property.listingType === 'RENT' ? 'DISEWA' : 'DIJUAL' %>
+            </span>
+            <h1 class="text-headline-md md:text-headline-lg font-bold text-on-surface mt-2 font-display-lg">
+                <%= property.title %>
+            </h1>
+            <p class="text-body-md text-outline mt-1.5 flex items-center gap-1">
+                <span class="material-symbols-outlined text-[18px]">location_on</span>
+                <%= property.shortAddress %>, <%= property.district %>, <%= property.city %>, <%= property.province %>
+            </p>
+        </div>
+        <div class="md:text-right shrink-0">
+            <p class="text-body-sm text-outline font-semibold uppercase tracking-wider">Harga Penawaran</p>
+            <p class="text-primary text-headline-md md:text-headline-lg font-bold mt-1">
+                Rp <%= priceFormatted %>
+            </p>
+        </div>
+    </div>
+
+    <!-- Image Gallery Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Large Main Photo -->
+        <div class="md:col-span-2 relative h-96 md:h-[480px] rounded-2xl overflow-hidden bg-surface-container shadow-sm">
+            <% if (property.images && property.images.length > 0) { %>
+                <img src="<%= property.images.find(img => img.isMain)?.url || property.images[0].url %>" alt="<%= property.title %>" class="object-cover w-full h-full" />
+            <% } else { %>
+                <div class="absolute inset-0 bg-primary/5 flex items-center justify-center text-primary/45">
+                    <span class="material-symbols-outlined text-[64px]">image</span>
+                </div>
+            <% } %>
+            <% if (property.isFeatured) { %>
+                <div class="absolute top-3 right-3 bg-primary text-white text-label-sm font-bold px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1 z-20">
+                    <span class="material-symbols-outlined text-[14px]">star</span> Premium
+                </div>
+            <% } %>
+        </div>
+        
+        <!-- Gallery Thumbnails Grid (up to 4 support files) -->
+        <div class="grid grid-cols-2 gap-4 h-auto md:h-[480px]">
+            <% 
+            const supports = property.images ? property.images.filter(img => !img.isMain) : [];
+            for (let i = 0; i < 4; i++) {
+                if (supports[i]) { 
+            %>
+                    <div class="relative h-44 md:h-auto rounded-xl overflow-hidden bg-surface-container shadow-sm">
+                        <img src="<%= supports[i].url %>" alt="Detail Foto" class="object-cover w-full h-full hover:scale-105 transition-all duration-300" />
+                    </div>
+                <% } else { %>
+                    <div class="hidden md:flex bg-surface-container-low rounded-xl border border-dashed border-border-light items-center justify-center text-outline">
+                        <span class="material-symbols-outlined text-[32px]">image</span>
+                    </div>
+                <% } 
+            } 
+            %>
+        </div>
+    </div>
+
+    <!-- Content Details Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <!-- Left specifications column -->
+        <div class="md:col-span-2 space-y-8">
+            
+            <!-- Summary Details Grid Card -->
+            <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="flex gap-3 items-center">
+                    <span class="material-symbols-outlined text-primary text-[32px] bg-primary/5 p-2 rounded-xl">square_foot</span>
+                    <div>
+                        <p class="text-body-sm text-outline">L. Bangunan</p>
+                        <p class="text-body-md font-bold text-on-surface"><%= property.buildingSize %> m²</p>
+                    </div>
+                </div>
+                <div class="flex gap-3 items-center">
+                    <span class="material-symbols-outlined text-primary text-[32px] bg-primary/5 p-2 rounded-xl">crop_free</span>
+                    <div>
+                        <p class="text-body-sm text-outline">L. Tanah</p>
+                        <p class="text-body-md font-bold text-on-surface"><%= property.landSize %> m²</p>
+                    </div>
+                </div>
+                <div class="flex gap-3 items-center">
+                    <span class="material-symbols-outlined text-primary text-[32px] bg-primary/5 p-2 rounded-xl">bed</span>
+                    <div>
+                        <p class="text-body-sm text-outline">Kamar Tidur</p>
+                        <p class="text-body-md font-bold text-on-surface"><%= property.bedrooms %> KT</p>
+                    </div>
+                </div>
+                <div class="flex gap-3 items-center">
+                    <span class="material-symbols-outlined text-primary text-[32px] bg-primary/5 p-2 rounded-xl">bathtub</span>
+                    <div>
+                        <p class="text-body-sm text-outline">Kamar Mandi</p>
+                        <p class="text-body-md font-bold text-on-surface"><%= property.bathrooms %> KM</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full Specifications Section -->
+            <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm space-y-4">
+                <h2 class="text-title-lg font-bold text-on-surface pb-3 border-b border-border-light">Spesifikasi Detail</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-8 text-body-md">
+                    <div class="flex justify-between py-1 border-b border-surface-subtle">
+                        <span class="text-outline">Sertifikat</span>
+                        <span class="font-semibold text-on-surface"><%= property.certificate %></span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-surface-subtle">
+                        <span class="text-outline">Daya Listrik</span>
+                        <span class="font-semibold text-on-surface"><%= property.electricity ? property.electricity + ' VA' : '-' %></span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-surface-subtle">
+                        <span class="text-outline">Sumber Air</span>
+                        <span class="font-semibold text-on-surface"><%= property.waterSource || '-' %></span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-surface-subtle">
+                        <span class="text-outline">Kapasitas Garasi</span>
+                        <span class="font-semibold text-on-surface"><%= property.garage %> Mobil</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-surface-subtle">
+                        <span class="text-outline">Kategori Properti</span>
+                        <span class="font-semibold text-on-surface"><%= property.category.name %></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description Body -->
+            <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm space-y-4">
+                <h2 class="text-title-lg font-bold text-on-surface pb-3 border-b border-border-light">Deskripsi Properti</h2>
+                <div class="text-body-md text-on-surface-variant whitespace-pre-line leading-relaxed">
+                    <%= property.description %>
+                </div>
+            </div>
+
+            <!-- Facilities List Grid -->
+            <% if (facilities && facilities.length > 0) { %>
+                <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm space-y-4">
+                    <h2 class="text-title-lg font-bold text-on-surface pb-3 border-b border-border-light">Fasilitas Properti</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <% facilities.forEach(fac => { %>
+                            <div class="flex items-center gap-2 bg-surface-subtle p-3 rounded-lg border border-border-light">
+                                <span class="material-symbols-outlined text-[20px] text-primary">check_circle</span>
+                                <span class="text-label-sm font-semibold text-on-surface-variant"><%= fac %></span>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Sidebar info (Right Column) -->
+        <aside class="space-y-6">
+            <!-- Agent Info card -->
+            <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm text-center space-y-4">
+                <div class="w-20 h-20 bg-primary/5 text-primary rounded-full flex items-center justify-center mx-auto border border-border-light">
+                    <span class="material-symbols-outlined text-[40px]" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+                </div>
+                <div>
+                    <p class="text-body-sm text-outline uppercase font-bold tracking-wider">Pemilik / Agen Iklan</p>
+                    <h3 class="text-title-lg font-bold text-on-surface mt-1"><%= property.contactName %></h3>
+                    <p class="text-body-sm text-on-surface-variant font-medium mt-0.5">WhatsApp: <%= property.whatsappNumber %></p>
+                </div>
+                <hr class="border-border-light" />
+                <a 
+                    href="<%= waLeadUrl %>"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="bg-whatsapp-green text-white w-full py-3 rounded-lg text-label-md font-bold hover:opacity-90 transition-all flex justify-center items-center gap-2 cursor-pointer shadow-sm"
+                >
+                    <span class="material-symbols-outlined text-[20px]">chat</span> Hubungi via WhatsApp
+                </a>
+            </div>
+
+            <!-- Safety Tips Card -->
+            <div class="bg-primary/5 p-6 rounded-2xl border border-primary/10 space-y-3">
+                <h4 class="text-title-md font-bold text-primary flex items-center gap-1.5">
+                    <span class="material-symbols-outlined">security</span> Tips Keamanan Transaksi
+                </h4>
+                <ul class="text-body-sm text-on-surface-variant space-y-2 list-disc pl-4 leading-relaxed">
+                    <li>Jangan melakukan transfer DP / booking fee sebelum melakukan survey lokasi secara fisik.</li>
+                    <li>Pastikan memeriksa kelengkapan surat sertifikat (SHM/HGB) langsung di lokasi.</li>
+                    <li>Lakukan pertemuan transaksi jual-beli di kantor notaris resmi demi keamanan hukum.</li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Sticky Bottom Contact Bar for Mobile Devices -->
+    <div class="fixed bottom-0 left-0 right-0 bg-surface-container-lowest border-t border-border-light p-3 md:hidden flex justify-between items-center z-40 shadow-lg">
+        <div>
+            <p class="text-body-xs text-outline font-bold">Harga Penawaran</p>
+            <p class="text-primary text-title-md font-bold">Rp <%= priceFormatted %></p>
+        </div>
+        <a 
+            href="<%= waLeadUrl %>"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="bg-whatsapp-green text-white px-5 py-2.5 rounded-lg text-label-md font-bold hover:opacity-90 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+        >
+            <span class="material-symbols-outlined text-[18px]">chat</span> Hubungi Agen
+        </a>
+    </div>
+</div>

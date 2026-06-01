@@ -1,0 +1,199 @@
+<div class="max-w-3xl mx-auto px-container-margin md:px-stack-lg py-12 space-y-8">
+    <!-- Invoice Card -->
+    <div class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm overflow-hidden">
+        <!-- Invoice Header -->
+        <div class="p-6 md:p-8 bg-surface-container-low border-b border-border-light flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <span class="text-primary text-label-sm font-bold uppercase tracking-wider">Lembar Invoice</span>
+                <h1 class="text-headline-sm font-bold text-on-surface mt-1"><%= invoice.invoiceNumber %></h1>
+                <p class="text-body-sm text-outline mt-1">Tanggal: <%= new Date(invoice.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) %></p>
+            </div>
+            
+            <!-- Status Badge -->
+            <div>
+                <% if (invoice.status === 'PENDING') { %>
+                    <span class="bg-yellow-100 text-yellow-800 text-label-md font-bold px-4 py-2 rounded-full border border-yellow-200">Menunggu Pembayaran</span>
+                <% } else if (invoice.status === 'PAID') { %>
+                    <span class="bg-green-100 text-green-800 text-label-md font-bold px-4 py-2 rounded-full border border-green-200">Lunas</span>
+                <% } else if (invoice.status === 'REJECTED') { %>
+                    <span class="bg-red-100 text-red-800 text-label-md font-bold px-4 py-2 rounded-full border border-red-200">Ditolak</span>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Alert Notification Messages -->
+        <div class="px-6 md:px-8 pt-6">
+            <% if (typeof message !== 'undefined' && message) { %>
+                <div class="bg-green-500/10 text-green-600 border border-green-500/20 p-4 rounded-xl text-body-md font-medium">
+                    <%= message %>
+                </div>
+            <% } %>
+            <% if (typeof error !== 'undefined' && error) { %>
+                <div class="bg-error-container text-on-error-container border border-error/20 p-4 rounded-xl text-body-md font-medium">
+                    <%= error %>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Invoice Details Content -->
+        <div class="p-6 md:p-8 space-y-6">
+            <!-- Customer / Listing Information -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-body-md">
+                <div>
+                    <h3 class="text-label-sm font-bold text-outline uppercase tracking-wider mb-2">Ditagih Kepada</h3>
+                    <p class="font-bold text-on-surface"><%= invoice.user.name %></p>
+                    <p class="text-on-surface-variant mt-0.5">WhatsApp: <%= invoice.user.whatsapp %></p>
+                    <% if (invoice.user.email) { %>
+                        <p class="text-on-surface-variant"><%= invoice.user.email %></p>
+                    <% } %>
+                </div>
+                <div>
+                    <h3 class="text-label-sm font-bold text-outline uppercase tracking-wider mb-2">Item Terkait</h3>
+                    <% if (invoice.property) { %>
+                        <p class="font-bold text-primary hover:underline"><a href="/property/<%= invoice.property.slug %>" target="_blank"><%= invoice.property.title %></a></p>
+                        <p class="text-body-sm text-outline mt-0.5"><%= invoice.property.category.name %> | <%= invoice.property.listingType === 'SALE' ? 'Dijual' : 'Disewa' %></p>
+                    <% } else { %>
+                        <p class="font-bold text-on-surface">Paket Langganan Agen</p>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Price Breakdown Table -->
+            <div class="border border-border-light rounded-xl overflow-hidden mt-8">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-surface-container-low text-label-sm font-bold text-on-surface-variant border-b border-border-light">
+                            <th class="p-4">Deskripsi Layanan</th>
+                            <th class="p-4 text-right">Total Tagihan</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border-light text-body-md text-on-surface">
+                        <tr>
+                            <td class="p-4 font-semibold">
+                                <%= invoice.packageName %> 
+                                <span class="text-label-xs font-bold text-outline uppercase ml-2 bg-surface-container-high px-2 py-0.5 rounded">
+                                    <%= invoice.packageCode %>
+                                </span>
+                            </td>
+                            <td class="p-4 text-right font-bold">
+                                Rp <%= Number(invoice.amount).toLocaleString('id-ID') %>
+                            </td>
+                        </tr>
+                        <tr class="bg-surface-container-low/30">
+                            <td class="p-4 text-right font-bold text-outline text-label-md">Total Pembayaran</td>
+                            <td class="p-4 text-right font-bold text-primary text-title-lg">
+                                Rp <%= Number(invoice.amount).toLocaleString('id-ID') %>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Payment / Instructions Section -->
+            <% if (invoice.status === 'PENDING') { %>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t border-border-light/50">
+                    <!-- Instructions -->
+                    <div class="space-y-4">
+                        <h3 class="text-title-md font-bold text-on-surface flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-primary">account_balance</span>
+                            Instruksi Pembayaran Bank
+                        </h3>
+                        <p class="text-body-sm text-on-surface-variant leading-relaxed">
+                            Silakan transfer nominal tagihan tepat ke salah satu rekening bank resmi kami di bawah ini:
+                        </p>
+                        <div class="bg-surface-subtle p-4 rounded-xl border border-border-light space-y-3 text-body-md">
+                            <div>
+                                <p class="text-label-xs text-outline font-bold uppercase">Bank Central Asia (BCA)</p>
+                                <p class="font-bold text-on-surface mt-0.5">869-098-1234</p>
+                                <p class="text-body-sm text-on-surface-variant">a.n. PT Properti Indahweb Indonesia</p>
+                            </div>
+                            <hr class="border-border-light" />
+                            <div>
+                                <p class="text-label-xs text-outline font-bold uppercase">Bank Mandiri</p>
+                                <p class="font-bold text-on-surface mt-0.5">131-00-9876-543</p>
+                                <p class="text-body-sm text-on-surface-variant">a.n. PT Properti Indahweb Indonesia</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Proof Form / Uploaded file status -->
+                    <div class="space-y-4">
+                        <h3 class="text-title-md font-bold text-on-surface flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-primary">receipt_long</span>
+                            Konfirmasi Pembayaran
+                        </h3>
+
+                        <% if (invoice.paymentProof) { %>
+                            <div class="bg-primary/5 p-4 rounded-xl border border-primary/10 space-y-3">
+                                <p class="text-body-sm text-on-surface font-semibold flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[18px] text-primary">check_circle</span>
+                                    Bukti Pembayaran Telah Diunggah
+                                </p>
+                                <img src="<%= invoice.paymentProof %>" alt="Bukti Pembayaran" class="w-full h-40 object-cover rounded-lg border border-border-light">
+                                <p class="text-label-xs text-outline leading-relaxed">
+                                    Unggahan bukti pembayaran Anda sedang ditinjau oleh tim keuangan Admin. Iklan Anda akan aktif secara otomatis setelah diverifikasi.
+                                </p>
+                            </div>
+
+                            <details class="text-body-sm text-outline">
+                                <summary class="cursor-pointer hover:underline">Unggah bukti baru (Re-upload)</summary>
+                                <form action="/invoice/<%= invoice.invoiceNumber %>/upload-proof" method="POST" enctype="multipart/form-data" class="space-y-3 pt-3">
+                                    <input type="file" name="paymentProof" accept="image/*" required class="w-full px-3 py-2 rounded-lg border border-border-light text-body-sm outline-none bg-surface-bright">
+                                    <button type="submit" class="w-full bg-primary text-on-primary py-2 rounded-lg text-label-xs font-bold hover:bg-surface-tint transition-all cursor-pointer">
+                                        Kirim Bukti Baru
+                                    </button>
+                                </form>
+                            </details>
+                        <% } else { %>
+                            <form action="/invoice/<%= invoice.invoiceNumber %>/upload-proof" method="POST" enctype="multipart/form-data" class="space-y-4 bg-surface-subtle p-4 rounded-xl border border-border-light">
+                                <div class="space-y-1.5">
+                                    <label class="text-label-xs font-bold text-outline uppercase block">Pilih File Foto Bukti Transfer <span class="text-error">*</span></label>
+                                    <input type="file" name="paymentProof" accept="image/*" required class="w-full px-3 py-2 rounded-lg border border-border-light text-body-sm outline-none bg-surface-bright">
+                                    <p class="text-label-xs text-outline">Format gambar (JPG, PNG, WebP) maksimal 5MB.</p>
+                                </div>
+                                <button type="submit" class="w-full bg-primary text-on-primary py-2.5 rounded-lg text-label-md font-bold hover:bg-surface-tint transition-all cursor-pointer shadow-sm">
+                                    Kirim Bukti Pembayaran
+                                </button>
+                            </form>
+                        <% } %>
+                    </div>
+                </div>
+            <% } else if (invoice.status === 'PAID') { %>
+                <div class="bg-green-500/5 p-6 rounded-2xl border border-green-500/10 flex items-start gap-4">
+                    <span class="material-symbols-outlined text-[36px] text-green-600">verified_user</span>
+                    <div>
+                        <h4 class="text-title-md font-bold text-green-800">Pembayaran Terverifikasi</h4>
+                        <p class="text-body-sm text-green-700 mt-1">
+                            Invoice ini telah dibayar lunas pada <%= invoice.paidAt ? new Date(invoice.paidAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-' %>.
+                        </p>
+                        <% if (invoice.property) { %>
+                            <p class="text-body-sm text-outline mt-3">
+                                Keuntungan paket <%= invoice.packageName %> sudah aktif pada iklan properti Anda: 
+                                <a href="/property/<%= invoice.property.slug %>" class="text-primary hover:underline font-semibold" target="_blank"><%= invoice.property.title %></a>
+                            </p>
+                        <% } %>
+                    </div>
+                </div>
+            <% } else if (invoice.status === 'REJECTED') { %>
+                <div class="bg-red-500/5 p-6 rounded-2xl border border-red-500/10 flex items-start gap-4">
+                    <span class="material-symbols-outlined text-[36px] text-red-600">error</span>
+                    <div>
+                        <h4 class="text-title-md font-bold text-red-800">Bukti Pembayaran Ditolak</h4>
+                        <p class="text-body-sm text-red-700 mt-1">
+                            Maaf, bukti transfer yang Anda kirimkan dinilai tidak valid atau tidak sesuai oleh tim admin. Silakan periksa kembali mutasi transfer Anda atau hubungi dukungan CS kami.
+                        </p>
+                        <details class="mt-4">
+                            <summary class="cursor-pointer text-body-sm text-primary hover:underline font-semibold">Unggah Ulang Bukti Pembayaran</summary>
+                            <form action="/invoice/<%= invoice.invoiceNumber %>/upload-proof" method="POST" enctype="multipart/form-data" class="space-y-3 pt-3 max-w-sm">
+                                <input type="file" name="paymentProof" accept="image/*" required class="w-full px-3 py-2 rounded-lg border border-border-light text-body-sm outline-none bg-surface-bright">
+                                <button type="submit" class="w-full bg-primary text-on-primary py-2 rounded-lg text-label-xs font-bold hover:bg-surface-tint transition-all cursor-pointer">
+                                    Kirim Bukti Baru
+                                </button>
+                            </form>
+                        </details>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>

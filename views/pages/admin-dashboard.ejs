@@ -1,0 +1,313 @@
+<div class="max-w-7xl mx-auto px-container-margin md:px-stack-lg py-10 space-y-8">
+    <!-- Header Section -->
+    <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <div>
+            <h1 class="text-headline-md font-bold text-on-surface">Panel Peninjauan Admin</h1>
+            <p class="text-body-sm text-on-surface-variant mt-1">Review dan kelola persetujuan listing properti baru yang masuk.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="bg-primary/10 text-primary font-bold text-label-md px-4 py-2 rounded-lg border border-primary/20">
+                Mode: <%= user.role.toUpperCase() %>
+            </span>
+        </div>
+    </div>
+
+    <!-- Alert Message -->
+    <% if (typeof message !== 'undefined' && message) { %>
+        <div class="bg-primary/10 text-primary border border-primary/20 p-4 rounded-xl text-body-md font-medium flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">info</span>
+            <%= message %>
+        </div>
+    <% } %>
+
+    <!-- Queue Summary Card -->
+    <div class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-border-light flex justify-between items-center bg-surface-container-low/50">
+            <h2 class="text-title-lg font-bold text-on-surface">Antrean Menunggu Persetujuan (<%= properties.length %>)</h2>
+        </div>
+
+        <% if (properties.length === 0) { %>
+            <div class="p-12 text-center space-y-4">
+                <span class="material-symbols-outlined text-[64px] text-green-600">verified</span>
+                <p class="text-body-md text-on-surface-variant max-w-sm mx-auto">Semua bersih! Tidak ada properti baru yang mengantre untuk ditinjau.</p>
+            </div>
+        <% } else { %>
+            <!-- Desktop Table View -->
+            <div class="hidden md:block overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-surface-container-low text-label-sm font-bold text-on-surface-variant border-b border-border-light">
+                            <th class="p-4">Properti</th>
+                            <th class="p-4">Agen / WhatsApp</th>
+                            <th class="p-4">Spesifikasi</th>
+                            <th class="p-4">Harga</th>
+                            <th class="p-4">Tanggal Masuk</th>
+                            <th class="p-4 text-right">Aksi Peninjauan</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border-light">
+                        <% properties.forEach(property => { %>
+                            <tr class="hover:bg-surface-bright/50 transition-all text-body-md text-on-surface">
+                                <!-- Property Info -->
+                                <td class="p-4">
+                                    <div class="flex items-center gap-3">
+                                        <% 
+                                        const mainImg = property.images.find(img => img.isMain)?.url || (property.images[0]?.url || '/images/placeholder.jpg'); 
+                                        %>
+                                        <img src="<%= mainImg %>" alt="<%= property.title %>" class="w-16 h-12 object-cover rounded-lg border border-border-light flex-shrink-0">
+                                        <div class="max-w-[220px]">
+                                            <a href="/property/<%= property.slug %>" target="_blank" class="font-semibold text-primary hover:underline block truncate" title="Buka Detail (Tab Baru)"><%= property.title %></a>
+                                            <span class="text-label-xs text-outline block mt-0.5"><%= property.category.name %> | <%= property.listingType === 'SALE' ? 'Dijual' : 'Disewa' %></span>
+                                            <span class="text-label-xs text-outline block truncate"><%= property.district %>, <%= property.city %></span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Agent / Contact -->
+                                <td class="p-4">
+                                    <span class="font-semibold text-on-surface block"><%= property.contactName %></span>
+                                    <a href="https://wa.me/<%= property.whatsappNumber %>" target="_blank" class="text-body-sm text-green-600 hover:underline flex items-center gap-1 mt-0.5">
+                                        <span class="material-symbols-outlined text-[16px]">chat</span>
+                                        <%= property.whatsappNumber %>
+                                    </a>
+                                </td>
+
+                                <!-- Specs -->
+                                <td class="p-4 text-body-sm text-on-surface-variant">
+                                    <span>LT: <%= property.landSize %>m² | LB: <%= property.buildingSize %>m²</span>
+                                    <span class="block mt-0.5">KT: <%= property.bedrooms %> | KM: <%= property.bathrooms %></span>
+                                </td>
+
+                                <!-- Price -->
+                                <td class="p-4 font-bold text-on-surface">
+                                    Rp <%= Number(property.price).toLocaleString('id-ID') %>
+                                </td>
+
+                                <!-- Date Submitted -->
+                                <td class="p-4 text-body-sm text-outline">
+                                    <%= new Date(property.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+                                </td>
+
+                                <!-- Review Button controls -->
+                                <td class="p-4 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <!-- Approve form -->
+                                        <form action="/property/<%= property.id %>/approve" method="POST" class="inline">
+                                            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white text-label-xs font-bold px-3 py-2 rounded-lg flex items-center gap-1 transition-all shadow-sm cursor-pointer">
+                                                <span class="material-symbols-outlined text-[16px]">check</span> Setujui
+                                            </button>
+                                        </form>
+                                        
+                                        <!-- Reject form -->
+                                        <form action="/property/<%= property.id %>/reject" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menolak properti ini?')">
+                                            <button type="submit" class="bg-surface-container-high hover:bg-error/10 text-error hover:text-error text-label-xs font-bold px-3 py-2 rounded-lg border border-border-light flex items-center gap-1 transition-all cursor-pointer">
+                                                <span class="material-symbols-outlined text-[16px]">close</span> Tolak
+                                            </button>
+                                        </form>
+
+                                        <!-- Delete form -->
+                                        <form action="/property/<%= property.id %>/delete" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus properti ini secara permanen?')">
+                                            <button type="submit" class="text-outline hover:text-error p-2 rounded-lg border border-border-light hover:border-error/20 transition-all cursor-pointer flex items-center justify-center" title="Hapus Permanen">
+                                                <span class="material-symbols-outlined text-[18px]">delete</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile List Card View -->
+            <div class="block md:hidden divide-y divide-border-light">
+                <% properties.forEach(property => { %>
+                    <div class="p-4 space-y-3">
+                        <div class="flex gap-3">
+                            <% 
+                            const mainImg = property.images.find(img => img.isMain)?.url || (property.images[0]?.url || '/images/placeholder.jpg'); 
+                            %>
+                            <img src="<%= mainImg %>" alt="<%= property.title %>" class="w-20 h-16 object-cover rounded-lg border border-border-light flex-shrink-0">
+                            <div class="min-w-0 flex-grow">
+                                <a href="/property/<%= property.slug %>" target="_blank" class="font-semibold text-primary hover:underline block truncate text-body-md"><%= property.title %></a>
+                                <span class="text-label-xs text-outline block truncate mt-0.5"><%= property.category.name %> | <%= property.listingType === 'SALE' ? 'Dijual' : 'Disewa' %></span>
+                                <p class="font-bold text-on-surface text-body-md mt-1">Rp <%= Number(property.price).toLocaleString('id-ID') %></p>
+                            </div>
+                        </div>
+
+                        <div class="bg-surface-subtle p-3 rounded-lg border border-border-light/50 space-y-1.5 text-body-sm text-on-surface-variant">
+                            <div><strong>Agen:</strong> <%= property.contactName %> (<a href="https://wa.me/<%= property.whatsappNumber %>" target="_blank" class="text-green-600 hover:underline"><%= property.whatsappNumber %></a>)</div>
+                            <div><strong>Spesifikasi:</strong> LT: <%= property.landSize %>m² | LB: <%= property.buildingSize %>m² | KT: <%= property.bedrooms %> | KM: <%= property.bathrooms %></div>
+                            <div class="text-outline text-label-xs">Dikirim: <%= new Date(property.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) %></div>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-2 pt-2">
+                            <!-- Approve -->
+                            <form action="/property/<%= property.id %>/approve" method="POST" class="inline">
+                                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white text-label-xs font-bold px-3 py-2 rounded-lg flex items-center gap-1 transition-all cursor-pointer">
+                                    <span class="material-symbols-outlined text-[14px]">check</span> Setujui
+                                </button>
+                            </form>
+                            
+                            <!-- Reject -->
+                            <form action="/property/<%= property.id %>/reject" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menolak properti ini?')">
+                                <button type="submit" class="bg-surface-container-high text-error text-label-xs font-bold px-3 py-2 rounded-lg border border-border-light flex items-center gap-1 transition-all cursor-pointer">
+                                    <span class="material-symbols-outlined text-[14px]">close</span> Tolak
+                                </button>
+                            </form>
+
+                            <!-- Delete -->
+                            <form action="/property/<%= property.id %>/delete" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus properti ini secara permanen?')">
+                                <button type="submit" class="text-outline hover:text-error p-2 rounded-lg border border-border-light cursor-pointer flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-[16px]">delete</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Admin Invoices Management Section -->
+    <div class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-border-light flex justify-between items-center bg-surface-container-low/50">
+            <h2 class="text-title-lg font-bold text-on-surface">Persetujuan Bukti Bayar & Paket Iklan</h2>
+        </div>
+
+        <% if (typeof invoices === 'undefined' || invoices.length === 0) { %>
+            <div class="p-8 text-center text-body-md text-on-surface-variant">
+                Tidak ada tagihan atau pembayaran yang terdaftar.
+            </div>
+        <% } else { %>
+            <!-- Desktop Table View -->
+            <div class="hidden md:block overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-surface-container-low text-label-sm font-bold text-on-surface-variant border-b border-border-light">
+                            <th class="p-4">No. Invoice</th>
+                            <th class="p-4">Pengguna</th>
+                            <th class="p-4">Paket / Nominal</th>
+                            <th class="p-4">Bukti Transfer</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4 text-right">Tindakan Admin</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border-light">
+                        <% invoices.forEach(inv => { %>
+                            <tr class="hover:bg-surface-bright/50 transition-all text-body-md text-on-surface">
+                                <td class="p-4 font-mono font-bold">
+                                    <a href="/invoice/<%= inv.invoiceNumber %>" target="_blank" class="text-primary hover:underline"><%= inv.invoiceNumber %></a>
+                                    <span class="block text-label-xs text-outline mt-0.5"><%= new Date(inv.createdAt).toLocaleDateString('id-ID') %></span>
+                                </td>
+                                <td class="p-4">
+                                    <span class="font-semibold block"><%= inv.user.name %></span>
+                                    <span class="text-body-sm text-outline block mt-0.5"><%= inv.user.whatsapp %></span>
+                                </td>
+                                <td class="p-4">
+                                    <span class="font-bold block"><%= inv.packageName %></span>
+                                    <span class="text-body-sm text-primary font-semibold block mt-0.5">Rp <%= Number(inv.amount).toLocaleString('id-ID') %></span>
+                                </td>
+                                <td class="p-4">
+                                    <% if (inv.paymentProof) { %>
+                                        <a href="<%= inv.paymentProof %>" target="_blank" class="inline-block relative group">
+                                            <img src="<%= inv.paymentProof %>" alt="Bukti Transfer" class="w-16 h-12 object-cover rounded border border-border-light hover:scale-105 transition-all">
+                                            <span class="absolute bottom-0 right-0 bg-ink-dark/60 text-white text-[9px] p-0.5 rounded">Zoom</span>
+                                        </a>
+                                    <% } else { %>
+                                        <span class="text-outline text-body-sm">Belum Upload</span>
+                                    <% } %>
+                                </td>
+                                <td class="p-4">
+                                    <% if (inv.status === 'PENDING') { %>
+                                        <span class="bg-yellow-100 text-yellow-800 text-label-xs font-bold px-2.5 py-1 rounded-full border border-yellow-200">Pending</span>
+                                    <% } else if (inv.status === 'PAID') { %>
+                                        <span class="bg-green-100 text-green-800 text-label-xs font-bold px-2.5 py-1 rounded-full border border-green-200">Lunas</span>
+                                    <% } else if (inv.status === 'REJECTED') { %>
+                                        <span class="bg-red-100 text-red-800 text-label-xs font-bold px-2.5 py-1 rounded-full border border-red-200">Ditolak</span>
+                                    <% } %>
+                                </td>
+                                <td class="p-4 text-right">
+                                    <% if (inv.status === 'PENDING' && inv.paymentProof) { %>
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            <!-- Approve invoice -->
+                                            <form action="/property/invoice/<%= inv.id %>/approve" method="POST" class="inline">
+                                                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white text-label-xs font-bold px-2.5 py-1.5 rounded-lg transition-all cursor-pointer">
+                                                    Terima
+                                                </button>
+                                            </form>
+                                            <!-- Reject invoice -->
+                                            <form action="/property/invoice/<%= inv.id %>/reject" method="POST" class="inline" onsubmit="return confirm('Tolak bukti pembayaran ini?')">
+                                                <button type="submit" class="bg-surface-container-high text-error text-label-xs font-bold px-2.5 py-1.5 rounded-lg border border-border-light transition-all cursor-pointer">
+                                                    Tolak
+                                                </button>
+                                            </form>
+                                        </div>
+                                    <% } else { %>
+                                        <span class="text-outline text-body-sm">-</span>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile List Card View -->
+            <div class="block md:hidden divide-y divide-border-light">
+                <% invoices.forEach(inv => { %>
+                    <div class="p-4 space-y-3 text-body-md text-on-surface">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <a href="/invoice/<%= inv.invoiceNumber %>" target="_blank" class="font-mono font-bold text-primary hover:underline"><%= inv.invoiceNumber %></a>
+                                <p class="text-body-xs text-outline mt-0.5">Oleh: <%= inv.user.name %></p>
+                            </div>
+                            <span class="font-bold text-primary">Rp <%= Number(inv.amount).toLocaleString('id-ID') %></span>
+                        </div>
+
+                        <div class="bg-surface-subtle p-3 rounded-lg border border-border-light/50 space-y-1.5 text-body-sm text-on-surface-variant">
+                            <div><strong>Paket:</strong> <%= inv.packageName %></div>
+                            <div>
+                                <strong>Bukti Transfer:</strong>
+                                <% if (inv.paymentProof) { %>
+                                    <a href="<%= inv.paymentProof %>" target="_blank" class="text-primary hover:underline font-semibold block mt-1">Lihat Bukti Foto</a>
+                                <% } else { %>
+                                    <span class="text-outline">Belum Upload</span>
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-2">
+                            <!-- Status -->
+                            <div>
+                                <% if (inv.status === 'PENDING') { %>
+                                    <span class="bg-yellow-100 text-yellow-800 text-label-xs font-bold px-2.5 py-1 rounded-full border border-yellow-200">Pending</span>
+                                <% } else if (inv.status === 'PAID') { %>
+                                    <span class="bg-green-100 text-green-800 text-label-xs font-bold px-2.5 py-1 rounded-full border border-green-200">Lunas</span>
+                                <% } else if (inv.status === 'REJECTED') { %>
+                                    <span class="bg-red-100 text-red-800 text-label-xs font-bold px-2.5 py-1 rounded-full border border-red-200">Ditolak</span>
+                                <% } %>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="flex items-center gap-1.5">
+                                <% if (inv.status === 'PENDING' && inv.paymentProof) { %>
+                                    <form action="/property/invoice/<%= inv.id %>/approve" method="POST" class="inline">
+                                        <button type="submit" class="bg-green-600 text-white text-label-xs font-bold px-2.5 py-1.5 rounded-lg cursor-pointer">
+                                            Terima
+                                        </button>
+                                    </form>
+                                    <form action="/property/invoice/<%= inv.id %>/reject" method="POST" class="inline" onsubmit="return confirm('Tolak bukti pembayaran ini?')">
+                                        <button type="submit" class="bg-surface-container-high text-error text-label-xs font-bold px-2.5 py-1.5 rounded-lg border border-border-light cursor-pointer">
+                                            Tolak
+                                        </button>
+                                    </form>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+</div>

@@ -1,0 +1,345 @@
+<div class="max-w-7xl mx-auto px-container-margin md:px-stack-lg py-10 space-y-8">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm">
+        <div>
+            <h1 class="text-headline-md font-bold text-on-surface">Halo, <%= user.name %>!</h1>
+            <p class="text-body-sm text-on-surface-variant mt-1">Kelola listing properti Anda dan pantau performa iklan Anda di sini.</p>
+        </div>
+        <a href="/pasang-iklan" class="bg-primary text-on-primary text-label-md font-semibold px-5 py-3 rounded-full hover:bg-surface-tint transition-all shadow-sm flex items-center gap-2 self-start md:self-auto">
+            <span class="material-symbols-outlined text-[20px]">add_circle</span> Pasang Iklan Baru
+        </a>
+    </div>
+
+    <!-- Alert Message -->
+    <% if (typeof message !== 'undefined' && message) { %>
+        <div class="bg-primary/10 text-primary border border-primary/20 p-4 rounded-xl text-body-md font-medium flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">info</span>
+            <%= message %>
+        </div>
+    <% } %>
+
+    <!-- Quick Stats Grid -->
+    <% 
+    let totalListings = properties.length;
+    let activeListings = properties.filter(p => p.status === 'AVAILABLE').length;
+    let totalLeads = properties.reduce((sum, p) => sum + (p._count?.tracks || 0), 0);
+    %>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Stat Card 1 -->
+        <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm flex items-center gap-4">
+            <div class="p-3 bg-primary/10 rounded-xl">
+                <span class="material-symbols-outlined text-primary text-[32px]">list_alt</span>
+            </div>
+            <div>
+                <p class="text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Total Iklan</p>
+                <h3 class="text-headline-md font-bold text-on-surface mt-0.5"><%= totalListings %></h3>
+            </div>
+        </div>
+
+        <!-- Stat Card 2 -->
+        <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm flex items-center gap-4">
+            <div class="p-3 bg-green-500/10 rounded-xl">
+                <span class="material-symbols-outlined text-green-600 text-[32px]">check_circle</span>
+            </div>
+            <div>
+                <p class="text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Iklan Aktif</p>
+                <h3 class="text-headline-md font-bold text-on-surface mt-0.5"><%= activeListings %></h3>
+            </div>
+        </div>
+
+        <!-- Stat Card 3 -->
+        <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm flex items-center gap-4">
+            <div class="p-3 bg-green-500/15 rounded-xl">
+                <span class="material-symbols-outlined text-green-500 text-[32px]">chat</span>
+            </div>
+            <div>
+                <p class="text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Klik Chat WhatsApp</p>
+                <h3 class="text-headline-md font-bold text-on-surface mt-0.5"><%= totalLeads %></h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Listings Table / Grid Section -->
+    <div class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-border-light">
+            <h2 class="text-title-lg font-bold text-on-surface">Listing Properti Saya</h2>
+        </div>
+
+        <% if (properties.length === 0) { %>
+            <div class="p-12 text-center space-y-4">
+                <span class="material-symbols-outlined text-[64px] text-outline">real_estate_agent</span>
+                <p class="text-body-md text-on-surface-variant max-w-sm mx-auto">Anda belum memiliki listing properti yang terpasang.</p>
+                <a href="/pasang-iklan" class="inline-flex bg-primary text-on-primary text-label-md font-semibold px-5 py-2.5 rounded-full hover:bg-surface-tint transition-all shadow-sm gap-1.5 items-center">
+                    Pasang Iklan Pertama Anda
+                </a>
+            </div>
+        <% } else { %>
+            <!-- Desktop Table view -->
+            <div class="hidden md:block overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-surface-container-low text-label-sm font-bold text-on-surface-variant border-b border-border-light">
+                            <th class="p-4">Properti</th>
+                            <th class="p-4">Tipe & Kategori</th>
+                            <th class="p-4">Harga</th>
+                            <th class="p-4">Performa</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4 text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border-light">
+                        <% properties.forEach(property => { %>
+                            <tr class="hover:bg-surface-bright/50 transition-all text-body-md text-on-surface">
+                                <!-- Property Thumbnail & Title -->
+                                <td class="p-4 flex items-center gap-3">
+                                    <% 
+                                    const mainImg = property.images.find(img => img.isMain)?.url || (property.images[0]?.url || '/images/placeholder.jpg'); 
+                                    %>
+                                    <img src="<%= mainImg %>" alt="<%= property.title %>" class="w-16 h-12 object-cover rounded-lg border border-border-light">
+                                    <div class="max-w-[240px]">
+                                        <a href="/property/<%= property.slug %>" class="font-semibold text-primary hover:underline block truncate"><%= property.title %></a>
+                                        <span class="text-label-xs text-outline block truncate"><%= property.district %>, <%= property.city %></span>
+                                    </div>
+                                </td>
+
+                                <!-- Category & Type -->
+                                <td class="p-4">
+                                    <span class="text-label-sm font-bold bg-surface-container-high text-on-surface-variant px-2.5 py-1 rounded-md uppercase">
+                                        <%= property.listingType === 'SALE' ? 'Dijual' : 'Disewa' %>
+                                    </span>
+                                    <span class="text-body-sm text-on-surface-variant block mt-1"><%= property.category.name %></span>
+                                </td>
+
+                                <!-- Price -->
+                                <td class="p-4 font-bold text-on-surface">
+                                    Rp <%= Number(property.price).toLocaleString('id-ID') %>
+                                </td>
+
+                                <!-- Lead clicks -->
+                                <td class="p-4">
+                                    <div class="flex items-center gap-1 text-green-600 font-semibold">
+                                        <span class="material-symbols-outlined text-[18px]">chat</span>
+                                        <span><%= property._count?.tracks || 0 %> lead</span>
+                                    </div>
+                                </td>
+
+                                <!-- Status Badge -->
+                                <td class="p-4">
+                                    <% if (property.status === 'PENDING') { %>
+                                        <span class="bg-yellow-100 text-yellow-800 text-label-xs font-bold px-2.5 py-1 rounded-full border border-yellow-200">Menunggu Review</span>
+                                    <% } else if (property.status === 'AVAILABLE') { %>
+                                        <span class="bg-green-100 text-green-800 text-label-xs font-bold px-2.5 py-1 rounded-full border border-green-200">Aktif / Tayang</span>
+                                    <% } else if (property.status === 'SOLD') { %>
+                                        <span class="bg-gray-100 text-gray-700 text-label-xs font-bold px-2.5 py-1 rounded-full border border-gray-200">Terjual</span>
+                                    <% } else if (property.status === 'RENTED') { %>
+                                        <span class="bg-gray-100 text-gray-700 text-label-xs font-bold px-2.5 py-1 rounded-full border border-gray-200">Disewakan</span>
+                                    <% } else if (property.status === 'REJECTED') { %>
+                                        <span class="bg-red-100 text-red-800 text-label-xs font-bold px-2.5 py-1 rounded-full border border-red-200">Ditolak</span>
+                                    <% } %>
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="p-4 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <% if (property.status === 'AVAILABLE') { %>
+                                            <form action="/property/<%= property.id %>/status" method="POST" class="inline">
+                                                <input type="hidden" name="status" value="<%= property.listingType === 'SALE' ? 'SOLD' : 'RENTED' %>">
+                                                <button type="submit" class="text-label-sm font-bold text-primary hover:bg-primary/5 px-2.5 py-1.5 rounded-lg border border-primary/20 transition-all cursor-pointer">
+                                                    Tandai <%= property.listingType === 'SALE' ? 'Terjual' : 'Disewa' %>
+                                                </button>
+                                            </form>
+                                        <% } else if (property.status === 'SOLD' || property.status === 'RENTED') { %>
+                                            <form action="/property/<%= property.id %>/status" method="POST" class="inline">
+                                                <input type="hidden" name="status" value="AVAILABLE">
+                                                <button type="submit" class="text-label-sm font-bold text-green-600 hover:bg-green-500/5 px-2.5 py-1.5 rounded-lg border border-green-500/20 transition-all cursor-pointer">
+                                                    Aktifkan Kembali
+                                                </button>
+                                            </form>
+                                        <% } %>
+
+                                        <form action="/property/<%= property.id %>/delete" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus properti ini secara permanen?')">
+                                            <button type="submit" class="text-label-sm font-bold text-error hover:bg-error/5 p-2 rounded-lg border border-error/20 transition-all cursor-pointer flex items-center justify-center" title="Hapus Properti">
+                                                <span class="material-symbols-outlined text-[18px]">delete</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile List Card view -->
+            <div class="block md:hidden divide-y divide-border-light">
+                <% properties.forEach(property => { %>
+                    <div class="p-4 space-y-3">
+                        <div class="flex gap-3">
+                            <% 
+                            const mainImg = property.images.find(img => img.isMain)?.url || (property.images[0]?.url || '/images/placeholder.jpg'); 
+                            %>
+                            <img src="<%= mainImg %>" alt="<%= property.title %>" class="w-20 h-16 object-cover rounded-lg border border-border-light flex-shrink-0">
+                            <div class="min-w-0 flex-grow">
+                                <a href="/property/<%= property.slug %>" class="font-semibold text-primary hover:underline block truncate text-body-md"><%= property.title %></a>
+                                <span class="text-label-xs text-outline block truncate mt-0.5"><%= property.district %>, <%= property.city %></span>
+                                <p class="font-bold text-on-surface text-body-md mt-1">Rp <%= Number(property.price).toLocaleString('id-ID') %></p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between gap-2 pt-1">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-label-xs font-bold bg-surface-container-high text-on-surface-variant px-2 py-0.5 rounded uppercase">
+                                    <%= property.listingType === 'SALE' ? 'Jual' : 'Sewa' %>
+                                </span>
+                                <span class="text-body-sm text-outline"><%= property.category.name %></span>
+                            </div>
+                            <div class="flex items-center gap-1 text-green-600 text-label-sm font-semibold">
+                                <span class="material-symbols-outlined text-[16px]">chat</span>
+                                <span><%= property._count?.tracks || 0 %> lead</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between gap-2 pt-2 border-t border-border-light/50">
+                            <!-- Status -->
+                            <div>
+                                <% if (property.status === 'PENDING') { %>
+                                    <span class="bg-yellow-100 text-yellow-800 text-label-xs font-bold px-2.5 py-1 rounded-full border border-yellow-200">Pending</span>
+                                <% } else if (property.status === 'AVAILABLE') { %>
+                                    <span class="bg-green-100 text-green-800 text-label-xs font-bold px-2.5 py-1 rounded-full border border-green-200">Aktif</span>
+                                <% } else if (property.status === 'SOLD') { %>
+                                    <span class="bg-gray-100 text-gray-700 text-label-xs font-bold px-2.5 py-1 rounded-full border border-gray-200">Terjual</span>
+                                <% } else if (property.status === 'RENTED') { %>
+                                    <span class="bg-gray-100 text-gray-700 text-label-xs font-bold px-2.5 py-1 rounded-full border border-gray-200">Disewa</span>
+                                <% } else if (property.status === 'REJECTED') { %>
+                                    <span class="bg-red-100 text-red-800 text-label-xs font-bold px-2.5 py-1 rounded-full border border-red-200">Ditolak</span>
+                                <% } %>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="flex items-center gap-1.5">
+                                <% if (property.status === 'AVAILABLE') { %>
+                                    <form action="/property/<%= property.id %>/status" method="POST" class="inline">
+                                        <input type="hidden" name="status" value="<%= property.listingType === 'SALE' ? 'SOLD' : 'RENTED' %>">
+                                        <button type="submit" class="text-label-xs font-bold text-primary hover:bg-primary/5 px-2.5 py-1.5 rounded-lg border border-primary/20 cursor-pointer">
+                                            Tandai <%= property.listingType === 'SALE' ? 'Terjual' : 'Disewa' %>
+                                        </button>
+                                    </form>
+                                <% } else if (property.status === 'SOLD' || property.status === 'RENTED') { %>
+                                    <form action="/property/<%= property.id %>/status" method="POST" class="inline">
+                                        <input type="hidden" name="status" value="AVAILABLE">
+                                        <button type="submit" class="text-label-xs font-bold text-green-600 hover:bg-green-500/5 px-2.5 py-1.5 rounded-lg border border-green-500/20 cursor-pointer">
+                                            Aktifkan
+                                        </button>
+                                    </form>
+                                <% } %>
+
+                                <form action="/property/<%= property.id %>/delete" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus properti ini secara permanen?')">
+                                    <button type="submit" class="text-label-xs font-bold text-error hover:bg-error/5 p-2 rounded-lg border border-error/20 cursor-pointer flex items-center justify-center" title="Hapus Properti">
+                                        <span class="material-symbols-outlined text-[16px]">delete</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Invoices & Tagihan Section -->
+    <div class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-border-light">
+            <h2 class="text-title-lg font-bold text-on-surface">Invoice & Tagihan Saya</h2>
+        </div>
+
+        <% if (typeof invoices === 'undefined' || invoices.length === 0) { %>
+            <div class="p-8 text-center text-body-md text-on-surface-variant">
+                Anda tidak memiliki tagihan aktif saat ini.
+            </div>
+        <% } else { %>
+            <!-- Desktop Invoices Table -->
+            <div class="hidden md:block overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-surface-container-low text-label-sm font-bold text-on-surface-variant border-b border-border-light">
+                            <th class="p-4">No. Invoice</th>
+                            <th class="p-4">Layanan / Paket</th>
+                            <th class="p-4">Properti Terkait</th>
+                            <th class="p-4">Nominal</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4 text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border-light">
+                        <% invoices.forEach(inv => { %>
+                            <tr class="hover:bg-surface-bright/50 transition-all text-body-md text-on-surface">
+                                <td class="p-4 font-mono font-bold text-primary">
+                                    <a href="/invoice/<%= inv.invoiceNumber %>" class="hover:underline"><%= inv.invoiceNumber %></a>
+                                </td>
+                                <td class="p-4">
+                                    <%= inv.packageName %>
+                                </td>
+                                <td class="p-4">
+                                    <% if (inv.property) { %>
+                                        <a href="/property/<%= inv.property.slug %>" class="text-primary hover:underline font-semibold" target="_blank"><%= inv.property.title %></a>
+                                    <% } else { %>
+                                        <span class="text-outline">-</span>
+                                    <% } %>
+                                </td>
+                                <td class="p-4 font-bold">
+                                    Rp <%= Number(inv.amount).toLocaleString('id-ID') %>
+                                </td>
+                                <td class="p-4">
+                                    <% if (inv.status === 'PENDING') { %>
+                                        <span class="bg-yellow-100 text-yellow-800 text-label-xs font-bold px-2.5 py-1 rounded-full border border-yellow-200">Pending</span>
+                                    <% } else if (inv.status === 'PAID') { %>
+                                        <span class="bg-green-100 text-green-800 text-label-xs font-bold px-2.5 py-1 rounded-full border border-green-200">Lunas</span>
+                                    <% } else if (inv.status === 'REJECTED') { %>
+                                        <span class="bg-red-100 text-red-800 text-label-xs font-bold px-2.5 py-1 rounded-full border border-red-200">Ditolak</span>
+                                    <% } %>
+                                </td>
+                                <td class="p-4 text-right">
+                                    <a href="/invoice/<%= inv.invoiceNumber %>" class="inline-flex bg-primary text-on-primary text-label-xs font-bold px-3 py-1.5 rounded-lg hover:bg-surface-tint transition-all cursor-pointer">
+                                        Lihat / Bayar
+                                    </a>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile Invoices List -->
+            <div class="block md:hidden divide-y divide-border-light">
+                <% invoices.forEach(inv => { %>
+                    <div class="p-4 space-y-2 text-body-md text-on-surface">
+                        <div class="flex justify-between items-center">
+                            <a href="/invoice/<%= inv.invoiceNumber %>" class="font-mono font-bold text-primary hover:underline"><%= inv.invoiceNumber %></a>
+                            <span class="font-bold">Rp <%= Number(inv.amount).toLocaleString('id-ID') %></span>
+                        </div>
+                        <div class="flex justify-between items-center text-body-sm">
+                            <span class="text-on-surface-variant"><%= inv.packageName %></span>
+                            <div>
+                                <% if (inv.status === 'PENDING') { %>
+                                    <span class="bg-yellow-100 text-yellow-800 text-label-xs font-bold px-2 py-0.5 rounded border border-yellow-100">Pending</span>
+                                <% } else if (inv.status === 'PAID') { %>
+                                    <span class="bg-green-100 text-green-800 text-label-xs font-bold px-2 py-0.5 rounded border border-green-100">Lunas</span>
+                                <% } else if (inv.status === 'REJECTED') { %>
+                                    <span class="bg-red-100 text-red-800 text-label-xs font-bold px-2 py-0.5 rounded border border-red-100">Ditolak</span>
+                                <% } %>
+                            </div>
+                        </div>
+                        <% if (inv.property) { %>
+                            <p class="text-body-xs text-outline truncate">Properti: <%= inv.property.title %></p>
+                        <% } %>
+                        <div class="pt-2 text-right">
+                            <a href="/invoice/<%= inv.invoiceNumber %>" class="bg-primary text-on-primary text-label-xs font-bold px-3 py-1.5 rounded-lg inline-block">
+                                Lihat / Bayar
+                            </a>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+</div>

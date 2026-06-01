@@ -1,0 +1,230 @@
+<div class="space-y-section-gap pb-12">
+    <!-- Hero Search Section -->
+    <section class="relative bg-gradient-to-br from-primary/10 via-primary/5 to-surface-subtle py-16 md:py-24 px-container-margin md:px-stack-lg border-b border-border-light">
+        <div class="max-w-4xl mx-auto text-center space-y-6">
+            <span class="text-primary text-label-md font-bold tracking-widest uppercase">Portal Properti Terlengkap</span>
+            <h1 class="text-headline-lg font-bold text-on-background leading-tight font-display-lg">
+                Temukan Rumah Impian Anda di Properti Indahweb
+            </h1>
+            <p class="text-body-lg text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
+                Portal terpercaya untuk membeli, menjual, dan menyewa properti di kota Bandung dan seluruh Indonesia. Cepat, ringan, dan gratis biaya pasang iklan.
+            </p>
+
+            <!-- Search Form Card -->
+            <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-lg border border-border-light max-w-3xl mx-auto animate-fade-in text-left">
+                <form action="/catalog" method="GET" class="space-y-4">
+                    <!-- Tipe Toggle: Jual or Sewa -->
+                    <div class="flex gap-2 border-b border-border-light pb-4">
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="radio" name="listingType" value="SALE" checked class="accent-primary" />
+                            <span class="text-label-md font-bold text-on-surface">Dijual</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer ml-4">
+                            <input type="radio" name="listingType" value="RENT" class="accent-primary" />
+                            <span class="text-label-md font-bold text-on-surface">Disewa</span>
+                        </label>
+                    </div>
+
+                    <!-- Inputs -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div class="md:col-span-2 relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-outline">
+                                <span class="material-symbols-outlined text-[20px]">search</span>
+                            </span>
+                            <input 
+                                type="text" 
+                                name="keyword" 
+                                placeholder="Cari jalan, komplek..." 
+                                class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md" 
+                            />
+                        </div>
+
+                        <div>
+                            <select 
+                                name="category" 
+                                class="w-full px-3 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md"
+                            >
+                                <option value="">Kategori</option>
+                                <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                                    <% categories.forEach(cat => { %>
+                                        <option value="<%= cat.slug %>"><%= cat.name %></option>
+                                    <% }) %>
+                                <% } %>
+                            </select>
+                        </div>
+
+                        <div>
+                            <input 
+                                type="text" 
+                                name="city" 
+                                placeholder="Kota (e.g. Bandung)" 
+                                class="w-full px-3 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md" 
+                            />
+                        </div>
+                    </div>
+
+                    <button 
+                        type="submit" 
+                        class="w-full bg-primary text-on-primary py-3 rounded-lg text-label-md font-semibold hover:bg-surface-tint transition-all shadow-sm flex justify-center items-center gap-2 cursor-pointer"
+                    >
+                        Temukan Properti <span class="material-symbols-outlined text-[18px]">search</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Properties Section -->
+    <% if (typeof featuredProperties !== 'undefined' && featuredProperties.length > 0) { %>
+        <section class="max-w-7xl mx-auto px-container-margin md:px-stack-lg space-y-6">
+            <div class="mb-6">
+                <span class="text-primary text-label-sm font-bold tracking-wider uppercase">Pilihan Premium</span>
+                <h2 class="text-headline-md font-bold text-on-surface">Properti Unggulan Rekomendasi</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <% featuredProperties.forEach(prop => { %>
+                    <div class="border-2 border-primary bg-primary/[0.01] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col relative">
+                        <div class="absolute top-3 right-3 bg-primary text-white text-[11px] font-bold px-2 py-0.5 rounded-md shadow-sm flex items-center gap-0.5 z-20">
+                            <span class="material-symbols-outlined text-[12px] font-bold">star</span> Premium
+                        </div>
+                        <div class="relative h-48 w-full bg-surface-container">
+                            <% if (prop.images && prop.images.length > 0) { %>
+                                <img src="<%= prop.images[0].url %>" alt="<%= prop.title %>" class="object-cover w-full h-full" />
+                            <% } else { %>
+                                <div class="absolute inset-0 bg-primary/5 flex items-center justify-center text-primary/45">
+                                    <span class="material-symbols-outlined text-[48px]">image</span>
+                                </div>
+                            <% } %>
+                            <div class="absolute top-3 left-3 bg-whatsapp-green text-white text-label-sm font-bold px-2.5 py-1 rounded-full shadow-sm">
+                                <%= prop.listingType === 'RENT' ? 'DISEWA' : 'DIJUAL' %>
+                            </div>
+                        </div>
+                        <div class="p-4 flex-grow flex flex-col justify-between space-y-3">
+                            <div>
+                                <span class="text-primary text-label-sm font-bold"><%= prop.category.name %></span>
+                                <h3 class="text-title-md font-bold text-on-surface line-clamp-1 mt-1">
+                                    <a href="/property/<%= prop.slug %>" class="hover:underline"><%= prop.title %></a>
+                                </h3>
+                                <p class="text-body-sm text-outline line-clamp-1 mt-0.5"><%= prop.city %>, <%= prop.province %></p>
+                                <p class="text-primary text-title-lg font-bold mt-2">
+                                    Rp <%= Number(prop.price).toLocaleString('id-ID') %>
+                                </p>
+                            </div>
+                            <div class="flex justify-between items-center border-t border-border-light pt-3 text-outline text-label-sm">
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[16px]">square_foot</span> Lb <%= prop.buildingSize %>m²
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[16px]">bed</span> <%= prop.bedrooms %> KT
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[16px]">bathtub</span> <%= prop.bathrooms %> KM
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        </section>
+    <% } %>
+
+    <!-- Popular Locations Directory -->
+    <section class="max-w-7xl mx-auto px-container-margin md:px-stack-lg space-y-6">
+        <div class="mb-6">
+            <span class="text-primary text-label-sm font-bold tracking-wider uppercase">Jelajahi Lokasi</span>
+            <h2 class="text-headline-md font-bold text-on-surface">Cari Properti di Kota Populer</h2>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <% 
+            const popularCities = [
+                { name: 'Bandung', province: 'Jawa Barat', color: 'bg-primary' },
+                { name: 'Jakarta', province: 'DKI Jakarta', color: 'bg-secondary' },
+                { name: 'Surabaya', province: 'Jawa Timur', color: 'bg-surface-tint' },
+                { name: 'Tangerang', province: 'Banten', color: 'bg-tertiary-container' }
+            ];
+            popularCities.forEach(city => { 
+            %>
+                <a 
+                    href="/catalog?city=<%= city.name %>" 
+                    class="relative rounded-2xl h-40 overflow-hidden shadow-sm hover:shadow-md transition-all group block"
+                >
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent z-10"></div>
+                    <div class="absolute inset-0 <%= city.color %> opacity-90 group-hover:scale-105 transition-all duration-300"></div>
+                    <div class="absolute bottom-4 left-4 z-20 text-white">
+                        <h3 class="text-headline-sm font-bold"><%= city.name %></h3>
+                        <p class="text-label-sm opacity-90"><%= city.province %></p>
+                    </div>
+                </a>
+            <% }) %>
+        </div>
+    </section>
+
+    <!-- Latest Listings Section -->
+    <section class="max-w-7xl mx-auto px-container-margin md:px-stack-lg space-y-6">
+        <div class="flex justify-between items-end mb-4">
+            <div>
+                <span class="text-primary text-label-sm font-bold tracking-wider uppercase">Terbaru</span>
+                <h2 class="text-headline-md font-bold text-on-surface">Properti Pilihan Terbaru</h2>
+            </div>
+            <a href="/catalog" class="text-label-md font-bold text-primary flex items-center gap-1 hover:underline">
+                Lihat Semua Properti <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </a>
+        </div>
+
+        <% if (typeof latestProperties === 'undefined' || latestProperties.length === 0) { %>
+            <div class="bg-surface-container-lowest border border-border-light p-12 text-center rounded-2xl">
+                <span class="material-symbols-outlined text-outline text-[48px] mb-2">house</span>
+                <p class="text-body-md text-on-surface-variant">Belum ada properti terdaftar.</p>
+            </div>
+        <% } else { %>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <% latestProperties.forEach(prop => { %>
+                    <div class="<%= prop.isFeatured ? 'border-2 border-primary bg-primary/[0.01]' : 'border border-border-light bg-surface-container-lowest' %> rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col relative">
+                        <% if (prop.isFeatured) { %>
+                            <div class="absolute top-3 right-3 bg-primary text-white text-[11px] font-bold px-2 py-0.5 rounded-md shadow-sm flex items-center gap-0.5 z-20">
+                                <span class="material-symbols-outlined text-[12px] font-bold">star</span> Premium
+                            </div>
+                        <% } %>
+                        <div class="relative h-48 w-full bg-surface-container">
+                            <% if (prop.images && prop.images.length > 0) { %>
+                                <img src="<%= prop.images[0].url %>" alt="<%= prop.title %>" class="object-cover w-full h-full" />
+                            <% } else { %>
+                                <div class="absolute inset-0 bg-primary/5 flex items-center justify-center text-primary/45">
+                                    <span class="material-symbols-outlined text-[48px]">image</span>
+                                </div>
+                            <% } %>
+                            <div class="absolute top-3 left-3 bg-whatsapp-green text-white text-label-sm font-bold px-2.5 py-1 rounded-full shadow-sm">
+                                <%= prop.listingType === 'RENT' ? 'DISEWA' : 'DIJUAL' %>
+                            </div>
+                        </div>
+                        <div class="p-4 flex-grow flex flex-col justify-between space-y-3">
+                            <div>
+                                <span class="text-primary text-label-sm font-bold"><%= prop.category.name %></span>
+                                <h3 class="text-title-md font-bold text-on-surface line-clamp-1 mt-1">
+                                    <a href="/property/<%= prop.slug %>" class="hover:underline"><%= prop.title %></a>
+                                </h3>
+                                <p class="text-body-sm text-outline line-clamp-1 mt-0.5"><%= prop.city %>, <%= prop.province %></p>
+                                <p class="text-primary text-title-lg font-bold mt-2">
+                                    Rp <%= Number(prop.price).toLocaleString('id-ID') %>
+                                </p>
+                            </div>
+                            <div class="flex justify-between items-center border-t border-border-light pt-3 text-outline text-label-sm">
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[16px]">square_foot</span> Lb <%= prop.buildingSize %>m²
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[16px]">bed</span> <%= prop.bedrooms %> KT
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[16px]">bathtub</span> <%= prop.bathrooms %> KM
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </section>
+</div>

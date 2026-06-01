@@ -1,0 +1,15 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><%= typeof metaTitle !== 'undefined' ? metaTitle : (typeof title !== 'undefined' ? title + ' | Properti Indahweb' : 'Properti Indahweb | Portal Properti Terpercaya') %></title>
+<meta name="description" content="<%= typeof metaDescription !== 'undefined' ? metaDescription : (typeof description !== 'undefined' ? description : 'Portal jual beli dan sewa properti lokal Indonesia yang cepat, ringan, dan SEO friendly.') %>">
+<% if (typeof canonicalUrl !== 'undefined' && canonicalUrl) { %>
+<link rel="canonical" href="<%= canonicalUrl %>">
+<% } %>
+
+<!-- Google Fonts Inter & Material Symbols Outlined -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+<!-- Tailwind compiled stylesheet -->
+<link rel="stylesheet" href="/css/main.css">
