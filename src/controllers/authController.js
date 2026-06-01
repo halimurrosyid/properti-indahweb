@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 exports.getLogin = (req, res) => {
   if (req.session.user) {
-    return res.redirect('/');
+    return res.redirect('/dashboard');
   }
   res.render('pages/login', {
     title: 'Masuk Ke Akun Agen',
@@ -59,7 +59,7 @@ exports.postLogin = async (req, res, next) => {
       role: user.role
     };
 
-    res.redirect('/');
+    res.redirect('/dashboard');
   } catch (error) {
     next(error);
   }
@@ -67,7 +67,7 @@ exports.postLogin = async (req, res, next) => {
 
 exports.getRegister = (req, res) => {
   if (req.session.user) {
-    return res.redirect('/');
+    return res.redirect('/dashboard');
   }
   res.render('pages/register', {
     title: 'Daftar Akun Baru',
@@ -134,7 +134,7 @@ exports.postRegister = async (req, res, next) => {
       role: user.role
     };
 
-    res.redirect('/');
+    res.redirect('/dashboard');
   } catch (error) {
     next(error);
   }
