@@ -15,6 +15,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const isProd = process.env.NODE_ENV === 'production';
 
+// Trust proxy (necessary for express-rate-limit behind reverse proxies like Dokploy/CloudPanel)
+app.set('trust proxy', 1);
+
 // ====================================================
 // Security Middlewares
 // ====================================================
