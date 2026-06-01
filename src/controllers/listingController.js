@@ -62,6 +62,29 @@ exports.postQuickPost = async (req, res, next) => {
       authorWhatsapp = req.session.user.whatsapp;
     }
 
+    // Verify posting limits based on user role to prevent spamming
+    const activeCount = await prisma.property.count({
+      where: {
+        userId: userId,
+        status: { in: ['AVAILABLE', 'PENDING'] }
+      }
+    });
+
+    const currentUser = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+
+    if (currentUser && currentUser.role === 'user') {
+      if (activeCount >= 1) {
+        return res.status(400).send('Batas posting tercapai: Akun gratis dibatasi maksimal 1 iklan aktif. Silakan hubungi admin atau aktifkan Paket Agen untuk menambah properti.');
+      }
+    } else if (currentUser && currentUser.role === 'agent') {
+      const agentLimit = 50;
+      if (activeCount >= agentLimit) {
+        return res.status(400).send(`Batas posting tercapai: Paket Agen dibatasi maksimal ${agentLimit} iklan aktif untuk mencegah spam.`);
+      }
+    }
+
     // 2. Parse listing metadata
     const {
       title,
