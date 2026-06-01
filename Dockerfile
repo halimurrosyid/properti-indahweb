@@ -28,4 +28,4 @@ ENV PORT=3000
 # Expose server port
 EXPOSE 3000
 
-CMD npx prisma migrate deploy && npm start
+CMD npx prisma migrate deploy && npx prisma db seed && npm start
