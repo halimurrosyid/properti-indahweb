@@ -1,5 +1,7 @@
-# Base image containing Node.js
-FROM node:20-alpine
+FROM node:20-alpine3.20
+
+# Install dependencies needed for Prisma on Alpine Linux
+RUN apk add --no-cache openssl libc6-compat
 
 # Setup app directory
 WORKDIR /usr/src/app
