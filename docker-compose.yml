@@ -2,16 +2,17 @@ version: '3.8'
 
 services:
   db:
-    image: mysql:8.0
-    container_name: properti_indahweb_mysql
+    image: postgres:15-alpine
+    container_name: properti_indahweb_postgres
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: properti_indahweb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
     ports:
-      - '3306:3306'
+      - '5432:5432'
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
 
   web:
     build: .
@@ -22,7 +23,7 @@ services:
     depends_on:
       - db
     environment:
-      - DATABASE_URL=mysql://root:password@db:3306/properti_indahweb
+      - DATABASE_URL=postgresql://postgres:password@db:5432/postgres
       - SESSION_SECRET=properti_indahweb_session_secret_key_123456
       - NODE_ENV=production
       - PORT=3000
@@ -34,5 +35,5 @@ services:
       - uploads_data:/usr/src/app/public/uploads
 
 volumes:
-  mysql_data:
+  postgres_data:
   uploads_data:
