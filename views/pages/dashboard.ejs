@@ -254,6 +254,30 @@
         <% } %>
     </div>
 
+    <!-- Properti Terfavorit Saya Section (Client-side rendered via LocalStorage API) -->
+    <div class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm overflow-hidden" id="favorites-section">
+        <div class="p-6 border-b border-border-light flex justify-between items-center bg-surface-container-low/50">
+            <h2 class="text-title-lg font-bold text-on-surface flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-primary">favorite</span> Properti Terfavorit Saya
+            </h2>
+            <span class="bg-primary/10 text-primary font-bold text-label-xs px-2.5 py-1 rounded-full border border-primary/20" id="favorites-count-badge">0 Properti</span>
+        </div>
+        
+        <div class="p-8 text-center text-body-md text-on-surface-variant space-y-4" id="favorites-empty-view">
+            <span class="material-symbols-outlined text-[48px] text-outline">favorite_border</span>
+            <p>Anda belum menyimpan properti favorit apa pun. Jelajahi katalog properti untuk menyimpannya.</p>
+            <a href="/catalog" class="inline-flex bg-primary text-on-primary font-semibold text-label-sm px-4 py-2 rounded-xl hover:bg-surface-tint transition-all">
+                Cari Properti
+            </a>
+        </div>
+
+        <div class="p-6 hidden" id="favorites-grid-view">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6" id="favorites-grid">
+                <!-- Javascript will inject cards here -->
+            </div>
+        </div>
+    </div>
+
     <!-- Invoices & Tagihan Section -->
     <div class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm overflow-hidden">
         <div class="p-6 border-b border-border-light">
@@ -351,3 +375,109 @@
         <% } %>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const countBadge = document.getElementById('favorites-count-badge');
+        const emptyView = document.getElementById('favorites-empty-view');
+        const gridView = document.getElementById('favorites-grid-view');
+        const grid = document.getElementById('favorites-grid');
+
+        function getFavorites() {
+            const favs = localStorage.getItem('properti_favorit');
+            return favs ? JSON.parse(favs) : [];
+        }
+
+        function saveFavorites(favs) {
+            localStorage.setItem('properti_favorit', JSON.stringify(favs));
+        }
+
+        async function loadFavorites() {
+            const favs = getFavorites();
+            
+            if (favs.length === 0) {
+                countBadge.textContent = '0 Properti';
+                emptyView.classList.remove('hidden');
+                gridView.classList.add('hidden');
+                return;
+            }
+
+            countBadge.textContent = `${favs.length} Properti`;
+
+            try {
+                const response = await fetch(`/api/properties/favorites?ids=${favs.join(',')}`);
+                if (!response.ok) throw new Error('Failed to load favorites');
+                
+                const properties = await response.json();
+                
+                if (properties.length === 0) {
+                    emptyView.classList.remove('hidden');
+                    gridView.classList.add('hidden');
+                    return;
+                }
+
+                grid.innerHTML = '';
+                properties.forEach(prop => {
+                    const mainImg = prop.images && prop.images.length > 0 
+                        ? prop.images[0].url
+                        : '/images/placeholder.jpg';
+                    const specLabel = `${prop.buildingSize}m² / ${prop.landSize}m²`;
+                    const priceFormatted = Number(prop.price).toLocaleString('id-ID');
+
+                    const card = document.createElement('div');
+                    card.className = 'border border-border-light bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col relative';
+                    card.innerHTML = `
+                        <div class="relative h-40 w-full bg-surface-container">
+                            <img src="${mainImg}" alt="${prop.title}" class="object-cover w-full h-full" />
+                            <div class="absolute top-2 left-2 bg-whatsapp-green text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                                ${prop.listingType === 'RENT' ? 'DISEWA' : 'DIJUAL'}
+                            </div>
+                            <button 
+                                class="absolute top-2 right-2 bg-surface-container-lowest/90 text-error w-8 h-8 rounded-full shadow flex items-center justify-center cursor-pointer transition-all z-20 remove-fav-btn"
+                                data-id="${prop.id}"
+                                title="Hapus dari Favorit"
+                            >
+                                <span class="material-symbols-outlined text-[16px]">delete</span>
+                            </button>
+                        </div>
+                        <div class="p-4 flex-grow flex flex-col justify-between space-y-2">
+                            <div>
+                                <span class="text-primary text-[11px] font-bold uppercase">${prop.category?.name || 'Properti'}</span>
+                                <h4 class="text-body-md font-bold text-on-surface line-clamp-1 mt-0.5">
+                                    <a href="/property/${prop.slug}" class="hover:underline">${prop.title}</a>
+                                </h4>
+                                <p class="text-body-xs text-outline line-clamp-1">${prop.city}, ${prop.province}</p>
+                                <p class="text-primary text-body-md font-bold mt-1">Rp ${priceFormatted}</p>
+                            </div>
+                            <div class="flex justify-between items-center border-t border-border-light pt-2 text-outline text-[11px]">
+                                <span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[14px]">square_foot</span> Lb ${prop.buildingSize}m²</span>
+                                <span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[14px]">bed</span> ${prop.bedrooms} KT</span>
+                                <span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[14px]">bathtub</span> ${prop.bathrooms} KM</span>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+
+                const removeButtons = grid.querySelectorAll('.remove-fav-btn');
+                removeButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const id = parseInt(btn.getAttribute('data-id'));
+                        let currentFavs = getFavorites();
+                        currentFavs = currentFavs.filter(item => item !== id);
+                        saveFavorites(currentFavs);
+                        loadFavorites();
+                    });
+                });
+
+                emptyView.classList.add('hidden');
+                gridView.classList.remove('hidden');
+            } catch (err) {
+                console.error('[Favorites Grid Error]', err);
+            }
+        }
+
+        loadFavorites();
+    });
+</script>

@@ -30,4 +30,10 @@ seoPaths.forEach(path => {
   router.get(`${path}/:city/:district`, pageController.getSeoListingPage);
 });
 
+// Agent profile portfolio
+router.get('/agen/:id', pageController.getAgentProfile);
+
+// Favorites JSON API
+router.get('/api/properties/favorites', pageController.getFavoritesApi);
+
 module.exports = router;

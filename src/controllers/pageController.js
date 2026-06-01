@@ -591,3 +591,70 @@ exports.getPackagesPage = async (req, res, next) => {
     next(error);
   }
 };
+
+// GET /agen/:id
+exports.getAgentProfile = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(404).send('Agen tidak ditemukan.');
+    }
+
+    const agent = await prisma.user.findUnique({
+      where: { id }
+    });
+
+    if (!agent) {
+      return res.status(404).send('Agen tidak ditemukan.');
+    }
+
+    const properties = await prisma.property.findMany({
+      where: {
+        userId: id,
+        status: 'AVAILABLE'
+      },
+      include: { category: true, images: true },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    res.render('pages/agent-profile', {
+      title: `Profil Agen: ${agent.name} | Properti Indahweb`,
+      description: `Lihat listing properti aktif yang dipasarkan oleh ${agent.name} di Properti Indahweb.`,
+      agent,
+      properties
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// GET /api/properties/favorites
+exports.getFavoritesApi = async (req, res, next) => {
+  try {
+    const { ids } = req.query;
+    if (!ids) {
+      return res.json([]);
+    }
+
+    const idList = ids
+      .split(',')
+      .map(id => parseInt(id.trim()))
+      .filter(id => !isNaN(id));
+
+    if (idList.length === 0) {
+      return res.json([]);
+    }
+
+    const properties = await prisma.property.findMany({
+      where: {
+        id: { in: idList },
+        status: 'AVAILABLE'
+      },
+      include: { category: true, images: true }
+    });
+
+    res.json(properties);
+  } catch (error) {
+    next(error);
+  }
+};

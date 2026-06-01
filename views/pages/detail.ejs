@@ -26,6 +26,11 @@
                 <span class="material-symbols-outlined text-[18px]">location_on</span>
                 <%= property.shortAddress %>, <%= property.district %>, <%= property.city %>, <%= property.province %>
             </p>
+            <a href="https://www.google.com/maps/search/?api=1&query=<%= encodeURIComponent(property.shortAddress + ' ' + property.district + ' ' + property.city + ' ' + property.province) %>" 
+               target="_blank" rel="noopener noreferrer" 
+               class="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline mt-2 bg-primary/5 px-2.5 py-1 rounded-md border border-primary/10 transition-colors">
+                <span class="material-symbols-outlined text-[14px]">map</span> Rute Google Maps
+            </a>
         </div>
         <div class="md:text-right shrink-0">
             <p class="text-body-sm text-outline font-semibold uppercase tracking-wider">Harga Penawaran</p>
@@ -160,6 +165,123 @@
                     </div>
                 </div>
             <% } %>
+
+            <!-- KPR Simulation Calculator (Only for Dijual/SALE) -->
+            <% if (property.listingType === 'SALE') { %>
+                <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm space-y-6">
+                    <h2 class="text-title-lg font-bold text-on-surface pb-3 border-b border-border-light flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">calculate</span> Simulasi KPR Interaktif
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Left inputs -->
+                        <div class="space-y-4">
+                            <!-- Price (Readonly) -->
+                            <div class="space-y-1.5">
+                                <label class="text-label-sm font-bold text-on-surface-variant">Harga Properti (Rp)</label>
+                                <input type="text" id="kpr-property-price" readonly value="<%= Number(property.price).toLocaleString('id-ID') %>" 
+                                       class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-2.5 text-body-md font-bold focus:outline-none">
+                            </div>
+                            
+                            <!-- Down Payment (DP) -->
+                            <div class="space-y-1.5">
+                                <div class="flex justify-between items-center text-label-sm font-bold text-on-surface-variant">
+                                    <label>Uang Muka (DP) - <span id="kpr-dp-pct-label">20</span>%</label>
+                                    <span id="kpr-dp-val-label" class="text-primary font-bold">Rp 0</span>
+                                </div>
+                                <input type="range" id="kpr-dp-pct" min="10" max="90" step="5" value="20" 
+                                       class="w-full h-2 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-primary">
+                            </div>
+
+                            <!-- Tenor (Years) -->
+                            <div class="space-y-1.5">
+                                <div class="flex justify-between items-center text-label-sm font-bold text-on-surface-variant">
+                                    <label>Tenor Pinjaman: <span id="kpr-tenor-label" class="text-primary font-bold">15</span> Tahun</label>
+                                </div>
+                                <input type="range" id="kpr-tenor" min="5" max="30" step="1" value="15" 
+                                       class="w-full h-2 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-primary">
+                            </div>
+
+                            <!-- Interest Rate -->
+                            <div class="space-y-1.5">
+                                <div class="flex justify-between items-center text-label-sm font-bold text-on-surface-variant">
+                                    <label>Suku Bunga KPR: <span id="kpr-rate-label" class="text-primary font-bold">6.5</span>% per Tahun</label>
+                                </div>
+                                <input type="range" id="kpr-rate" min="1" max="15" step="0.1" value="6.5" 
+                                       class="w-full h-2 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-primary">
+                            </div>
+                        </div>
+
+                        <!-- Right results card -->
+                        <div class="bg-primary/5 p-6 rounded-2xl border border-primary/10 flex flex-col justify-center items-center text-center space-y-4">
+                            <span class="material-symbols-outlined text-[48px] text-primary">analytics</span>
+                            <div>
+                                <p class="text-body-sm text-on-surface-variant font-bold uppercase tracking-wider">Estimasi Angsuran / Bulan</p>
+                                <h3 class="text-headline-md font-black text-primary mt-1" id="kpr-installment-result">Rp 0</h3>
+                            </div>
+                            <div class="text-body-xs text-outline leading-relaxed border-t border-primary/20 pt-4 w-full">
+                                <p>Jumlah Pinjaman: <span id="kpr-loan-label" class="font-bold text-on-surface">Rp 0</span></p>
+                                <p class="mt-1">Perhitungan menggunakan suku bunga efektif flat.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const price = parseFloat("<%= property.price %>");
+                        const dpPctSlider = document.getElementById('kpr-dp-pct');
+                        const dpPctLabel = document.getElementById('kpr-dp-pct-label');
+                        const dpValLabel = document.getElementById('kpr-dp-val-label');
+                        
+                        const tenorSlider = document.getElementById('kpr-tenor');
+                        const tenorLabel = document.getElementById('kpr-tenor-label');
+                        
+                        const rateSlider = document.getElementById('kpr-rate');
+                        const rateLabel = document.getElementById('kpr-rate-label');
+                        
+                        const loanLabel = document.getElementById('kpr-loan-label');
+                        const resultLabel = document.getElementById('kpr-installment-result');
+
+                        function formatRupiah(num) {
+                            return 'Rp ' + Math.round(num).toLocaleString('id-ID');
+                        }
+
+                        function calculateKPR() {
+                            const dpPct = parseFloat(dpPctSlider.value);
+                            const dpVal = price * (dpPct / 100);
+                            const loanVal = price - dpVal;
+                            
+                            const years = parseInt(tenorSlider.value);
+                            const months = years * 12;
+                            
+                            const annualRate = parseFloat(rateSlider.value);
+                            const monthlyRate = (annualRate / 100) / 12;
+
+                            dpPctLabel.textContent = dpPct;
+                            dpValLabel.textContent = formatRupiah(dpVal);
+                            tenorLabel.textContent = years;
+                            rateLabel.textContent = annualRate;
+                            loanLabel.textContent = formatRupiah(loanVal);
+
+                            let monthlyInstallment = 0;
+                            if (monthlyRate > 0) {
+                                monthlyInstallment = loanVal * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+                            } else {
+                                monthlyInstallment = loanVal / months;
+                            }
+
+                            resultLabel.textContent = formatRupiah(monthlyInstallment);
+                        }
+
+                        dpPctSlider.addEventListener('input', calculateKPR);
+                        tenorSlider.addEventListener('input', calculateKPR);
+                        rateSlider.addEventListener('input', calculateKPR);
+
+                        calculateKPR();
+                    });
+                </script>
+            <% } %>
         </div>
 
         <!-- Sidebar info (Right Column) -->
@@ -171,18 +293,80 @@
                 </div>
                 <div>
                     <p class="text-body-sm text-outline uppercase font-bold tracking-wider">Pemilik / Agen Iklan</p>
-                    <h3 class="text-title-lg font-bold text-on-surface mt-1"><%= property.contactName %></h3>
+                    <h3 class="text-title-lg font-bold text-primary hover:underline mt-1">
+                        <a href="/agen/<%= property.userId %>"><%= property.contactName %></a>
+                    </h3>
                     <p class="text-body-sm text-on-surface-variant font-medium mt-0.5">WhatsApp: <%= property.whatsappNumber %></p>
                 </div>
                 <hr class="border-border-light" />
-                <a 
-                    href="<%= waLeadUrl %>"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="bg-whatsapp-green text-white w-full py-3 rounded-lg text-label-md font-bold hover:opacity-90 transition-all flex justify-center items-center gap-2 cursor-pointer shadow-sm"
-                >
-                    <span class="material-symbols-outlined text-[20px]">chat</span> Hubungi via WhatsApp
-                </a>
+                <div class="flex flex-col gap-2">
+                    <a 
+                        href="<%= waLeadUrl %>"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="bg-whatsapp-green text-white w-full py-3 rounded-lg text-label-md font-bold hover:opacity-90 transition-all flex justify-center items-center gap-2 cursor-pointer shadow-sm"
+                    >
+                        <span class="material-symbols-outlined text-[20px]">chat</span> Hubungi via WhatsApp
+                    </a>
+                    
+                    <button 
+                        id="favorite-btn"
+                        class="w-full py-3 rounded-lg text-label-md font-bold border border-border-light hover:bg-surface-container-low transition-all flex justify-center items-center gap-2 cursor-pointer bg-surface-container-lowest text-on-surface"
+                    >
+                        <span class="material-symbols-outlined text-[20px] text-outline" id="favorite-icon">favorite</span> 
+                        <span id="favorite-text">Simpan ke Favorit</span>
+                    </button>
+                </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const propertyId = parseInt("<%= property.id %>");
+                        const favBtn = document.getElementById('favorite-btn');
+                        const favIcon = document.getElementById('favorite-icon');
+                        const favText = document.getElementById('favorite-text');
+
+                        function getFavorites() {
+                            const favs = localStorage.getItem('properti_favorit');
+                            return favs ? JSON.parse(favs) : [];
+                        }
+
+                        function saveFavorites(favs) {
+                            localStorage.setItem('properti_favorit', JSON.stringify(favs));
+                        }
+
+                        function updateBtnUI() {
+                            const favs = getFavorites();
+                            if (favs.includes(propertyId)) {
+                                favIcon.textContent = 'favorite';
+                                favIcon.classList.remove('text-outline');
+                                favIcon.classList.add('text-error');
+                                favIcon.style.fontVariationSettings = "'FILL' 1";
+                                favText.textContent = 'Tersimpan di Favorit';
+                                favBtn.classList.add('border-error/20', 'bg-error/5');
+                            } else {
+                                favIcon.textContent = 'favorite';
+                                favIcon.classList.add('text-outline');
+                                favIcon.classList.remove('text-error');
+                                favIcon.style.fontVariationSettings = "'FILL' 0";
+                                favText.textContent = 'Simpan ke Favorit';
+                                favBtn.classList.remove('border-error/20', 'bg-error/5');
+                            }
+                        }
+
+                        favBtn.addEventListener('click', () => {
+                            let favs = getFavorites();
+                            if (favs.includes(propertyId)) {
+                                favs = favs.filter(id => id !== propertyId);
+                            } else {
+                                favs.push(propertyId);
+                            }
+                            saveFavorites(favs);
+                            updateBtnUI();
+                        });
+
+                        updateBtnUI();
+                    });
+                </script>
             </div>
 
             <!-- Safety Tips Card -->
