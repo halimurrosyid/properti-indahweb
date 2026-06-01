@@ -1,0 +1,88 @@
+<div class="max-w-7xl mx-auto px-container-margin md:px-stack-lg py-8 space-y-8">
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center gap-2 text-label-sm text-outline">
+        <a href="/" class="hover:text-primary transition-colors">Home</a>
+        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+        <a href="/artikel" class="hover:text-primary transition-colors">Artikel</a>
+        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+        <span class="text-on-surface truncate max-w-[200px] md:max-w-xs"><%= article.title %></span>
+    </nav>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        <!-- Article Body Column -->
+        <article class="lg:col-span-2 bg-surface-container-lowest rounded-3xl border border-border-light shadow-sm overflow-hidden p-6 md:p-10 space-y-6">
+            <!-- Article Header Info -->
+            <div class="space-y-4">
+                <% if (!article.isPublished) { %>
+                    <span class="bg-yellow-100 text-yellow-800 text-label-xs font-bold px-2.5 py-1 rounded-md border border-yellow-200">Mode Draft / Peninjauan</span>
+                <% } %>
+                <h1 class="text-headline-md md:text-headline-lg font-black text-on-surface leading-tight">
+                    <%= article.title %>
+                </h1>
+                
+                <div class="flex flex-wrap items-center gap-4 text-label-sm text-outline font-semibold">
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[16px]">calendar_today</span>
+                        <%= new Date(article.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+                    </span>
+                    <span>•</span>
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[16px]">schedule</span>
+                        <%= Math.max(2, Math.ceil((article.content || '').split(' ').length / 200)) %> mnt membaca
+                    </span>
+                    <span>•</span>
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[16px]">person</span>
+                        Redaksi Indahweb
+                    </span>
+                </div>
+            </div>
+
+            <!-- Cover Image -->
+            <% if (article.coverImage) { %>
+                <div class="aspect-[16/9] w-full rounded-2xl overflow-hidden border border-border-light bg-surface-container-low">
+                    <img src="<%= article.coverImage %>" alt="<%= article.title %>" class="w-full h-full object-cover">
+                </div>
+            <% } %>
+
+            <!-- Article Content -->
+            <div class="prose max-w-none text-on-surface-variant text-body-lg leading-relaxed space-y-6 pt-4 whitespace-pre-line">
+                <%= article.content %>
+            </div>
+
+            <!-- Share Buttons Concept & Divider -->
+            <div class="pt-8 border-t border-border-light flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <span class="text-label-sm text-outline font-bold">Bagikan artikel ini:</span>
+                <div class="flex items-center gap-3">
+                    <a href="https://api.whatsapp.com/send?text=Baca%20artikel%20menarik%20ini:%20<%= encodeURIComponent(canonicalUrl) %>" target="_blank" class="flex items-center gap-1 px-3 py-2 bg-green-50 text-green-600 border border-green-200 hover:bg-green-100/50 rounded-lg text-label-sm font-semibold transition-all">
+                        <span class="material-symbols-outlined text-[16px]">chat</span> WhatsApp
+                    </a>
+                    <button onclick="navigator.clipboard.writeText('<%= canonicalUrl %>'); alert('Tautan berhasil disalin!');" class="flex items-center gap-1 px-3 py-2 bg-primary/5 text-primary border border-primary/20 hover:bg-primary/10 rounded-lg text-label-sm font-semibold transition-all">
+                        <span class="material-symbols-outlined text-[16px]">link</span> Salin Link
+                    </button>
+                </div>
+            </div>
+        </article>
+
+        <!-- Sidebar Widgets -->
+        <aside class="space-y-6">
+            <!-- Call to Action (Search widget) -->
+            <div class="bg-gradient-to-br from-primary to-primary/80 text-on-primary p-6 rounded-3xl border border-primary-variant/20 shadow-md space-y-4">
+                <span class="material-symbols-outlined text-[48px]">home_work</span>
+                <h3 class="text-title-lg font-extrabold tracking-tight">Temukan Rumah Impian Anda Sekarang</h3>
+                <p class="text-body-sm opacity-90 leading-relaxed">
+                    Lihat ribuan listing properti dijual atau disewa dengan harga terbaik dan verifikasi lengkap dari agen terpercaya kami.
+                </p>
+                <a href="/catalog" class="block text-center bg-surface-container-lowest text-primary text-label-md font-bold py-3 px-4 rounded-xl hover:bg-surface-bright transition-all shadow-sm">
+                    Jelajahi Katalog Properti
+                </a>
+            </div>
+
+            <!-- Back link -->
+            <a href="/artikel" class="flex items-center justify-center gap-1 py-3 px-4 bg-surface-container-lowest hover:bg-surface-container-low text-on-surface-variant hover:text-primary border border-border-light rounded-2xl text-label-sm font-bold transition-all shadow-sm">
+                <span class="material-symbols-outlined text-[16px]">arrow_back</span> Kembali ke Semua Artikel
+            </a>
+        </aside>
+    </div>
+</div>

@@ -1,0 +1,39 @@
+<div class="min-h-[70vh] flex items-center justify-center px-container-margin py-16">
+    <div class="text-center space-y-8 max-w-lg mx-auto">
+        <!-- Error Icon -->
+        <div class="relative mx-auto w-40 h-40">
+            <div class="absolute inset-0 bg-error/10 rounded-full animate-pulse"></div>
+            <div class="absolute inset-4 bg-error/5 rounded-full flex items-center justify-center">
+                <span class="material-symbols-outlined text-error text-[72px]" style="font-variation-settings: 'FILL' 0;">error</span>
+            </div>
+        </div>
+
+        <!-- Error Heading -->
+        <div class="space-y-4">
+            <h1 class="text-[96px] font-bold text-error/20 leading-none select-none tracking-tighter">500</h1>
+            <h2 class="text-headline-md font-bold text-on-surface -mt-4">Terjadi Kesalahan Server</h2>
+            <p class="text-body-md text-on-surface-variant max-w-sm mx-auto leading-relaxed">
+                Maaf, server kami mengalami masalah sementara. Tim kami sedang bekerja untuk memperbaikinya. Silakan coba lagi beberapa saat.
+            </p>
+        </div>
+
+        <% if (process.env.NODE_ENV !== 'production' && typeof errorMessage !== 'undefined' && errorMessage) { %>
+        <div class="bg-error/5 border border-error/20 rounded-xl p-4 text-left">
+            <p class="text-label-xs font-bold text-error uppercase tracking-wider mb-2">Debug Info (Dev Mode)</p>
+            <pre class="text-body-xs text-on-surface-variant overflow-auto max-h-40 whitespace-pre-wrap break-words"><%= errorMessage %></pre>
+        </div>
+        <% } %>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-center pt-4">
+            <a href="/" class="bg-primary text-on-primary px-6 py-3 rounded-full text-label-md font-semibold hover:bg-surface-tint transition-all shadow-sm flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-[20px]">home</span>
+                Kembali ke Beranda
+            </a>
+            <button onclick="window.history.back()" class="bg-surface-container-highest text-on-surface px-6 py-3 rounded-full text-label-md font-semibold hover:bg-surface-container-high transition-all border border-border-light flex items-center justify-center gap-2 cursor-pointer">
+                <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+                Halaman Sebelumnya
+            </button>
+        </div>
+    </div>
+</div>

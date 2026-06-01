@@ -1,0 +1,222 @@
+<%
+  const isLoggedIn = typeof user !== 'undefined' && user;
+  // Format facilities string back to array for checkboxes
+  const selectedFacilities = property.facilities ? property.facilities.split(',').map(f => f.trim()) : [];
+  const facilityOptions = ['AC', 'Carport', 'Garasi', 'Taman', 'Kolam Renang', 'Gudang', 'Keamanan 24 Jam', 'Internet', 'Listrik', 'Air PAM'];
+%>
+
+<div class="max-w-3xl mx-auto px-container-margin md:px-stack-lg py-12">
+    <div class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm p-6 md:p-8 space-y-8">
+
+        <!-- Header -->
+        <div class="space-y-2">
+            <div class="flex items-center gap-3">
+                <a href="/dashboard" class="text-outline hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </a>
+                <div>
+                    <span class="text-primary text-label-md font-bold tracking-widest uppercase">Edit Iklan</span>
+                    <h1 class="text-headline-md font-bold text-on-surface mt-0.5">Perbarui Data Properti</h1>
+                </div>
+            </div>
+            <p class="text-body-sm text-on-surface-variant ml-9">
+                Perbarui informasi listing properti Anda. Setelah disimpan, iklan akan kembali ke status <strong>Menunggu Persetujuan</strong> dan ditinjau ulang oleh admin.
+            </p>
+        </div>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+        <div class="bg-error-container text-on-error-container border border-error/20 p-4 rounded-xl text-body-md font-medium flex items-start gap-2">
+            <span class="material-symbols-outlined text-error mt-0.5">error</span>
+            <%= error %>
+        </div>
+        <% } %>
+
+        <!-- Edit Form -->
+        <form action="/property/<%= property.id %>/edit" method="POST" enctype="multipart/form-data" class="space-y-8">
+
+            <!-- SECTION 1: Informasi Utama -->
+            <div class="space-y-4">
+                <h3 class="text-title-md font-bold text-on-surface pb-2 border-b border-border-light flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-primary text-on-primary text-label-xs font-bold flex items-center justify-center text-[11px]">1</span>
+                    Informasi Utama
+                </h3>
+
+                <div class="space-y-1.5">
+                    <label class="text-label-sm font-bold text-on-surface-variant">Judul Iklan <span class="text-error">*</span></label>
+                    <input type="text" name="title" required value="<%= property.title %>" placeholder="Contoh: Rumah Minimalis Modern Dekat ITB Bandung" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Kategori <span class="text-error">*</span></label>
+                        <select name="categoryId" required class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md">
+                            <option value="">Pilih Kategori</option>
+                            <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                                <% categories.forEach(cat => { %>
+                                    <option value="<%= cat.id %>" <%= property.categoryId === cat.id ? 'selected' : '' %>><%= cat.name %></option>
+                                <% }) %>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Tipe Listing <span class="text-error">*</span></label>
+                        <select name="listingType" required class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md">
+                            <option value="SALE" <%= property.listingType === 'SALE' ? 'selected' : '' %>>Dijual</option>
+                            <option value="RENT" <%= property.listingType === 'RENT' ? 'selected' : '' %>>Disewa</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-label-sm font-bold text-on-surface-variant">Harga Penawaran (Rp) <span class="text-error">*</span></label>
+                    <input type="number" name="price" required value="<%= Number(property.price) %>" placeholder="Contoh: 850000000" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md">
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-label-sm font-bold text-on-surface-variant">Deskripsi Lengkap <span class="text-error">*</span></label>
+                    <textarea name="description" rows="5" required class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md"><%= property.description %></textarea>
+                </div>
+            </div>
+
+            <!-- SECTION 2: Spesifikasi -->
+            <div class="space-y-4">
+                <h3 class="text-title-md font-bold text-on-surface pb-2 border-b border-border-light flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-primary text-on-primary text-label-xs font-bold flex items-center justify-center text-[11px]">2</span>
+                    Spesifikasi & Fasilitas
+                </h3>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Luas Tanah (m²)</label>
+                        <input type="number" name="landSize" value="<%= property.landSize %>" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Luas Bangunan (m²)</label>
+                        <input type="number" name="buildingSize" value="<%= property.buildingSize %>" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Sertifikat</label>
+                        <input type="text" name="certificate" value="<%= property.certificate %>" placeholder="SHM / HGB / AJB" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Kamar Tidur</label>
+                        <input type="number" name="bedrooms" value="<%= property.bedrooms %>" min="0" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Kamar Mandi</label>
+                        <input type="number" name="bathrooms" value="<%= property.bathrooms %>" min="0" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Garasi</label>
+                        <input type="number" name="garage" value="<%= property.garage %>" min="0" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Listrik (Watt)</label>
+                        <input type="text" name="electricity" value="<%= property.electricity || '' %>" placeholder="e.g. 1300" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-label-sm font-bold text-on-surface-variant">Sumber Air</label>
+                    <input type="text" name="waterSource" value="<%= property.waterSource || '' %>" placeholder="PAM / Sumur / PDAM" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary outline-none bg-surface-bright text-body-md">
+                </div>
+
+                <!-- Facilities -->
+                <div class="space-y-2">
+                    <label class="text-label-sm font-bold text-on-surface-variant">Fasilitas Tersedia</label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        <% facilityOptions.forEach(fac => { %>
+                        <label class="flex items-center gap-2 p-2.5 bg-surface-subtle rounded-lg border border-border-light cursor-pointer hover:border-primary/50 transition-all text-body-sm font-medium text-on-surface-variant">
+                            <input type="checkbox" name="facilities" value="<%= fac %>" class="accent-primary" <%= selectedFacilities.includes(fac) ? 'checked' : '' %>>
+                            <%= fac %>
+                        </label>
+                        <% }) %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: Lokasi -->
+            <div class="space-y-4">
+                <h3 class="text-title-md font-bold text-on-surface pb-2 border-b border-border-light flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-primary text-on-primary text-label-xs font-bold flex items-center justify-center text-[11px]">3</span>
+                    Lokasi Properti
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Provinsi <span class="text-error">*</span></label>
+                        <input type="text" name="province" required value="<%= property.province %>" placeholder="e.g. Jawa Barat" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Kota / Kabupaten <span class="text-error">*</span></label>
+                        <input type="text" name="city" required value="<%= property.city %>" placeholder="e.g. Bandung" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Kecamatan <span class="text-error">*</span></label>
+                        <input type="text" name="district" required value="<%= property.district %>" placeholder="e.g. Coblong" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Alamat Singkat <span class="text-error">*</span></label>
+                        <input type="text" name="shortAddress" required value="<%= property.shortAddress %>" placeholder="e.g. Jl. Dago No. 12" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary outline-none bg-surface-bright text-body-md">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 4: Foto -->
+            <div class="space-y-4">
+                <h3 class="text-title-md font-bold text-on-surface pb-2 border-b border-border-light flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-primary text-on-primary text-label-xs font-bold flex items-center justify-center text-[11px]">4</span>
+                    Foto Properti (Opsional)
+                </h3>
+                <p class="text-body-sm text-on-surface-variant">Unggah foto baru hanya jika ingin mengganti semua foto lama. Kosongkan jika tidak ingin mengubah foto.</p>
+
+                <!-- Current Images Preview -->
+                <% if (property.images && property.images.length > 0) { %>
+                <div class="space-y-2">
+                    <label class="text-label-sm font-bold text-on-surface-variant">Foto Saat Ini</label>
+                    <div class="flex gap-3 flex-wrap">
+                        <% property.images.forEach(img => { %>
+                        <div class="relative">
+                            <img src="<%= img.url %>" alt="Foto" class="w-24 h-18 object-cover rounded-lg border border-border-light <%= img.isMain ? 'ring-2 ring-primary' : '' %>">
+                            <% if (img.isMain) { %>
+                            <span class="absolute -top-1.5 -right-1.5 bg-primary text-on-primary text-[9px] font-bold px-1 py-0.5 rounded">UTAMA</span>
+                            <% } %>
+                        </div>
+                        <% }) %>
+                    </div>
+                </div>
+                <% } %>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Ganti Foto Utama</label>
+                        <input type="file" name="mainImage" accept="image/*" class="w-full px-3 py-2 rounded-lg border border-border-light text-body-sm outline-none bg-surface-bright">
+                        <p class="text-label-xs text-outline">JPG/PNG/WebP, maks 5MB.</p>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-label-sm font-bold text-on-surface-variant">Ganti Foto Galeri (maks 6)</label>
+                        <input type="file" name="galleryImages" accept="image/*" multiple class="w-full px-3 py-2 rounded-lg border border-border-light text-body-sm outline-none bg-surface-bright">
+                        <p class="text-label-xs text-outline">JPG/PNG/WebP, maks 5MB per foto.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border-light">
+                <button type="submit" class="flex-1 bg-primary text-on-primary py-3 rounded-lg text-label-md font-semibold hover:bg-surface-tint transition-all shadow-sm flex justify-center items-center gap-2 cursor-pointer">
+                    <span class="material-symbols-outlined text-[20px]">save</span>
+                    Simpan Perubahan
+                </button>
+                <a href="/dashboard" class="flex-1 bg-surface-container-highest text-on-surface py-3 rounded-lg text-label-md font-semibold hover:bg-surface-container-high transition-all border border-border-light flex justify-center items-center gap-2">
+                    <span class="material-symbols-outlined text-[20px]">close</span>
+                    Batal
+                </a>
+            </div>
+        </form>
+    </div>
+</div>

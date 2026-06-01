@@ -437,3 +437,127 @@ exports.postUploadProof = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.getEditListing = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id);
+    const userId = req.session.user.id;
+
+    const property = await prisma.property.findUnique({
+      where: { id },
+      include: { category: true, images: true }
+    });
+
+    if (!property) {
+      return res.status(404).render('pages/404', {
+        title: 'Properti Tidak Ditemukan',
+        description: 'Properti yang ingin Anda edit tidak ditemukan.'
+      });
+    }
+
+    if (property.userId !== userId && req.session.user.role !== 'super_admin' && req.session.user.role !== 'admin') {
+      return res.status(403).send('Akses Ditolak: Anda tidak memiliki hak untuk mengedit properti ini.');
+    }
+
+    const categories = await prisma.category.findMany();
+
+    res.render('pages/edit-listing', {
+      title: `Edit: ${property.title}`,
+      description: 'Edit dan perbarui data listing properti Anda.',
+      property,
+      categories,
+      error: req.query.err || null
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.postEditListing = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id);
+    const userId = req.session.user.id;
+
+    const property = await prisma.property.findUnique({
+      where: { id },
+      include: { images: true }
+    });
+
+    if (!property) {
+      return res.status(404).send('Properti tidak ditemukan.');
+    }
+
+    if (property.userId !== userId && req.session.user.role !== 'super_admin' && req.session.user.role !== 'admin') {
+      return res.status(403).send('Akses Ditolak.');
+    }
+
+    const {
+      title, description, price, listingType, categoryId,
+      landSize, buildingSize, bedrooms, bathrooms, certificate,
+      electricity, waterSource, garage, province, city, district,
+      shortAddress, facilities
+    } = req.body;
+
+    const facilitiesStr = Array.isArray(facilities) ? facilities.join(', ') : (facilities || '');
+
+    await prisma.property.update({
+      where: { id },
+      data: {
+        title,
+        description,
+        price: parseFloat(price),
+        listingType,
+        categoryId: parseInt(categoryId),
+        landSize: parseInt(landSize) || 0,
+        buildingSize: parseInt(buildingSize) || 0,
+        bedrooms: parseInt(bedrooms) || 0,
+        bathrooms: parseInt(bathrooms) || 0,
+        certificate: certificate || '',
+        electricity: electricity || null,
+        waterSource: waterSource || null,
+        garage: garage ? parseInt(garage) : 0,
+        facilities: facilitiesStr || null,
+        province,
+        city,
+        district,
+        shortAddress,
+        status: 'PENDING'  // Back to review queue after edit
+      }
+    });
+
+    // Handle new image uploads
+    const newImageRecords = [];
+
+    if (req.files && req.files.mainImage && req.files.mainImage[0]) {
+      await prisma.propertyImage.deleteMany({ where: { propertyId: id, isMain: true } });
+      newImageRecords.push({
+        propertyId: id,
+        url: `/uploads/${req.files.mainImage[0].filename}`,
+        isMain: true
+      });
+    }
+
+    if (req.files && req.files.galleryImages && req.files.galleryImages.length > 0) {
+      await prisma.propertyImage.deleteMany({ where: { propertyId: id, isMain: false } });
+      req.files.galleryImages.forEach(file => {
+        newImageRecords.push({
+          propertyId: id,
+          url: `/uploads/${file.filename}`,
+          isMain: false
+        });
+      });
+    }
+
+    if (newImageRecords.length > 0) {
+      await prisma.propertyImage.createMany({ data: newImageRecords });
+    }
+
+    const redirectTarget = (req.session.user.role === 'super_admin' || req.session.user.role === 'admin')
+      ? '/admin/dashboard?msg=Listing berhasil diperbarui dan menunggu persetujuan ulang.'
+      : '/dashboard?msg=Listing berhasil diperbarui dan menunggu persetujuan admin.';
+
+    res.redirect(redirectTarget);
+  } catch (error) {
+    next(error);
+  }
+};

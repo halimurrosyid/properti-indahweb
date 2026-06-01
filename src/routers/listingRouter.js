@@ -50,4 +50,8 @@ router.post('/invoice/:invoiceNumber/upload-proof', isAuthenticated, upload.sing
 router.post('/invoice/:id/approve', isAuthenticated, isAdmin, listingController.approveInvoice);
 router.post('/invoice/:id/reject', isAuthenticated, isAdmin, listingController.rejectInvoice);
 
+// Edit Listing (by owner or admin)
+router.get('/:id/edit', isAuthenticated, listingController.getEditListing);
+router.post('/:id/edit', isAuthenticated, uploadFields, listingController.postEditListing);
+
 module.exports = router;

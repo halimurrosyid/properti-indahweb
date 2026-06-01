@@ -10,7 +10,8 @@
         <nav class="hidden md:flex items-center gap-6">
             <a href="/catalog?listingType=SALE" class="text-on-surface-variant hover:text-primary transition-colors text-label-md font-semibold">Dijual</a>
             <a href="/catalog?listingType=RENT" class="text-on-surface-variant hover:text-primary transition-colors text-label-md font-semibold">Disewa</a>
-            <a href="/catalog" class="text-on-surface-variant hover:text-primary transition-colors text-label-md font-semibold">Semua Katalog</a>
+            <a href="/catalog" class="text-on-surface-variant hover:text-primary transition-colors text-label-md font-semibold">Katalog</a>
+            <a href="/artikel" class="text-on-surface-variant hover:text-primary transition-colors text-label-md font-semibold">Artikel</a>
         </nav>
 
         <!-- Action Controls -->
@@ -42,7 +43,8 @@
         <nav class="flex flex-col gap-3">
             <a href="/catalog?listingType=SALE" class="text-on-surface-variant hover:text-primary text-body-md font-semibold py-1">Dijual</a>
             <a href="/catalog?listingType=RENT" class="text-on-surface-variant hover:text-primary text-body-md font-semibold py-1">Disewa</a>
-            <a href="/catalog" class="text-on-surface-variant hover:text-primary text-body-md font-semibold py-1">Semua Katalog</a>
+            <a href="/catalog" class="text-on-surface-variant hover:text-primary text-body-md font-semibold py-1">Katalog</a>
+            <a href="/artikel" class="text-on-surface-variant hover:text-primary text-body-md font-semibold py-1">Artikel</a>
             <hr class="border-border-light my-1" />
             <% if (typeof user !== 'undefined' && user) { %>
                 <% if (user.role === 'super_admin' || user.role === 'admin') { %>
