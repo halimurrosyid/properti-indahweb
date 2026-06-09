@@ -1,5 +1,51 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+
+const escapeXml = (value) => String(value || '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&apos;');
+
+const toSitemapDate = (date) => {
+  if (!date) return null;
+  return new Date(date).toISOString().split('T')[0];
+};
+
+const slugifyPathSegment = (value) => String(value || '')
+  .toLowerCase()
+  .trim()
+  .replace(/\s+/g, '-')
+  .replace(/[^\w-]+/g, '')
+  .replace(/--+/g, '-')
+  .replace(/^-+|-+$/g, '');
+
+const buildSiteUrl = (req) => {
+  const configuredUrl = process.env.SITE_URL || process.env.APP_URL;
+  if (configuredUrl) {
+    return configuredUrl.replace(/\/+$/, '');
+  }
+
+  return `${req.protocol}://${req.get('host')}`;
+};
+
+const appendSitemapUrl = (urls, host, path, options = {}) => {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const loc = `${host}${normalizedPath}`;
+  const lastmod = toSitemapDate(options.lastmod);
+  const images = options.images || [];
+
+  urls.push({
+    loc,
+    lastmod,
+    changefreq: options.changefreq,
+    priority: options.priority,
+    images: images
+      .filter(Boolean)
+      .map(imagePath => imagePath.startsWith('http') ? imagePath : `${host}${imagePath}`)
+  });
+};
 const popularCities = require('../config/popularCities.json');
 
 exports.getHome = async (req, res, next) => {
@@ -475,14 +521,22 @@ exports.getSeoListingPage = async (req, res, next) => {
 
 exports.getSitemap = async (req, res, next) => {
   try {
-    const host = `${req.protocol}://${req.get('host')}`;
-    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+    const host = buildSiteUrl(req);
+    const urls = [];
 
-    // 1. Static Pages
-    const staticUrls = ['/', '/catalog', '/pasang-iklan', '/disclaimer'];
-    staticUrls.forEach(url => {
-      xml += `  <url>\n    <loc>${host}${url}</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
+    // 1. Static public pages
+    [
+      { path: '/', changefreq: 'daily', priority: '1.0' },
+      { path: '/catalog', changefreq: 'daily', priority: '0.9' },
+      { path: '/artikel', changefreq: 'daily', priority: '0.9' },
+      { path: '/pasang-iklan', changefreq: 'weekly', priority: '0.8' },
+      { path: '/packages', changefreq: 'weekly', priority: '0.7' },
+      { path: '/disclaimer', changefreq: 'monthly', priority: '0.3' }
+    ].forEach(page => {
+      appendSitemapUrl(urls, host, page.path, {
+        changefreq: page.changefreq,
+        priority: page.priority
+      });
     });
 
     // 2. SEO Category Landing Pages
@@ -494,19 +548,22 @@ exports.getSitemap = async (req, res, next) => {
     ];
 
     seoCategories.forEach(item => {
-      xml += `  <url>\n    <loc>${host}${item.path}</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
+      appendSitemapUrl(urls, host, item.path, {
+        changefreq: 'daily',
+        priority: '0.8'
+      });
     });
 
     // 3. SEO Location Pages (Dynamic based on existing locations)
     const activeProperties = await prisma.property.findMany({
       where: { status: 'AVAILABLE' },
-      include: { category: true }
+      include: { category: true, images: true }
     });
 
     const locations = new Set();
     activeProperties.forEach(prop => {
-      const citySlug = prop.city.toLowerCase().trim().replace(/\s+/g, '-');
-      const distSlug = prop.district.toLowerCase().trim().replace(/\s+/g, '-');
+      const citySlug = slugifyPathSegment(prop.city);
+      const distSlug = slugifyPathSegment(prop.district);
       const catSlug = prop.category.slug;
       const type = prop.listingType;
 
@@ -517,33 +574,112 @@ exports.getSitemap = async (req, res, next) => {
       else if (catSlug === 'kos') basePath = '/kos';
 
       if (basePath) {
-        locations.add(`${basePath}/${citySlug}`);
-        locations.add(`${basePath}/${citySlug}/${distSlug}`);
+        if (citySlug) locations.add(`${basePath}/${citySlug}`);
+        if (citySlug && distSlug) locations.add(`${basePath}/${citySlug}/${distSlug}`);
       }
     });
 
     locations.forEach(loc => {
-      xml += `  <url>\n    <loc>${host}${loc}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
+      appendSitemapUrl(urls, host, loc, {
+        changefreq: 'weekly',
+        priority: '0.6'
+      });
     });
 
     // 4. Detail Property Pages
     activeProperties.forEach(prop => {
-      xml += `  <url>\n    <loc>${host}/property/${prop.slug}</loc>\n    <lastmod>${prop.updatedAt.toISOString().split('T')[0]}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+      appendSitemapUrl(urls, host, `/property/${prop.slug}`, {
+        lastmod: prop.updatedAt,
+        changefreq: 'weekly',
+        priority: prop.isFeatured ? '0.8' : '0.7',
+        images: prop.images.map(image => image.url)
+      });
     });
 
-    // 5. Detail Blog Article Pages
+    // 5. Public agent profile pages for agents/admins with active listings
+    const activeAgents = await prisma.user.findMany({
+      where: {
+        properties: {
+          some: { status: 'AVAILABLE' }
+        }
+      },
+      include: {
+        properties: {
+          where: { status: 'AVAILABLE' },
+          orderBy: { updatedAt: 'desc' },
+          take: 1
+        }
+      }
+    });
+
+    activeAgents.forEach(agent => {
+      appendSitemapUrl(urls, host, `/agen/${agent.id}`, {
+        lastmod: agent.properties[0]?.updatedAt || agent.updatedAt,
+        changefreq: 'weekly',
+        priority: '0.5'
+      });
+    });
+
+    // 6. Blog category pages with published articles
+    const activeBlogCategories = await prisma.blogCategory.findMany({
+      where: {
+        posts: {
+          some: { status: 'published' }
+        }
+      },
+      include: {
+        posts: {
+          where: { status: 'published' },
+          orderBy: { updated_at: 'desc' },
+          take: 1
+        }
+      }
+    });
+
+    activeBlogCategories.forEach(category => {
+      appendSitemapUrl(urls, host, `/artikel/kategori/${category.slug}`, {
+        lastmod: category.posts[0]?.updated_at || category.updated_at,
+        changefreq: 'weekly',
+        priority: '0.6'
+      });
+    });
+
+    // 7. Detail Blog Article Pages
     const activeBlogPosts = await prisma.blogPost.findMany({
-      where: { status: 'published' }
+      where: { status: 'published' },
+      orderBy: { published_at: 'desc' }
     });
 
     activeBlogPosts.forEach(post => {
       const lastmodDate = post.published_at || post.updated_at || new Date();
-      xml += `  <url>\n    <loc>${host}/artikel/${post.slug}</loc>\n    <lastmod>${lastmodDate.toISOString().split('T')[0]}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+      appendSitemapUrl(urls, host, `/artikel/${post.slug}`, {
+        lastmod: lastmodDate,
+        changefreq: 'weekly',
+        priority: '0.7',
+        images: post.featured_image ? [post.featured_image] : []
+      });
+    });
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n`;
+
+    urls.forEach(url => {
+      xml += `  <url>\n`;
+      xml += `    <loc>${escapeXml(url.loc)}</loc>\n`;
+      if (url.lastmod) xml += `    <lastmod>${escapeXml(url.lastmod)}</lastmod>\n`;
+      if (url.changefreq) xml += `    <changefreq>${escapeXml(url.changefreq)}</changefreq>\n`;
+      if (url.priority) xml += `    <priority>${escapeXml(url.priority)}</priority>\n`;
+      url.images.forEach(imageUrl => {
+        xml += `    <image:image>\n`;
+        xml += `      <image:loc>${escapeXml(imageUrl)}</image:loc>\n`;
+        xml += `    </image:image>\n`;
+      });
+      xml += `  </url>\n`;
     });
 
     xml += `</urlset>`;
 
-    res.header('Content-Type', 'application/xml');
+    res.header('Content-Type', 'application/xml; charset=utf-8');
     res.send(xml);
   } catch (error) {
     next(error);
@@ -672,4 +808,3 @@ exports.getDisclaimer = async (req, res, next) => {
     next(error);
   }
 };
-
