@@ -1,0 +1,5 @@
+ALTER TABLE "AiBlogJob" ADD COLUMN IF NOT EXISTS "category_id" INTEGER;
+ALTER TABLE "AiBlogJob" ADD COLUMN IF NOT EXISTS "word_min" INTEGER;
+ALTER TABLE "AiBlogJob" ADD COLUMN IF NOT EXISTS "word_max" INTEGER;
+
+CREATE INDEX IF NOT EXISTS "AiBlogJob_category_id_idx" ON "AiBlogJob"("category_id");

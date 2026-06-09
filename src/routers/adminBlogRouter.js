@@ -59,6 +59,7 @@ router.post('/ai-jobs/items/:itemId/regenerate', csrfProtection, adminBlogContro
 
 // 3. Articles CRUD Routes
 router.get('/', csrfProtection, adminBlogController.getBlogList);
+router.post('/bulk-update', csrfProtection, adminBlogController.postBulkUpdateBlogs);
 router.get('/create', csrfProtection, adminBlogController.getCreateBlog);
 router.post('/create', upload.single('featured_image'), csrfProtection, adminBlogController.postCreateBlog);
 router.get('/:id/edit', csrfProtection, adminBlogController.getEditBlog);

@@ -89,10 +89,12 @@ exports.getBlogList = async (req, res, next) => {
       include: { category: true, author: true, ai_job: true },
       orderBy: { created_at: 'desc' }
     });
+    const categories = await prisma.blogCategory.findMany({ orderBy: { name: 'asc' } });
 
     res.render('pages/admin/blog-list', {
       title: 'Manajemen Artikel Blog',
       posts,
+      categories,
       statusFilter: status || '',
       sourceFilter: source || '',
       message: req.query.msg || null,
@@ -342,6 +344,87 @@ exports.postDeleteBlog = async (req, res, next) => {
   }
 };
 
+// POST /admin/blog/bulk-update
+exports.postBulkUpdateBlogs = async (req, res, next) => {
+  try {
+    const {
+      selected_post_ids,
+      bulk_status,
+      bulk_category_id,
+      bulk_scheduled_at
+    } = req.body;
+
+    const selectedIds = Array.isArray(selected_post_ids)
+      ? selected_post_ids
+      : (selected_post_ids ? [selected_post_ids] : []);
+
+    const ids = selectedIds
+      .map(id => parseInt(id))
+      .filter(id => Number.isInteger(id) && id > 0);
+
+    if (ids.length === 0) {
+      return res.redirect('/admin/blog?err=Pilih minimal satu artikel untuk diperbarui.');
+    }
+
+    const data = {};
+
+    if (bulk_category_id && bulk_category_id !== '__nochange') {
+      data.category_id = bulk_category_id === '__none' ? null : parseInt(bulk_category_id);
+      if (bulk_category_id !== '__none' && !Number.isInteger(data.category_id)) {
+        return res.redirect('/admin/blog?err=Kategori bulk tidak valid.');
+      }
+    }
+
+    if (bulk_status && bulk_status !== '__nochange') {
+      const allowedStatuses = ['draft', 'published', 'scheduled', 'archived', 'deleted'];
+      if (!allowedStatuses.includes(bulk_status)) {
+        return res.redirect('/admin/blog?err=Status bulk tidak valid.');
+      }
+
+      data.status = bulk_status;
+
+      if (bulk_status === 'published') {
+        data.published_at = new Date();
+        data.scheduled_at = null;
+      } else if (bulk_status === 'scheduled') {
+        if (!bulk_scheduled_at) {
+          return res.redirect('/admin/blog?err=Jadwal publish wajib diisi jika status bulk diubah ke Scheduled.');
+        }
+        data.scheduled_at = parseJakartaDateTimeLocal(bulk_scheduled_at);
+        data.published_at = null;
+      } else {
+        data.scheduled_at = null;
+        data.published_at = null;
+      }
+
+      if (bulk_status === 'archived') {
+        data.archived_at = new Date();
+      } else if (bulk_status !== 'archived') {
+        data.archived_at = null;
+      }
+
+      if (bulk_status === 'deleted') {
+        data.deleted_at = new Date();
+      } else if (bulk_status !== 'deleted') {
+        data.deleted_at = null;
+      }
+    }
+
+    if (Object.keys(data).length === 0) {
+      return res.redirect('/admin/blog?err=Pilih minimal satu perubahan bulk untuk diterapkan.');
+    }
+
+    await prisma.blogPost.updateMany({
+      where: { id: { in: ids } },
+      data
+    });
+
+    res.redirect(`/admin/blog?msg=${ids.length} artikel berhasil diperbarui secara massal.`);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // ==========================================
 // 2. CATEGORIES MANAGEMENT
 // ==========================================
@@ -427,6 +510,8 @@ exports.getAiGenerate = async (req, res, next) => {
       title: 'Generate Artikel Otomatis dengan AI',
       categories,
       isApiConfigured,
+      defaultWordMin: parseInt(process.env.AI_BLOG_DEFAULT_WORD_MIN) || 900,
+      defaultWordMax: parseInt(process.env.AI_BLOG_DEFAULT_WORD_MAX) || 1500,
       error: req.query.err || null
     });
   } catch (error) {
@@ -440,7 +525,8 @@ exports.postAiGenerate = async (req, res, next) => {
     const {
       batch_name, titles_text, category_id, focus_keyword,
       prompt_template, knowledge_base, status_mode,
-      publish_start_at, interval_hours, publish_window_start, publish_window_end
+      publish_start_at, interval_hours, publish_window_start, publish_window_end,
+      word_min, word_max
     } = req.body;
 
     const created_by = req.session.user.id;
@@ -462,6 +548,17 @@ exports.postAiGenerate = async (req, res, next) => {
     const maxTitles = parseInt(process.env.AI_BLOG_MAX_TITLES_PER_BATCH) || 50;
     if (titles.length > maxTitles) {
       return res.redirect(`/admin/blog/ai-generate?err=Jumlah judul melebihi batas maksimal batch (${maxTitles} judul).`);
+    }
+
+    const selectedCategoryId = category_id ? parseInt(category_id) : null;
+    if (!selectedCategoryId) {
+      return res.redirect('/admin/blog/ai-generate?err=Kategori hasil artikel wajib dipilih.');
+    }
+
+    const wordMin = word_min ? parseInt(word_min) : (parseInt(process.env.AI_BLOG_DEFAULT_WORD_MIN) || 900);
+    const wordMax = word_max ? parseInt(word_max) : (parseInt(process.env.AI_BLOG_DEFAULT_WORD_MAX) || 1500);
+    if (!Number.isInteger(wordMin) || !Number.isInteger(wordMax) || wordMin < 300 || wordMax < wordMin || wordMax > 3000) {
+      return res.redirect('/admin/blog/ai-generate?err=Range jumlah kata tidak valid. Gunakan minimal 300 kata dan maksimal 3000 kata.');
     }
 
     let featuredImage = null;
@@ -493,6 +590,9 @@ exports.postAiGenerate = async (req, res, next) => {
         publish_start_at: status_mode === 'scheduled' ? pStartAt : null,
         publish_window_start: status_mode === 'scheduled' ? pWindowStart : null,
         publish_window_end: status_mode === 'scheduled' ? pWindowEnd : null,
+        category_id: selectedCategoryId,
+        word_min: wordMin,
+        word_max: wordMax,
         prompt_template: prompt_template || null,
         knowledge_base: knowledge_base || null,
         featured_image: featuredImage,

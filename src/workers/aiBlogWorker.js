@@ -79,7 +79,10 @@ async function processJobItem(job, item) {
     });
 
     // 2. Generate article using Anthropic API
-    const articleData = await anthropicService.generateSeoArticle(item.title, job.knowledge_base);
+    const articleData = await anthropicService.generateSeoArticle(item.title, job.knowledge_base, {
+      wordMin: job.word_min,
+      wordMax: job.word_max
+    });
     
     // 3. Resolve slug uniqueness
     const finalSlug = await generateUniqueSlug(articleData.slug || item.title);

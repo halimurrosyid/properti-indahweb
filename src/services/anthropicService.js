@@ -22,9 +22,13 @@ const parseAiJson = (text) => {
   return JSON.parse(cleaned);
 };
 
-exports.generateSeoArticle = async (title, knowledgeBase = '') => {
+exports.generateSeoArticle = async (title, knowledgeBase = '', options = {}) => {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   const modelName = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001';
+  const defaultWordMin = parseInt(process.env.AI_BLOG_DEFAULT_WORD_MIN, 10) || 900;
+  const defaultWordMax = parseInt(process.env.AI_BLOG_DEFAULT_WORD_MAX, 10) || 1500;
+  const wordMin = parseInt(options.wordMin, 10) || defaultWordMin;
+  const wordMax = parseInt(options.wordMax, 10) || defaultWordMax;
   
   if (!apiKey) {
     throw new Error('API Key Anthropic belum dikonfigurasi di file .env. Silakan hubungi Super Admin.');
@@ -38,7 +42,7 @@ Topik utama adalah properti lokal Indonesia, jual beli rumah, sewa rumah, tanah,
 
 Syarat artikel:
 - Bahasa Indonesia natural
-- Panjang 900 sampai 1500 kata
+- Panjang ${wordMin} sampai ${wordMax} kata
 - SEO friendly
 - AIO/GEO friendly
 - Tidak keyword stuffing
@@ -84,7 +88,7 @@ Jangan sertakan markdown code block.`;
   try {
     const response = await anthropic.messages.create({
       model: modelName,
-      max_tokens: 4000,
+      max_tokens: Math.min(8000, Math.max(3000, Math.ceil(wordMax * 2.2))),
       messages: [{ role: 'user', content: prompt }]
     });
 

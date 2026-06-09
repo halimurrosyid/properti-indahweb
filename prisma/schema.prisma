@@ -158,6 +158,9 @@ model AiBlogJob {
   publish_start_at     DateTime?
   publish_window_start String? // e.g. "08:00"
   publish_window_end   String? // e.g. "22:00"
+  category_id          Int?
+  word_min             Int?
+  word_max             Int?
   prompt_template      String?         @db.Text
   knowledge_base       String?         @db.Text
   featured_image       String?
@@ -171,6 +174,7 @@ model AiBlogJob {
   updated_at           DateTime        @updatedAt
 
   @@index([status])
+  @@index([category_id])
 }
 
 model AiBlogJobItem {
