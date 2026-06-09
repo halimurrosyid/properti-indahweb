@@ -210,8 +210,11 @@ async function runWorker() {
   }
 }
 
-// Start execution
-runWorker().catch(err => {
-  console.error('[AI Worker] FATAL crash:', err);
-  process.exit(1);
-});
+if (require.main === module) {
+  runWorker().catch(err => {
+    console.error('[AI Worker] FATAL crash:', err);
+    process.exit(1);
+  });
+}
+
+module.exports = { runWorker };

@@ -75,8 +75,11 @@ async function runScheduler() {
   }
 }
 
-// Start execution
-runScheduler().catch(err => {
-  console.error('[Blog Scheduler] FATAL crash:', err);
-  process.exit(1);
-});
+if (require.main === module) {
+  runScheduler().catch(err => {
+    console.error('[Blog Scheduler] FATAL crash:', err);
+    process.exit(1);
+  });
+}
+
+module.exports = { runScheduler };

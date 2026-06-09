@@ -27,6 +27,8 @@ services:
       - SESSION_SECRET=properti_indahweb_session_secret_key_123456
       - NODE_ENV=production
       - PORT=3000
+      - RUN_BACKGROUND_JOBS=true
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - SUPER_ADMIN_EMAIL=admin@properti.indahweb.com
       - SUPER_ADMIN_PASSWORD=adminindahweb
       - SUPER_ADMIN_NAME=Super Admin Indahweb
