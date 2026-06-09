@@ -1,4 +1,5 @@
 const { Anthropic } = require('@anthropic-ai/sdk');
+const { normalizeMetaTitle } = require('../utils/seoMeta');
 
 // Helper to safely parse JSON from AI response
 const parseAiJson = (text) => {
@@ -58,6 +59,7 @@ Syarat artikel:
 - Jangan mengarang data spesifik yang tidak tersedia
 - Jika membahas lokasi, gunakan bahasa umum dan aman
 - Output harus berupa JSON valid
+- meta_title cukup mengikuti judul artikel tanpa tambahan "| Properti Indahweb", karena nama situs ditambahkan otomatis oleh sistem
 
 Format JSON:
 {
@@ -104,6 +106,8 @@ Jangan sertakan markdown code block.`;
           throw new Error(`AI response is missing the required field: "${field}"`);
         }
       }
+
+      parsedData.meta_title = normalizeMetaTitle(parsedData.meta_title, parsedData.title);
       
       return parsedData;
     } catch (parseError) {

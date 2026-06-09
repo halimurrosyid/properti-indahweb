@@ -1,4 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
+const { normalizeMetaTitle } = require('../utils/seoMeta');
 const prisma = new PrismaClient();
 
 // GET /artikel
@@ -164,7 +165,7 @@ exports.getBlogDetail = async (req, res, next) => {
     const canonical = post.canonical_url || `${proto}://${host}/artikel/${post.slug}`;
 
     res.render('pages/blog-detail', {
-      title: post.meta_title || post.title,
+      title: normalizeMetaTitle(post.meta_title, post.title),
       description: post.meta_description || post.excerpt || post.title.substring(0, 160),
       post,
       relatedPosts,

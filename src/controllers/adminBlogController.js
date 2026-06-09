@@ -6,6 +6,7 @@ const {
   fitDateToJakartaPublishWindow,
   parseJakartaDateTimeLocal
 } = require('../utils/dateTime');
+const { normalizeMetaTitle } = require('../utils/seoMeta');
 const { resolveUploadedFilePath } = require('../config/uploadPath');
 
 // Helper to generate URL slug
@@ -168,7 +169,7 @@ exports.postCreateBlog = async (req, res, next) => {
         author_id,
         status: postStatus,
         source: 'manual',
-        meta_title: meta_title || null,
+        meta_title: normalizeMetaTitle(meta_title, title),
         meta_description: meta_description || null,
         focus_keyword: focus_keyword || null,
         canonical_url: canonical_url || null,
@@ -199,7 +200,10 @@ exports.getEditBlog = async (req, res, next) => {
 
     res.render('pages/admin/blog-form', {
       title: `Edit Artikel: ${post.title}`,
-      post,
+      post: {
+        ...post,
+        meta_title: normalizeMetaTitle(post.meta_title, post.title)
+      },
       categories,
       error: req.query.err || null
     });
@@ -271,7 +275,7 @@ exports.postEditBlog = async (req, res, next) => {
         featured_image: featuredImage,
         category_id: category_id ? parseInt(category_id) : null,
         status: postStatus,
-        meta_title: meta_title || null,
+        meta_title: normalizeMetaTitle(meta_title, title),
         meta_description: meta_description || null,
         focus_keyword: focus_keyword || null,
         canonical_url: canonical_url || null,
