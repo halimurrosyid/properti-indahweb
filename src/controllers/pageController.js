@@ -48,6 +48,29 @@ const appendSitemapUrl = (urls, host, path, options = {}) => {
 };
 const fallbackPopularCities = require('../config/popularCities.json');
 
+const sortPopularCitiesByActiveListings = async (cities) => {
+  const cityCounts = await prisma.property.groupBy({
+    by: ['city'],
+    where: { status: 'AVAILABLE' },
+    _count: { city: true }
+  });
+
+  const countsByCity = new Map(
+    cityCounts.map(item => [String(item.city || '').toLowerCase(), item._count.city])
+  );
+
+  return cities
+    .map(city => ({
+      ...city,
+      propertyCount: countsByCity.get(String(city.name || '').toLowerCase()) || 0
+    }))
+    .sort((a, b) => {
+      if (b.propertyCount !== a.propertyCount) return b.propertyCount - a.propertyCount;
+      if ((a.displayOrder || 0) !== (b.displayOrder || 0)) return (a.displayOrder || 0) - (b.displayOrder || 0);
+      return a.name.localeCompare(b.name);
+    });
+};
+
 exports.getHome = async (req, res, next) => {
   try {
     const categories = await prisma.category.findMany();
@@ -84,7 +107,6 @@ exports.getHome = async (req, res, next) => {
     let popularCities = await prisma.popularCity.findMany({
       where: { isActive: true },
       orderBy: [
-        { displayOrder: 'asc' },
         { name: 'asc' }
       ]
     });
@@ -92,6 +114,7 @@ exports.getHome = async (req, res, next) => {
     if (popularCities.length === 0) {
       popularCities = fallbackPopularCities;
     }
+    popularCities = await sortPopularCitiesByActiveListings(popularCities);
 
     res.render('pages/home', {
       title: 'Portal Properti Terpercaya',
@@ -356,12 +379,12 @@ exports.getAdminDashboard = async (req, res, next) => {
 
 exports.getAdminLocations = async (req, res, next) => {
   try {
-    const cities = await prisma.popularCity.findMany({
+    let cities = await prisma.popularCity.findMany({
       orderBy: [
-        { displayOrder: 'asc' },
         { name: 'asc' }
       ]
     });
+    cities = await sortPopularCitiesByActiveListings(cities);
 
     res.render('pages/admin-locations', {
       title: 'Kelola Lokasi Populer',
@@ -376,20 +399,22 @@ exports.getAdminLocations = async (req, res, next) => {
 
 exports.postCreateAdminLocation = async (req, res, next) => {
   try {
-    const { name, province, imageUrl, displayOrder, isActive } = req.body;
+    const { name, province, isActive } = req.body;
 
     if (!name || !province) {
       return res.redirect('/admin/locations?err=Nama kota dan provinsi wajib diisi.');
     }
 
     const uploadedImage = req.file ? `/uploads/${req.file.filename}` : null;
+    if (!uploadedImage) {
+      return res.redirect('/admin/locations?err=Upload gambar lokasi wajib diisi.');
+    }
 
     await prisma.popularCity.create({
       data: {
         name: name.trim(),
         province: province.trim(),
-        imageUrl: uploadedImage || imageUrl || null,
-        displayOrder: displayOrder ? parseInt(displayOrder) : 0,
+        imageUrl: uploadedImage,
         isActive: isActive === 'on'
       }
     });
@@ -403,7 +428,7 @@ exports.postCreateAdminLocation = async (req, res, next) => {
 exports.postUpdateAdminLocation = async (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
-    const { name, province, imageUrl, displayOrder, isActive } = req.body;
+    const { name, province, isActive } = req.body;
 
     if (!name || !province) {
       return res.redirect('/admin/locations?err=Nama kota dan provinsi wajib diisi.');
@@ -416,8 +441,7 @@ exports.postUpdateAdminLocation = async (req, res, next) => {
       data: {
         name: name.trim(),
         province: province.trim(),
-        imageUrl: uploadedImage || imageUrl || null,
-        displayOrder: displayOrder ? parseInt(displayOrder) : 0,
+        ...(uploadedImage ? { imageUrl: uploadedImage } : {}),
         isActive: isActive === 'on'
       }
     });
