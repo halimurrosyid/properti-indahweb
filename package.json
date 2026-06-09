@@ -11,6 +11,7 @@
     "prisma:generate": "npx prisma generate",
     "prisma:push": "npx prisma db push",
     "prisma:seed": "node prisma/seed.js",
+    "seed:regions": "node scripts/seedRegions.js",
     "worker:ai-blog": "node src/workers/aiBlogWorker.js",
     "worker:blog-scheduler": "node src/workers/blogScheduler.js"
   },

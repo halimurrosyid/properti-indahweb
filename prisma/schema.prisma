@@ -50,6 +50,9 @@ model Property {
   province       String
   city           String
   district       String
+  provinceCode   String?
+  cityCode       String?
+  districtCode   String?
   shortAddress   String
   contactName    String
   whatsappNumber String
@@ -63,6 +66,48 @@ model Property {
   invoices       Invoice[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+
+  @@index([provinceCode])
+  @@index([cityCode])
+  @@index([districtCode])
+}
+
+model RegionProvince {
+  id        Int            @id @default(autoincrement())
+  code      String         @unique
+  name      String
+  cities    RegionCity[]
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+
+  @@map("RegionProvince")
+}
+
+model RegionCity {
+  id           Int              @id @default(autoincrement())
+  code         String           @unique
+  name         String
+  provinceCode String           @map("province_code")
+  province     RegionProvince   @relation(fields: [provinceCode], references: [code], onDelete: Cascade)
+  districts    RegionDistrict[]
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+
+  @@index([provinceCode])
+  @@map("RegionCity")
+}
+
+model RegionDistrict {
+  id        Int        @id @default(autoincrement())
+  code      String     @unique
+  name      String
+  cityCode  String     @map("city_code")
+  city      RegionCity @relation(fields: [cityCode], references: [code], onDelete: Cascade)
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+
+  @@index([cityCode])
+  @@map("RegionDistrict")
 }
 
 model PropertyImage {

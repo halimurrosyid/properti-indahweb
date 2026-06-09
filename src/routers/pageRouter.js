@@ -4,6 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const pageController = require('../controllers/pageController');
 const listingController = require('../controllers/listingController');
+const regionController = require('../controllers/regionController');
 const { isAuthenticated, isAdmin, isSuperAdmin } = require('../middlewares/authMiddleware');
 const { ensureUploadDir } = require('../config/uploadPath');
 
@@ -32,6 +33,10 @@ router.get('/', pageController.getHome);
 router.get('/catalog', pageController.getCatalog);
 router.get('/property/:slug', pageController.getPropertyDetail);
 router.get('/pasang-iklan', pageController.getPasangIklan);
+
+router.get('/api/regions/provinces', regionController.getProvinces);
+router.get('/api/regions/cities', regionController.getCities);
+router.get('/api/regions/districts', regionController.getDistricts);
 
 router.get('/dashboard', isAuthenticated, pageController.getUserDashboard);
 router.get('/admin/dashboard', isAuthenticated, isAdmin, pageController.getAdminDashboard);

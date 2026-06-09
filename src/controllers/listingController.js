@@ -5,6 +5,49 @@ const crypto = require('crypto');
 
 const prisma = new PrismaClient();
 
+async function resolveRegionSelection({ provinceCode, cityCode, districtCode }) {
+  if (!provinceCode || !cityCode || !districtCode) {
+    const error = new Error('Pilih provinsi, kota/kabupaten, dan kecamatan dari daftar wilayah.');
+    error.status = 400;
+    throw error;
+  }
+
+  const district = await prisma.regionDistrict.findFirst({
+    where: {
+      code: districtCode,
+      cityCode,
+      city: {
+        provinceCode,
+        province: {
+          code: provinceCode
+        }
+      }
+    },
+    include: {
+      city: {
+        include: {
+          province: true
+        }
+      }
+    }
+  });
+
+  if (!district) {
+    const error = new Error('Kombinasi provinsi, kota/kabupaten, dan kecamatan tidak valid.');
+    error.status = 400;
+    throw error;
+  }
+
+  return {
+    province: district.city.province.name,
+    city: district.city.name,
+    district: district.name,
+    provinceCode: district.city.province.code,
+    cityCode: district.city.code,
+    districtCode: district.code
+  };
+}
+
 exports.postQuickPost = async (req, res, next) => {
   try {
     let userId = req.session.user ? req.session.user.id : null;
@@ -103,9 +146,14 @@ exports.postQuickPost = async (req, res, next) => {
       province,
       city,
       district,
+      provinceCode,
+      cityCode,
+      districtCode,
       shortAddress,
       facilities
     } = req.body;
+
+    const region = await resolveRegionSelection({ provinceCode, cityCode, districtCode });
 
     // Generate unique slug
     const uniqueSlug = slugify(title, { lower: true, strict: true }) + '-' + Date.now();
@@ -131,9 +179,12 @@ exports.postQuickPost = async (req, res, next) => {
         waterSource: waterSource || null,
         garage: garage ? parseInt(garage) : 0,
         facilities: facilitiesStr || null,
-        province,
-        city,
-        district,
+        province: region.province,
+        city: region.city,
+        district: region.district,
+        provinceCode: region.provinceCode,
+        cityCode: region.cityCode,
+        districtCode: region.districtCode,
         shortAddress,
         contactName: authorName,
         whatsappNumber: authorWhatsapp,
@@ -518,10 +569,11 @@ exports.postEditListing = async (req, res, next) => {
       title, description, price, listingType, categoryId,
       landSize, buildingSize, bedrooms, bathrooms, certificate,
       electricity, waterSource, garage, province, city, district,
-      shortAddress, facilities
+      provinceCode, cityCode, districtCode, shortAddress, facilities
     } = req.body;
 
     const facilitiesStr = Array.isArray(facilities) ? facilities.join(', ') : (facilities || '');
+    const region = await resolveRegionSelection({ provinceCode, cityCode, districtCode });
 
     await prisma.property.update({
       where: { id },
@@ -540,9 +592,12 @@ exports.postEditListing = async (req, res, next) => {
         waterSource: waterSource || null,
         garage: garage ? parseInt(garage) : 0,
         facilities: facilitiesStr || null,
-        province,
-        city,
-        district,
+        province: region.province,
+        city: region.city,
+        district: region.district,
+        provinceCode: region.provinceCode,
+        cityCode: region.cityCode,
+        districtCode: region.districtCode,
         shortAddress,
         status: 'PENDING'  // Back to review queue after edit
       }

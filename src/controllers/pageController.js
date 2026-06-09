@@ -48,6 +48,8 @@ const appendSitemapUrl = (urls, host, path, options = {}) => {
 };
 const fallbackPopularCities = require('../config/popularCities.json');
 
+const normalizeRegionName = (value) => String(value || '').toLowerCase().replace(/^(kota|kabupaten)\s+/i, '').trim();
+
 const sortPopularCitiesByActiveListings = async (cities) => {
   const cityCounts = await prisma.property.groupBy({
     by: ['city'],
@@ -55,14 +57,16 @@ const sortPopularCitiesByActiveListings = async (cities) => {
     _count: { city: true }
   });
 
-  const countsByCity = new Map(
-    cityCounts.map(item => [String(item.city || '').toLowerCase(), item._count.city])
-  );
+  const countsByCity = cityCounts.reduce((map, item) => {
+    const key = normalizeRegionName(item.city);
+    map.set(key, (map.get(key) || 0) + item._count.city);
+    return map;
+  }, new Map());
 
   return cities
     .map(city => ({
       ...city,
-      propertyCount: countsByCity.get(String(city.name || '').toLowerCase()) || 0
+      propertyCount: countsByCity.get(normalizeRegionName(city.name)) || 0
     }))
     .sort((a, b) => {
       if (b.propertyCount !== a.propertyCount) return b.propertyCount - a.propertyCount;

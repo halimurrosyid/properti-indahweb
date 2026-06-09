@@ -139,26 +139,36 @@
             </div>
 
             <!-- SECTION 3: Lokasi -->
-            <div class="space-y-4">
+            <div class="space-y-4" data-region-root data-initial-province-code="<%= property.provinceCode || '' %>" data-initial-city-code="<%= property.cityCode || '' %>" data-initial-district-code="<%= property.districtCode || '' %>" data-initial-province-name="<%= property.province || '' %>" data-initial-city-name="<%= property.city || '' %>" data-initial-district-name="<%= property.district || '' %>">
                 <h3 class="text-title-md font-bold text-on-surface pb-2 border-b border-border-light flex items-center gap-2">
                     <span class="w-6 h-6 rounded-full bg-primary text-on-primary text-label-xs font-bold flex items-center justify-center text-[11px]">3</span>
                     Lokasi Properti
                 </h3>
 
+                <input type="hidden" name="province" data-region-name="province" value="<%= property.province %>">
+                <input type="hidden" name="city" data-region-name="city" value="<%= property.city %>">
+                <input type="hidden" name="district" data-region-name="district" value="<%= property.district %>">
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="space-y-1.5">
                         <label class="text-label-sm font-bold text-on-surface-variant">Provinsi <span class="text-error">*</span></label>
-                        <input type="text" name="province" required value="<%= property.province %>" placeholder="Contoh: Jawa Barat" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary outline-none bg-surface-bright text-body-md">
+                        <select name="provinceCode" required data-region-select="province" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary outline-none bg-surface-bright text-body-md">
+                            <option value="">Memuat provinsi...</option>
+                        </select>
                     </div>
                     <div class="space-y-1.5">
                         <label class="text-label-sm font-bold text-on-surface-variant">Kota / Kabupaten <span class="text-error">*</span></label>
-                        <input type="text" name="city" required value="<%= property.city %>" placeholder="Contoh: Bandung" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary outline-none bg-surface-bright text-body-md">
+                        <select name="cityCode" required data-region-select="city" disabled class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary outline-none bg-surface-bright text-body-md disabled:opacity-70">
+                            <option value="">Pilih provinsi dulu</option>
+                        </select>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="space-y-1.5">
                         <label class="text-label-sm font-bold text-on-surface-variant">Kecamatan <span class="text-error">*</span></label>
-                        <input type="text" name="district" required value="<%= property.district %>" placeholder="Contoh: Coblong" class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary outline-none bg-surface-bright text-body-md">
+                        <select name="districtCode" required data-region-select="district" disabled class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary outline-none bg-surface-bright text-body-md disabled:opacity-70">
+                            <option value="">Pilih kota/kabupaten dulu</option>
+                        </select>
                     </div>
                     <div class="space-y-1.5">
                         <label class="text-label-sm font-bold text-on-surface-variant">Alamat Singkat <span class="text-error">*</span></label>
@@ -220,3 +230,5 @@
         </form>
     </div>
 </div>
+
+<script src="/js/region-select.js"></script>
