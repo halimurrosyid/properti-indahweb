@@ -6,6 +6,11 @@
             <p class="text-body-sm text-on-surface-variant mt-1">Review dan kelola persetujuan listing properti baru yang masuk.</p>
         </div>
         <div class="flex items-center gap-3">
+            <% if (user && user.role === 'super_admin') { %>
+                <a href="/admin/locations" class="bg-surface-container-lowest hover:bg-surface-container-low text-on-surface-variant hover:text-primary font-bold text-label-md px-4 py-2 rounded-lg border border-border-light transition-all flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[18px]">location_city</span> Lokasi Populer
+                </a>
+            <% } %>
             <a href="/admin/blog" class="bg-secondary/10 hover:bg-secondary/20 text-secondary font-bold text-label-md px-4 py-2 rounded-lg border border-secondary/20 transition-all flex items-center gap-1.5">
                 <span class="material-symbols-outlined text-[18px]">article</span> Kelola Artikel
             </a>

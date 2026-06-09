@@ -13,3 +13,10 @@ exports.isAdmin = (req, res, next) => {
   }
   res.status(403).send('Akses Ditolak: Halaman ini hanya dapat diakses oleh Administrator.');
 };
+
+exports.isSuperAdmin = (req, res, next) => {
+  if (req.session && req.session.user && req.session.user.role === 'super_admin') {
+    return next();
+  }
+  res.status(403).send('Akses Ditolak: Halaman ini hanya dapat diakses oleh Super Admin.');
+};

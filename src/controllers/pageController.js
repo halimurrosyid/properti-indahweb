@@ -46,7 +46,7 @@ const appendSitemapUrl = (urls, host, path, options = {}) => {
       .map(imagePath => imagePath.startsWith('http') ? imagePath : `${host}${imagePath}`)
   });
 };
-const popularCities = require('../config/popularCities.json');
+const fallbackPopularCities = require('../config/popularCities.json');
 
 exports.getHome = async (req, res, next) => {
   try {
@@ -80,6 +80,18 @@ exports.getHome = async (req, res, next) => {
         createdAt: 'desc'
       }
     });
+
+    let popularCities = await prisma.popularCity.findMany({
+      where: { isActive: true },
+      orderBy: [
+        { displayOrder: 'asc' },
+        { name: 'asc' }
+      ]
+    });
+
+    if (popularCities.length === 0) {
+      popularCities = fallbackPopularCities;
+    }
 
     res.render('pages/home', {
       title: 'Portal Properti Terpercaya',
@@ -337,6 +349,94 @@ exports.getAdminDashboard = async (req, res, next) => {
       invoices,
       message: req.query.msg || null
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getAdminLocations = async (req, res, next) => {
+  try {
+    const cities = await prisma.popularCity.findMany({
+      orderBy: [
+        { displayOrder: 'asc' },
+        { name: 'asc' }
+      ]
+    });
+
+    res.render('pages/admin-locations', {
+      title: 'Kelola Lokasi Populer',
+      cities,
+      message: req.query.msg || null,
+      error: req.query.err || null
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.postCreateAdminLocation = async (req, res, next) => {
+  try {
+    const { name, province, imageUrl, displayOrder, isActive } = req.body;
+
+    if (!name || !province) {
+      return res.redirect('/admin/locations?err=Nama kota dan provinsi wajib diisi.');
+    }
+
+    const uploadedImage = req.file ? `/uploads/${req.file.filename}` : null;
+
+    await prisma.popularCity.create({
+      data: {
+        name: name.trim(),
+        province: province.trim(),
+        imageUrl: uploadedImage || imageUrl || null,
+        displayOrder: displayOrder ? parseInt(displayOrder) : 0,
+        isActive: isActive === 'on'
+      }
+    });
+
+    res.redirect('/admin/locations?msg=Lokasi populer berhasil ditambahkan.');
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.postUpdateAdminLocation = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { name, province, imageUrl, displayOrder, isActive } = req.body;
+
+    if (!name || !province) {
+      return res.redirect('/admin/locations?err=Nama kota dan provinsi wajib diisi.');
+    }
+
+    const uploadedImage = req.file ? `/uploads/${req.file.filename}` : null;
+
+    await prisma.popularCity.update({
+      where: { id },
+      data: {
+        name: name.trim(),
+        province: province.trim(),
+        imageUrl: uploadedImage || imageUrl || null,
+        displayOrder: displayOrder ? parseInt(displayOrder) : 0,
+        isActive: isActive === 'on'
+      }
+    });
+
+    res.redirect('/admin/locations?msg=Lokasi populer berhasil diperbarui.');
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.postDeleteAdminLocation = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id);
+
+    await prisma.popularCity.delete({
+      where: { id }
+    });
+
+    res.redirect('/admin/locations?msg=Lokasi populer berhasil dihapus.');
   } catch (error) {
     next(error);
   }
