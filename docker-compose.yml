@@ -28,6 +28,7 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - RUN_BACKGROUND_JOBS=true
+      - AI_BLOG_SCHEDULED_PIPELINE_LIMIT=5
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - SUPER_ADMIN_EMAIL=admin@properti.indahweb.com
       - SUPER_ADMIN_PASSWORD=adminindahweb

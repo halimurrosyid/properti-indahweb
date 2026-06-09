@@ -5,6 +5,34 @@ const anthropicService = require('../services/anthropicService');
 // Helper to delay execution
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+const getScheduledPipelineLimit = () => {
+  const limit = parseInt(process.env.AI_BLOG_SCHEDULED_PIPELINE_LIMIT, 10);
+  return Number.isInteger(limit) && limit > 0 ? limit : 5;
+};
+
+const fitDateToPublishWindow = (date, windowStartStr = '08:00', windowEndStr = '22:00') => {
+  const current = new Date(date.getTime());
+  const [startH, startM] = windowStartStr.split(':').map(Number);
+  const [endH, endM] = windowEndStr.split(':').map(Number);
+  const startMinutes = startH * 60 + startM;
+  const endMinutes = endH * 60 + endM;
+
+  while (true) {
+    const curMinutes = current.getHours() * 60 + current.getMinutes();
+
+    if (curMinutes >= startMinutes && curMinutes <= endMinutes) {
+      return current;
+    }
+
+    if (curMinutes > endMinutes) {
+      current.setDate(current.getDate() + 1);
+      current.setHours(startH, startM, 0, 0);
+    } else {
+      current.setHours(startH, startM, 0, 0);
+    }
+  }
+};
+
 // Helper to generate unique slug
 const generateUniqueSlug = async (title) => {
   let baseSlug = title
@@ -36,6 +64,33 @@ const generateUniqueSlug = async (title) => {
   return slug;
 };
 
+const resolveScheduledAt = async (job, item) => {
+  if (job.publish_mode !== 'scheduled') {
+    return null;
+  }
+
+  const intervalHours = job.interval_hours || 12;
+  const windowStart = job.publish_window_start || '08:00';
+  const windowEnd = job.publish_window_end || '22:00';
+  const latestScheduledPost = await prisma.blogPost.findFirst({
+    where: {
+      ai_job_id: job.id,
+      status: 'scheduled',
+      scheduled_at: { not: null }
+    },
+    orderBy: { scheduled_at: 'desc' }
+  });
+
+  if (latestScheduledPost?.scheduled_at) {
+    const nextDate = new Date(latestScheduledPost.scheduled_at.getTime());
+    nextDate.setHours(nextDate.getHours() + intervalHours);
+    return fitDateToPublishWindow(nextDate, windowStart, windowEnd);
+  }
+
+  const fallbackDate = item.scheduled_at || job.publish_start_at || new Date();
+  return fitDateToPublishWindow(new Date(fallbackDate), windowStart, windowEnd);
+};
+
 async function processJobItem(job, item) {
   console.log(`[AI Worker] Processing item ID ${item.id}: "${item.title}"`);
   
@@ -62,7 +117,7 @@ async function processJobItem(job, item) {
       publishedAt = new Date();
     } else if (job.publish_mode === 'scheduled') {
       postStatus = 'scheduled';
-      scheduledAt = item.scheduled_at;
+      scheduledAt = await resolveScheduledAt(job, item);
     }
 
     // 5. Create the BlogPost
@@ -93,7 +148,8 @@ async function processJobItem(job, item) {
       data: {
         status: 'completed',
         slug: finalSlug,
-        blog_post_id: newPost.id
+        blog_post_id: newPost.id,
+        scheduled_at: scheduledAt
       }
     });
 
@@ -128,16 +184,93 @@ async function processJobItem(job, item) {
   }
 }
 
+const shouldPauseScheduledJob = async (job) => {
+  if (job.publish_mode !== 'scheduled') {
+    return false;
+  }
+
+  const scheduledCount = await prisma.blogPost.count({
+    where: {
+      ai_job_id: job.id,
+      status: 'scheduled'
+    }
+  });
+
+  return scheduledCount >= getScheduledPipelineLimit();
+};
+
+const markJobRunning = async (job) => {
+  if (job.status !== 'pending') {
+    return job;
+  }
+
+  const startedAt = job.started_at || new Date();
+  const updatedJob = await prisma.aiBlogJob.update({
+    where: { id: job.id },
+    data: {
+      status: 'running',
+      started_at: startedAt
+    },
+    include: {
+      items: {
+        where: { status: 'pending' },
+        orderBy: { id: 'asc' }
+      }
+    }
+  });
+
+  console.log(`[AI Worker] Job ID ${updatedJob.id} ("${updatedJob.batch_name || 'Unnamed Batch'}") started.`);
+  return updatedJob;
+};
+
+const finishJobIfReady = async (job) => {
+  const generatingItemsCount = await prisma.aiBlogJobItem.count({
+    where: { ai_job_id: job.id, status: 'generating' }
+  });
+
+  if (generatingItemsCount > 0) {
+    return true;
+  }
+
+  const pendingItemsCount = await prisma.aiBlogJobItem.count({
+    where: { ai_job_id: job.id, status: 'pending' }
+  });
+
+  if (pendingItemsCount > 0) {
+    return false;
+  }
+
+  const freshJobData = await prisma.aiBlogJob.findUnique({
+    where: { id: job.id }
+  });
+
+  let finalStatus = 'completed';
+  if (freshJobData.generated_count === 0 && freshJobData.failed_count > 0) {
+    finalStatus = 'failed';
+  }
+
+  await prisma.aiBlogJob.update({
+    where: { id: job.id },
+    data: {
+      status: finalStatus,
+      completed_at: new Date()
+    }
+  });
+  console.log(`[AI Worker] Job ID ${job.id} finished with status: ${finalStatus}`);
+  return true;
+};
+
 async function runWorker() {
   console.log('[AI Worker] AI Blog Generation Worker started and polling database...');
   
   while (true) {
     try {
-      // Find a job that is running or pending
-      let activeJob = await prisma.aiBlogJob.findFirst({
+      // Find active jobs and process the first one that has an open generation slot.
+      const activeJobs = await prisma.aiBlogJob.findMany({
         where: {
           status: { in: ['pending', 'running'] }
         },
+        orderBy: { created_at: 'asc' },
         include: {
           items: {
             where: { status: 'pending' },
@@ -146,63 +279,35 @@ async function runWorker() {
         }
       });
 
-      if (!activeJob) {
+      if (activeJobs.length === 0) {
         // No pending or running jobs, rest for a bit
         await sleep(5000);
         continue;
       }
 
-      // If job is pending, mark it running
-      if (activeJob.status === 'pending') {
-        activeJob = await prisma.aiBlogJob.update({
-          where: { id: activeJob.id },
-          data: {
-            status: 'running',
-            started_at: new Date()
-          },
-          include: {
-            items: {
-              where: { status: 'pending' },
-              orderBy: { id: 'asc' }
-            }
-          }
-        });
-        console.log(`[AI Worker] Job ID ${activeJob.id} ("${activeJob.batch_name || 'Unnamed Batch'}") started.`);
-      }
+      let didWork = false;
 
-      // Process the first pending item
-      const pendingItem = activeJob.items[0];
-      if (pendingItem) {
-        await processJobItem(activeJob, pendingItem);
-        // Wait a small buffer time (e.g. 2s) to prevent Anthropic rate-limiting spikes
-        await sleep(2000);
-      } else {
-        // If there are no more pending items, complete the job
-        // Check if there are any generating items still in progress (highly unlikely with sequential runs, but safe)
-        const generatingItemsCount = await prisma.aiBlogJobItem.count({
-          where: { ai_job_id: activeJob.id, status: 'generating' }
-        });
+      for (const job of activeJobs) {
+        const pendingItem = job.items[0];
 
-        if (generatingItemsCount === 0) {
-          const freshJobData = await prisma.aiBlogJob.findUnique({
-            where: { id: activeJob.id }
-          });
-
-          let finalStatus = 'completed';
-          if (freshJobData.generated_count === 0 && freshJobData.failed_count > 0) {
-            finalStatus = 'failed';
-          }
-
-          await prisma.aiBlogJob.update({
-            where: { id: activeJob.id },
-            data: {
-              status: finalStatus,
-              completed_at: new Date()
-            }
-          });
-          console.log(`[AI Worker] Job ID ${activeJob.id} finished with status: ${finalStatus}`);
+        if (!pendingItem) {
+          didWork = await finishJobIfReady(job) || didWork;
+          continue;
         }
+
+        if (await shouldPauseScheduledJob(job)) {
+          continue;
+        }
+
+        const activeJob = await markJobRunning(job);
+        await processJobItem(activeJob, pendingItem);
+        didWork = true;
+        break;
       }
+
+      // Wait a small buffer after work to prevent API rate spikes. If every
+      // scheduled batch is full, rest longer until scheduler opens a slot.
+      await sleep(didWork ? 2000 : 30000);
     } catch (loopError) {
       console.error('[AI Worker] Loop error:', loopError);
       await sleep(10000);
