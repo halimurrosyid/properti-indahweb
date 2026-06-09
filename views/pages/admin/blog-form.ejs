@@ -93,7 +93,7 @@
                 <% if (isEdit && post.featured_image) { %>
                     <div class="mb-3 space-y-2">
                         <span class="text-body-xs text-outline block">Gambar Saat Ini:</span>
-                        <img src="<%= post.featured_image %>" alt="Featured Cover" class="w-48 aspect-[16/10] object-cover rounded-lg border border-border-light bg-surface-container-low">
+                        <img src="<%= post.featured_image %>" alt="<%= post.title %> - Properti Indahweb" title="<%= post.title %>" class="w-48 aspect-[16/10] object-cover rounded-lg border border-border-light bg-surface-container-low">
                     </div>
                 <% } %>
                 <input type="file" id="featured_image" name="featured_image" accept="image/*"

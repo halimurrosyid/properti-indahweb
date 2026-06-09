@@ -67,7 +67,7 @@
             <!-- Featured Image -->
             <% if (post.featured_image) { %>
                 <div class="aspect-[16/9] w-full rounded-2xl overflow-hidden border border-border-light bg-surface-container-low shadow-sm">
-                    <img src="<%= post.featured_image %>" alt="<%= post.title %>" class="w-full h-full object-cover">
+                    <img src="<%= post.featured_image %>" alt="<%= post.title %> - Properti Indahweb" title="<%= post.title %>" class="w-full h-full object-cover">
                 </div>
             <% } %>
 
@@ -134,7 +134,7 @@
                 <% relatedPosts.forEach(rp => { %>
                     <a href="/artikel/<%= rp.slug %>" class="group bg-surface-container-lowest rounded-2xl border border-border-light overflow-hidden shadow-sm hover:shadow-md hover:border-primary/20 transition-all flex flex-col">
                         <% if (rp.featured_image) { %>
-                            <img src="<%= rp.featured_image %>" alt="" class="aspect-[16/10] w-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <img src="<%= rp.featured_image %>" alt="<%= rp.title %> - Properti Indahweb" title="<%= rp.title %>" class="aspect-[16/10] w-full object-cover group-hover:scale-105 transition-transform duration-300">
                         <% } else { %>
                             <div class="aspect-[16/10] w-full bg-surface-container-low flex items-center justify-center text-outline text-primary/30">
                                 <span class="material-symbols-outlined text-[36px]">article</span>

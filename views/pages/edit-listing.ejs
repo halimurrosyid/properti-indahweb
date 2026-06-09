@@ -180,9 +180,9 @@
                 <div class="space-y-2">
                     <label class="text-label-sm font-bold text-on-surface-variant">Foto Saat Ini</label>
                     <div class="flex gap-3 flex-wrap">
-                        <% property.images.forEach(img => { %>
+                        <% property.images.forEach((img, index) => { %>
                         <div class="relative">
-                            <img src="<%= img.url %>" alt="Foto" class="w-24 h-18 object-cover rounded-lg border border-border-light <%= img.isMain ? 'ring-2 ring-primary' : '' %>">
+                            <img src="<%= img.url %>" alt="<%= property.title %> - Foto <%= index + 1 %>" title="<%= property.title %> - Foto <%= index + 1 %>" class="w-24 h-18 object-cover rounded-lg border border-border-light <%= img.isMain ? 'ring-2 ring-primary' : '' %>">
                             <% if (img.isMain) { %>
                             <span class="absolute -top-1.5 -right-1.5 bg-primary text-on-primary text-[9px] font-bold px-1 py-0.5 rounded">UTAMA</span>
                             <% } %>
