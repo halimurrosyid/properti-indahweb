@@ -82,7 +82,7 @@
             <div class="space-y-2 <%= (isEdit && post.status === 'scheduled') ? '' : 'hidden' %>" id="schedule-date-container">
                 <label for="scheduled_at" class="text-label-md font-bold text-on-surface block">Tanggal & Jam Publish Otomatis <span class="text-error">*</span></label>
                 <input type="datetime-local" id="scheduled_at" name="scheduled_at" 
-                       value="<%= (isEdit && post.scheduled_at) ? new Date(new Date(post.scheduled_at).getTime() - new Date(post.scheduled_at).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '' %>"
+                       value="<%= (isEdit && post.scheduled_at) ? formatJakartaDateInputValue(post.scheduled_at) : '' %>"
                        class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all">
                 <span class="text-body-xs text-outline block">Artikel akan otomatis beralih status ke "published" saat jam ini terlewati (pastikan worker scheduler berjalan).</span>
             </div>

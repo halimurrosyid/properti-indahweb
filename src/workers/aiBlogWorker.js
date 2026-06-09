@@ -1,6 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const anthropicService = require('../services/anthropicService');
+const { addHours, fitDateToJakartaPublishWindow } = require('../utils/dateTime');
 
 // Helper to delay execution
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -8,29 +9,6 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const getScheduledPipelineLimit = () => {
   const limit = parseInt(process.env.AI_BLOG_SCHEDULED_PIPELINE_LIMIT, 10);
   return Number.isInteger(limit) && limit > 0 ? limit : 5;
-};
-
-const fitDateToPublishWindow = (date, windowStartStr = '08:00', windowEndStr = '22:00') => {
-  const current = new Date(date.getTime());
-  const [startH, startM] = windowStartStr.split(':').map(Number);
-  const [endH, endM] = windowEndStr.split(':').map(Number);
-  const startMinutes = startH * 60 + startM;
-  const endMinutes = endH * 60 + endM;
-
-  while (true) {
-    const curMinutes = current.getHours() * 60 + current.getMinutes();
-
-    if (curMinutes >= startMinutes && curMinutes <= endMinutes) {
-      return current;
-    }
-
-    if (curMinutes > endMinutes) {
-      current.setDate(current.getDate() + 1);
-      current.setHours(startH, startM, 0, 0);
-    } else {
-      current.setHours(startH, startM, 0, 0);
-    }
-  }
 };
 
 // Helper to generate unique slug
@@ -82,13 +60,12 @@ const resolveScheduledAt = async (job, item) => {
   });
 
   if (latestScheduledPost?.scheduled_at) {
-    const nextDate = new Date(latestScheduledPost.scheduled_at.getTime());
-    nextDate.setHours(nextDate.getHours() + intervalHours);
-    return fitDateToPublishWindow(nextDate, windowStart, windowEnd);
+    const nextDate = addHours(latestScheduledPost.scheduled_at, intervalHours);
+    return fitDateToJakartaPublishWindow(nextDate, windowStart, windowEnd);
   }
 
   const fallbackDate = item.scheduled_at || job.publish_start_at || new Date();
-  return fitDateToPublishWindow(new Date(fallbackDate), windowStart, windowEnd);
+  return fitDateToJakartaPublishWindow(new Date(fallbackDate), windowStart, windowEnd);
 };
 
 async function processJobItem(job, item) {

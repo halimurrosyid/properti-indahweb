@@ -132,11 +132,11 @@
                                 <!-- Publish / Scheduled date -->
                                 <td class="p-4 text-body-sm text-outline">
                                     <% if (post.status === 'published') { %>
-                                        <%= new Date(post.published_at).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' }) %>
+                                        <%= formatJakartaDateTime(post.published_at, { dateStyle: 'short', timeStyle: 'short' }) %>
                                     </td>
                                     <% } else if (post.status === 'scheduled') { %>
                                         <span class="text-blue-600 font-semibold">
-                                            <%= new Date(post.scheduled_at).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' }) %>
+                                            <%= formatJakartaDateTime(post.scheduled_at, { dateStyle: 'short', timeStyle: 'short' }) %>
                                         </span>
                                     <% } else { %>
                                         -
@@ -218,9 +218,9 @@
                             <div><strong>Kategori:</strong> <%= post.category ? post.category.name : '-' %></div>
                             <div><strong>Sumber:</strong> <%= post.source === 'ai' ? `🤖 AI (Batch ${post.ai_job?.batch_name || post.ai_job_id || '-'})` : '✍️ Manual' %></div>
                             <% if (post.status === 'scheduled') { %>
-                                <div><strong>Jadwal Publish:</strong> <span class="text-blue-600 font-semibold"><%= new Date(post.scheduled_at).toLocaleString('id-ID') %></span></div>
+                                <div><strong>Jadwal Publish:</strong> <span class="text-blue-600 font-semibold"><%= formatJakartaDateTime(post.scheduled_at, { dateStyle: 'short', timeStyle: 'short' }) %></span></div>
                             <% } else if (post.status === 'published') { %>
-                                <div><strong>Dipublish:</strong> <%= new Date(post.published_at).toLocaleString('id-ID') %></div>
+                                <div><strong>Dipublish:</strong> <%= formatJakartaDateTime(post.published_at, { dateStyle: 'short', timeStyle: 'short' }) %></div>
                             <% } %>
                         </div>
 

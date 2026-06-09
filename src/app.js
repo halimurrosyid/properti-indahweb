@@ -11,6 +11,7 @@ const authRouter = require('./routers/authRouter');
 const listingRouter = require('./routers/listingRouter');
 const publicBlogRouter = require('./routers/publicBlogRouter');
 const adminBlogRouter = require('./routers/adminBlogRouter');
+const { formatJakartaDateTime, formatJakartaDateInputValue } = require('./utils/dateTime');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -95,6 +96,8 @@ app.use(session({
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
   res.locals.canonicalUrl = req.protocol + '://' + req.get('host') + req.originalUrl.split('?')[0];
+  res.locals.formatJakartaDateTime = formatJakartaDateTime;
+  res.locals.formatJakartaDateInputValue = formatJakartaDateInputValue;
   next();
 });
 

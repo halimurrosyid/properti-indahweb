@@ -68,7 +68,7 @@
                                 <% } %>
                             </div>
                             <p class="text-body-xs text-outline font-semibold">
-                                Dibuat oleh: <%= job.creator?.name %> • Waktu: <%= new Date(job.created_at).toLocaleString('id-ID') %>
+                                Dibuat oleh: <%= job.creator?.name %> • Waktu: <%= formatJakartaDateTime(job.created_at, { dateStyle: 'short', timeStyle: 'medium' }) %>
                             </p>
                         </div>
 
@@ -144,7 +144,7 @@
                                             </td>
                                             <td class="py-3 text-body-sm text-outline">
                                                 <% if (item.scheduled_at) { %>
-                                                    <%= new Date(item.scheduled_at).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' }) %>
+                                                    <%= formatJakartaDateTime(item.scheduled_at, { dateStyle: 'short', timeStyle: 'short' }) %>
                                                 <% } else { %>
                                                     -
                                                 <% } %>

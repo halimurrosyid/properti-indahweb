@@ -2,6 +2,11 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const fs = require('fs');
 const path = require('path');
+const {
+  addHours,
+  fitDateToJakartaPublishWindow,
+  parseJakartaDateTimeLocal
+} = require('../utils/dateTime');
 
 // Helper to generate URL slug
 const generateSlug = async (title, currentId = null) => {
@@ -42,37 +47,13 @@ const generateSlug = async (title, currentId = null) => {
 const calculateScheduledTimes = (titlesCount, startAtDate, intervalHours, windowStartStr, windowEndStr) => {
   const times = [];
   let current = new Date(startAtDate.getTime());
-  
-  // Parse window boundaries
-  const [startH, startM] = windowStartStr.split(':').map(Number);
-  const [endH, endM] = windowEndStr.split(':').map(Number);
-
-  const startMinutes = startH * 60 + startM;
-  const endMinutes = endH * 60 + endM;
 
   for (let i = 0; i < titlesCount; i++) {
     if (i > 0) {
-      // Add interval
-      current.setHours(current.getHours() + intervalHours);
+      current = addHours(current, intervalHours);
     }
 
-    // Shift date/time until it falls in the allowed publishing window
-    while (true) {
-      const curMinutes = current.getHours() * 60 + current.getMinutes();
-      
-      if (curMinutes >= startMinutes && curMinutes <= endMinutes) {
-        break; // Inside window!
-      }
-      
-      if (curMinutes > endMinutes) {
-        // Past the end window of today, move to tomorrow's window start
-        current.setDate(current.getDate() + 1);
-        current.setHours(startH, startM, 0, 0);
-      } else {
-        // Before today's start window, shift to today's start window
-        current.setHours(startH, startM, 0, 0);
-      }
-    }
+    current = fitDateToJakartaPublishWindow(current, windowStartStr, windowEndStr);
     
     times.push(new Date(current.getTime()));
   }
@@ -166,7 +147,7 @@ exports.postCreateBlog = async (req, res, next) => {
       if (!scheduled_at) {
         return res.redirect('/admin/blog/create?err=Tanggal jadwal publish wajib diisi jika status scheduled.');
       }
-      schedAt = new Date(scheduled_at);
+      schedAt = parseJakartaDateTimeLocal(scheduled_at);
     }
 
     let featuredImage = null;
@@ -258,7 +239,7 @@ exports.postEditBlog = async (req, res, next) => {
       if (!scheduled_at) {
         return res.redirect(`/admin/blog/${id}/edit?err=Tanggal jadwal publish wajib diisi jika status scheduled.`);
       }
-      schedAt = new Date(scheduled_at);
+      schedAt = parseJakartaDateTimeLocal(scheduled_at);
       publishedAt = null;
     } else {
       // Draft/Archived/Deleted resets scheduling
@@ -489,7 +470,7 @@ exports.postAiGenerate = async (req, res, next) => {
     }
 
     // Parse interval parameters
-    const pStartAt = publish_start_at ? new Date(publish_start_at) : new Date();
+    const pStartAt = publish_start_at ? parseJakartaDateTimeLocal(publish_start_at) : new Date();
     const pInterval = interval_hours ? parseInt(interval_hours) : 12;
     const pWindowStart = publish_window_start || '08:00';
     const pWindowEnd = publish_window_end || '22:00';

@@ -28,6 +28,7 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - SITE_URL=${SITE_URL:-https://properti.indahweb.com}
+      - TZ=Asia/Jakarta
       - RUN_BACKGROUND_JOBS=true
       - AI_BLOG_SCHEDULED_PIPELINE_LIMIT=5
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
