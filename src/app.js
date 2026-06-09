@@ -12,6 +12,7 @@ const listingRouter = require('./routers/listingRouter');
 const publicBlogRouter = require('./routers/publicBlogRouter');
 const adminBlogRouter = require('./routers/adminBlogRouter');
 const { formatJakartaDateTime, formatJakartaDateInputValue } = require('./utils/dateTime');
+const { ensureUploadDir } = require('./config/uploadPath');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -73,6 +74,7 @@ app.set('layout', 'layout'); // views/layout.ejs
 // ====================================================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static(ensureUploadDir()));
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // ====================================================

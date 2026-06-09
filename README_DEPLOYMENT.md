@@ -62,19 +62,25 @@ CloudPanel mendukung penayangan Node.js di VPS secara langsung melalui Nginx rev
 Dokploy mendeploy aplikasi di dalam container Docker yang terisolasi. 
 
 ### Solusi Persistensi Gambar (Penting!)
-Di dalam container Docker, gambar yang diupload ke `/public/uploads` secara default akan hilang saat container di-redeploy karena Dokploy membangun ulang container baru dari source code Git.
-Untuk mengatasinya, kami telah mengonfigurasi **Docker Volumes** untuk memetakan direktori upload ke disk permanen pada VPS Host.
+Di dalam container Docker, gambar yang diupload akan hilang saat container di-redeploy jika folder upload masih berada di filesystem container. Aplikasi sekarang membaca folder upload dari environment `UPLOAD_DIR`.
+
+Untuk Dokploy, buat **Persistent Storage / Volume Mount** untuk service aplikasi:
+- Container path: `/data/uploads`
+- Environment: `UPLOAD_DIR=/data/uploads`
+
+URL gambar tetap memakai `/uploads/nama-file.jpg`, tetapi file fisiknya disimpan di `/data/uploads` yang harus persistent.
 
 #### Konfigurasi `docker-compose.yml` (Sudah Terpasang):
 ```yaml
 services:
   web:
     build: .
+    environment:
+      - UPLOAD_DIR=/data/uploads
     volumes:
-      - uploads_data:/usr/src/app/public/uploads
+      - uploads_data:/data/uploads
 ...
 volumes:
-  mysql_data:
   uploads_data:  # Disk persisten untuk menyimpan gambar selamanya
 ```
 

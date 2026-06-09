@@ -29,6 +29,7 @@ services:
       - PORT=3000
       - SITE_URL=${SITE_URL:-https://properti.indahweb.com}
       - TZ=Asia/Jakarta
+      - UPLOAD_DIR=/data/uploads
       - RUN_BACKGROUND_JOBS=true
       - AI_BLOG_SCHEDULED_PIPELINE_LIMIT=5
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
@@ -37,7 +38,7 @@ services:
       - SUPER_ADMIN_NAME=Super Admin Indahweb
       - SUPER_ADMIN_WHATSAPP=628123456789
     volumes:
-      - uploads_data:/usr/src/app/public/uploads
+      - uploads_data:/data/uploads
 
 volumes:
   postgres_data:

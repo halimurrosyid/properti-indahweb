@@ -1,12 +1,12 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const fs = require('fs');
-const path = require('path');
 const {
   addHours,
   fitDateToJakartaPublishWindow,
   parseJakartaDateTimeLocal
 } = require('../utils/dateTime');
+const { resolveUploadedFilePath } = require('../config/uploadPath');
 
 // Helper to generate URL slug
 const generateSlug = async (title, currentId = null) => {
@@ -253,7 +253,7 @@ exports.postEditBlog = async (req, res, next) => {
     if (req.file) {
       // Unlink old image if exists
       if (existingPost.featured_image) {
-        const oldPath = path.join(__dirname, '..', '..', 'public', existingPost.featured_image);
+        const oldPath = resolveUploadedFilePath(existingPost.featured_image);
         if (fs.existsSync(oldPath)) {
           fs.unlinkSync(oldPath);
         }

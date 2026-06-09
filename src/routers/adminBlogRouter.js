@@ -2,16 +2,12 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 const adminBlogController = require('../controllers/adminBlogController');
 const { isAuthenticated, isAdmin } = require('../middlewares/authMiddleware');
 const { csrfProtection } = require('../middlewares/csrfMiddleware');
+const { ensureUploadDir } = require('../config/uploadPath');
 
-// Setup upload folder
-const uploadDir = path.join(__dirname, '..', '..', 'public', 'uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+const uploadDir = ensureUploadDir();
 
 // Multer storage config
 const storage = multer.diskStorage({
