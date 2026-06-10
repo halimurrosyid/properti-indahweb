@@ -1,11 +1,37 @@
 require('dotenv').config();
+const fs = require('fs');
 const https = require('https');
+const path = require('path');
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
 const SOURCE_URL = process.env.REGION_SOURCE_URL || 'https://raw.githubusercontent.com/cahyadsn/wilayah/master/db/wilayah.sql';
+const SOURCE_FILE = process.env.REGION_SOURCE_FILE || path.join(__dirname, '..', 'prisma', 'data', 'wilayah.sql');
 const INSERT_BATCH_SIZE = 1000;
+const MIN_PROVINCES = 30;
+const MIN_CITIES = 400;
+const MIN_DISTRICTS = 7000;
+
+async function hasCompleteRegionData() {
+  const [provinces, cities, districts] = await Promise.all([
+    prisma.regionProvince.count(),
+    prisma.regionCity.count(),
+    prisma.regionDistrict.count()
+  ]);
+
+  return provinces >= MIN_PROVINCES && cities >= MIN_CITIES && districts >= MIN_DISTRICTS;
+}
+
+async function loadRegionSource() {
+  if (fs.existsSync(SOURCE_FILE)) {
+    console.log(`Loading Indonesian region master data from ${SOURCE_FILE}`);
+    return fs.promises.readFile(SOURCE_FILE, 'utf8');
+  }
+
+  console.log(`Fetching Indonesian region master data from ${SOURCE_URL}`);
+  return fetchText(SOURCE_URL);
+}
 
 function fetchText(url) {
   return new Promise((resolve, reject) => {
@@ -80,11 +106,15 @@ async function upsertBatch(model, rows, uniqueField, dataMapper) {
 }
 
 async function main() {
-  console.log(`Fetching Indonesian region master data from ${SOURCE_URL}`);
-  const sql = await fetchText(SOURCE_URL);
+  if (process.env.FORCE_REGION_SEED !== 'true' && await hasCompleteRegionData()) {
+    console.log('Region master data already exists. Skipping region seed.');
+    return;
+  }
+
+  const sql = await loadRegionSource();
   const { provinces, cities, districts } = parseWilayahSql(sql);
 
-  if (provinces.length < 30 || cities.length < 400 || districts.length < 7000) {
+  if (provinces.length < MIN_PROVINCES || cities.length < MIN_CITIES || districts.length < MIN_DISTRICTS) {
     throw new Error(`Parsed region data looks incomplete: ${provinces.length} provinces, ${cities.length} cities, ${districts.length} districts`);
   }
 

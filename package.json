@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
+    "start:prod": "npx prisma migrate deploy && npx prisma db seed && npm run seed:regions && npm start",
     "build:css": "npx @tailwindcss/cli -i ./tailwind.css -o ./public/css/main.css --minify",
     "watch:css": "npx @tailwindcss/cli -i ./tailwind.css -o ./public/css/main.css --watch",
     "prisma:generate": "npx prisma generate",

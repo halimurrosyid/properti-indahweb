@@ -88,18 +88,19 @@ volumes:
   uploads_data:  # Disk persisten untuk menyimpan gambar selamanya
 ```
 
-### Jalankan Migrasi Otomatis (Tanpa Terminal)
-Kami telah menyematkan runner migrasi Prisma langsung ke dalam perintah startup container Docker. Setiap kali Anda melakukan update kode dan Dokploy mendeteksi perubahan (*auto-redeploy*), container akan otomatis memproses perintah migrasi schema sebelum server web online.
+### Jalankan Migrasi & Seed Otomatis (Tanpa Terminal)
+Kami telah menyematkan runner migrasi Prisma dan seed data awal langsung ke dalam perintah startup container Docker. Setiap kali Anda melakukan update kode dan Dokploy mendeteksi perubahan (*auto-redeploy*), container akan otomatis memproses migrasi schema dan data master sebelum server web online.
 
 #### Konfigurasi `Dockerfile` (Sudah Terpasang):
 ```dockerfile
-# Start command running migrations first, then starting node app
-CMD npx prisma migrate deploy && npm start
+# Start command running migrations, seeds, then starting node app
+CMD ["npm", "run", "start:prod"]
 ```
 Dengan konfigurasi ini:
 - **TIDAK Perlu Membuka Terminal VPS** untuk menjalankan database migrasi setiap kali update.
 - Database PostgreSQL akan selalu ter-update secara otomatis begitu Dokploy selesai mem-build kode terbaru dari GitHub.
-- Jalankan `npm run seed:regions` sekali setelah migrasi pertama agar dropdown provinsi/kota/kecamatan terisi.
+- Data default aplikasi dan master wilayah Indonesia sampai kecamatan akan otomatis diisi.
+- Seed wilayah bersifat aman/idempotent: kalau data sudah lengkap, proses akan langsung dilewati agar redeploy tidak berat.
 
 ---
 
