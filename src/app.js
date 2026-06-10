@@ -100,6 +100,29 @@ app.use((req, res, next) => {
   res.locals.canonicalUrl = req.protocol + '://' + req.get('host') + req.originalUrl.split('?')[0];
   res.locals.formatJakartaDateTime = formatJakartaDateTime;
   res.locals.formatJakartaDateInputValue = formatJakartaDateInputValue;
+  res.locals.currentPath = req.path;
+
+  const isDashboardPath = req.path === '/dashboard'
+    || req.path.startsWith('/admin')
+    || req.path.startsWith('/invoice')
+    || /^\/property\/\d+\/edit$/.test(req.path);
+
+  if (res.locals.user && isDashboardPath) {
+    res.locals.layout = 'dashboard-layout';
+  }
+
+  const render = res.render.bind(res);
+  res.render = (view, options = {}, callback) => {
+    if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
+    if (res.locals.layout && !options.layout) {
+      options.layout = res.locals.layout;
+    }
+    return render(view, options, callback);
+  };
+
   next();
 });
 

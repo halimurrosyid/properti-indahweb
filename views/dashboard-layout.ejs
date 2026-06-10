@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full antialiased">
+<head>
+    <%- include('partials/head') %>
+</head>
+<body class="min-h-full bg-background text-on-background font-sans">
+    <div class="min-h-screen lg:grid lg:grid-cols-[280px_1fr]">
+        <%- include('partials/dashboard-sidebar') %>
+
+        <div class="min-w-0 lg:pl-0">
+            <header class="sticky top-0 z-30 bg-surface-container-lowest/95 backdrop-blur border-b border-border-light lg:hidden">
+                <div class="h-16 px-container-margin flex items-center justify-between">
+                    <a href="/dashboard" class="text-title-md font-black text-primary flex items-center gap-2">
+                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">real_estate_agent</span>
+                        <span>1rumah.biz.id</span>
+                    </a>
+                    <button type="button" id="dashboard-sidebar-open" class="w-10 h-10 rounded-lg border border-border-light bg-surface-container-low flex items-center justify-center text-on-surface-variant">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
+                </div>
+            </header>
+
+            <main class="min-h-screen bg-background">
+                <%- body %>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const openBtn = document.getElementById('dashboard-sidebar-open');
+            const closeBtn = document.getElementById('dashboard-sidebar-close');
+            const overlay = document.getElementById('dashboard-sidebar-overlay');
+            const sidebar = document.getElementById('dashboard-sidebar');
+
+            function openSidebar() {
+                overlay.classList.remove('hidden');
+                sidebar.classList.remove('-translate-x-full');
+            }
+
+            function closeSidebar() {
+                overlay.classList.add('hidden');
+                sidebar.classList.add('-translate-x-full');
+            }
+
+            if (openBtn && closeBtn && overlay && sidebar) {
+                openBtn.addEventListener('click', openSidebar);
+                closeBtn.addEventListener('click', closeSidebar);
+                overlay.addEventListener('click', closeSidebar);
+            }
+        })();
+    </script>
+</body>
+</html>

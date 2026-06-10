@@ -1,0 +1,104 @@
+<%
+    const pathNow = typeof currentPath !== 'undefined' ? currentPath : '';
+    const currentUser = typeof user !== 'undefined' ? user : null;
+    const isAdminUser = currentUser && (currentUser.role === 'admin' || currentUser.role === 'super_admin');
+    const isSuperAdminUser = currentUser && currentUser.role === 'super_admin';
+    const isActive = (href, mode = 'exact') => {
+        if (mode === 'prefix') return pathNow === href || pathNow.startsWith(href + '/');
+        return pathNow === href;
+    };
+    const isBlogMainActive = pathNow === '/admin/blog'
+        || pathNow === '/admin/blog/create'
+        || /^\/admin\/blog\/\d+\/edit$/.test(pathNow);
+    const linkClass = (active) => active
+        ? 'bg-primary text-on-primary shadow-sm'
+        : 'text-on-surface-variant hover:text-primary hover:bg-primary/5';
+%>
+
+<div id="dashboard-sidebar-overlay" class="fixed inset-0 bg-black/40 z-40 hidden lg:hidden"></div>
+
+<aside id="dashboard-sidebar" class="fixed lg:sticky top-0 left-0 z-50 h-screen w-[280px] -translate-x-full lg:translate-x-0 bg-surface-container-lowest border-r border-border-light shadow-xl lg:shadow-none transition-transform duration-200 flex flex-col">
+    <div class="h-16 px-5 border-b border-border-light flex items-center justify-between">
+        <a href="/dashboard" class="text-title-lg font-black text-primary flex items-center gap-2 min-w-0">
+            <span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">real_estate_agent</span>
+            <span class="truncate">1rumah.biz.id</span>
+        </a>
+        <button type="button" id="dashboard-sidebar-close" class="lg:hidden w-9 h-9 rounded-lg border border-border-light text-on-surface-variant flex items-center justify-center">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+        <div class="space-y-1">
+            <p class="px-3 pb-2 text-label-xs font-bold text-outline uppercase tracking-wider">Workspace</p>
+            <a href="/dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md font-bold transition-all <%= linkClass(isActive('/dashboard')) %>">
+                <span class="material-symbols-outlined text-[20px]">dashboard</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="/pasang-iklan" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md font-bold transition-all <%= linkClass(false) %>">
+                <span class="material-symbols-outlined text-[20px]">add_circle</span>
+                <span>Pasang Iklan</span>
+            </a>
+            <a href="/packages" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md font-bold transition-all <%= linkClass(false) %>">
+                <span class="material-symbols-outlined text-[20px]">workspace_premium</span>
+                <span>Paket Iklan</span>
+            </a>
+            <a href="/catalog" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md font-bold transition-all <%= linkClass(false) %>">
+                <span class="material-symbols-outlined text-[20px]">travel_explore</span>
+                <span>Katalog Publik</span>
+            </a>
+        </div>
+
+        <% if (isAdminUser) { %>
+            <div class="space-y-1">
+                <p class="px-3 pb-2 text-label-xs font-bold text-outline uppercase tracking-wider">Admin</p>
+                <a href="/admin/dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md font-bold transition-all <%= linkClass(isActive('/admin/dashboard')) %>">
+                    <span class="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+                    <span>Panel Admin</span>
+                </a>
+                <a href="/admin/blog" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md font-bold transition-all <%= linkClass(isBlogMainActive) %>">
+                    <span class="material-symbols-outlined text-[20px]">article</span>
+                    <span>Artikel Blog</span>
+                </a>
+                <a href="/admin/blog/ai-jobs" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md font-bold transition-all <%= linkClass(isActive('/admin/blog/ai-jobs', 'prefix')) %>">
+                    <span class="material-symbols-outlined text-[20px]">automation</span>
+                    <span>Batch AI</span>
+                </a>
+                <a href="/admin/blog/categories" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md font-bold transition-all <%= linkClass(isActive('/admin/blog/categories', 'prefix')) %>">
+                    <span class="material-symbols-outlined text-[20px]">category</span>
+                    <span>Kategori Blog</span>
+                </a>
+                <% if (isSuperAdminUser) { %>
+                    <a href="/admin/locations" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md font-bold transition-all <%= linkClass(isActive('/admin/locations', 'prefix')) %>">
+                        <span class="material-symbols-outlined text-[20px]">location_city</span>
+                        <span>Lokasi Populer</span>
+                    </a>
+                <% } %>
+            </div>
+        <% } %>
+
+        <div class="space-y-1">
+            <p class="px-3 pb-2 text-label-xs font-bold text-outline uppercase tracking-wider">Akun</p>
+            <a href="/" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md font-bold transition-all text-on-surface-variant hover:text-primary hover:bg-primary/5">
+                <span class="material-symbols-outlined text-[20px]">home</span>
+                <span>Beranda</span>
+            </a>
+            <a href="/auth/logout" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md font-bold transition-all text-on-surface-variant hover:text-error hover:bg-error/5">
+                <span class="material-symbols-outlined text-[20px]">logout</span>
+                <span>Keluar</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="border-t border-border-light p-4">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-black">
+                <%= currentUser && currentUser.name ? currentUser.name.trim().charAt(0).toUpperCase() : 'U' %>
+            </div>
+            <div class="min-w-0">
+                <p class="text-label-md font-bold text-on-surface truncate"><%= currentUser ? currentUser.name : 'User' %></p>
+                <p class="text-label-xs text-outline truncate"><%= currentUser ? currentUser.role : '' %></p>
+            </div>
+        </div>
+    </div>
+</aside>
