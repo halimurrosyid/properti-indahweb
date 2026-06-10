@@ -44,6 +44,8 @@ router.get('/admin/locations', isAuthenticated, isSuperAdmin, pageController.get
 router.post('/admin/locations', isAuthenticated, isSuperAdmin, locationUpload.single('imageFile'), pageController.postCreateAdminLocation);
 router.post('/admin/locations/:id', isAuthenticated, isSuperAdmin, locationUpload.single('imageFile'), pageController.postUpdateAdminLocation);
 router.post('/admin/locations/:id/delete', isAuthenticated, isSuperAdmin, pageController.postDeleteAdminLocation);
+router.get('/admin/packages', isAuthenticated, isSuperAdmin, pageController.getAdminPackages);
+router.post('/admin/packages/:id', isAuthenticated, isSuperAdmin, pageController.postUpdateAdminPackage);
 
 // Invoice & Packages Page
 router.get('/invoice/:invoiceNumber', isAuthenticated, pageController.getInvoiceDetail);

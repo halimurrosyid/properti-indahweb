@@ -1,11 +1,14 @@
 require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
+const { seedDefaultPackages } = require('../src/services/adPackageService');
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('Starting seeding database...');
+  await seedDefaultPackages(prisma);
+  console.log('Upserted default ad packages.');
 
   // 1. Create Default Categories
   const categoriesData = [

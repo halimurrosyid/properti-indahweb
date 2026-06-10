@@ -89,6 +89,40 @@
                 </table>
             </div>
 
+            <% if (packageDetails || invoice.durationDays || invoice.listingLimit || invoice.featuredDurationDays || invoice.grantsAgent) { %>
+                <div class="bg-surface-subtle border border-border-light rounded-2xl p-5 space-y-4">
+                    <h3 class="text-title-md font-bold text-on-surface flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">workspace_premium</span>
+                        Detail Benefit Paket
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-body-sm">
+                        <div class="bg-surface-container-lowest border border-border-light rounded-xl p-3">
+                            <span class="block text-label-xs text-outline font-bold uppercase">Durasi Paket</span>
+                            <span class="font-bold text-on-surface"><%= invoice.durationDays || (packageDetails && packageDetails.durationDays) || 'Selamanya' %><%= (invoice.durationDays || (packageDetails && packageDetails.durationDays)) ? ' hari' : '' %></span>
+                        </div>
+                        <div class="bg-surface-container-lowest border border-border-light rounded-xl p-3">
+                            <span class="block text-label-xs text-outline font-bold uppercase">Limit Iklan Aktif</span>
+                            <span class="font-bold text-on-surface"><%= invoice.listingLimit || (packageDetails && packageDetails.listingLimit) || 1 %> iklan</span>
+                        </div>
+                        <div class="bg-surface-container-lowest border border-border-light rounded-xl p-3">
+                            <span class="block text-label-xs text-outline font-bold uppercase">Featured</span>
+                            <span class="font-bold text-on-surface"><%= invoice.featuredDurationDays || (packageDetails && packageDetails.featuredDurationDays) ? `${invoice.featuredDurationDays || packageDetails.featuredDurationDays} hari` : 'Tidak' %></span>
+                        </div>
+                    </div>
+                    <% const snapshotBenefits = packageDetails && Array.isArray(packageDetails.benefits) ? packageDetails.benefits : []; %>
+                    <% if (snapshotBenefits.length > 0) { %>
+                        <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-body-sm text-on-surface-variant">
+                            <% snapshotBenefits.forEach(benefit => { %>
+                                <li class="flex items-start gap-2">
+                                    <span class="material-symbols-outlined text-[18px] text-primary mt-0.5">check_circle</span>
+                                    <span><%= benefit %></span>
+                                </li>
+                            <% }) %>
+                        </ul>
+                    <% } %>
+                </div>
+            <% } %>
+
             <!-- Payment / Instructions Section -->
             <% if (invoice.status === 'PENDING') { %>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t border-border-light/50">

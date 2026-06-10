@@ -251,68 +251,37 @@ const isLoggedIn = typeof user !== 'undefined' && user;
                 <h3 class="text-headline-sm font-bold text-on-surface">Langkah 6: Pilih Paket Iklan</h3>
                 <p class="text-body-sm text-on-surface-variant">Pilih jenis paket tayang untuk memaksimalkan penjualan properti Anda.</p>
                 
-                <input type="hidden" name="packageCode" id="selectedPackageCode" value="GRATIS">
+                <% 
+                    const packageCodes = adPackages.map(pkg => pkg.code);
+                    const initialPackageCode = packageCodes.includes(selectedPackageCode) ? selectedPackageCode : (packageCodes[0] || 'GRATIS');
+                %>
+                <input type="hidden" name="packageCode" id="selectedPackageCode" value="<%= initialPackageCode %>">
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                    <!-- Card 1: Gratis -->
-                    <div class="package-card border-2 border-primary bg-primary/5 p-5 rounded-2xl cursor-pointer transition-all hover:shadow-md relative" data-code="GRATIS" onclick="selectPackage('GRATIS')">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="text-title-lg font-bold text-on-surface">Paket Gratis</h4>
-                                <p class="text-body-sm text-outline mt-1">Iklan standard, tayang selamanya.</p>
+                    <% adPackages.forEach(pkg => { 
+                        const isSelected = pkg.code === initialPackageCode;
+                        const price = Number(pkg.price || 0);
+                        const benefits = parseBenefits(pkg.benefits).slice(0, 3);
+                    %>
+                        <div class="package-card border-2 <%= isSelected ? 'border-primary bg-primary/5' : 'border-border-light' %> p-5 rounded-2xl cursor-pointer transition-all hover:shadow-md relative" data-code="<%= pkg.code %>" onclick="selectPackage('<%= pkg.code %>')">
+                            <% if (pkg.isPopular) { %>
+                                <span class="absolute top-3 right-3 bg-primary text-on-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Populer</span>
+                            <% } %>
+                            <div class="flex justify-between items-start gap-4">
+                                <div class="pr-16">
+                                    <h4 class="text-title-lg font-bold text-on-surface"><%= pkg.name %></h4>
+                                    <p class="text-body-sm text-outline mt-1"><%= pkg.description || 'Paket iklan properti' %></p>
+                                </div>
+                                <span class="<%= price > 0 ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant' %> font-bold text-label-xs px-2.5 py-1 rounded whitespace-nowrap">Rp <%= formatPackagePrice(pkg.price) %></span>
                             </div>
-                            <span class="bg-surface-container-high text-on-surface-variant font-bold text-label-xs px-2.5 py-1 rounded">Rp 0</span>
+                            <ul class="text-body-sm text-on-surface-variant mt-4 space-y-1.5 border-t border-border-light pt-3">
+                                <% benefits.forEach(benefit => { %>
+                                    <li class="flex items-start gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary mt-0.5">check_circle</span><span><%= benefit %></span></li>
+                                <% }) %>
+                                <li class="flex items-start gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary mt-0.5">check_circle</span><span>Maksimal <%= pkg.listingLimit %> iklan aktif</span></li>
+                            </ul>
                         </div>
-                        <ul class="text-body-sm text-on-surface-variant mt-4 space-y-1.5 border-t border-border-light pt-3">
-                            <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span> Tayang di katalog publik</li>
-                            <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span> Hubungi via WhatsApp</li>
-                        </ul>
-                    </div>
-
-                    <!-- Card 2: Featured 7 Hari -->
-                    <div class="package-card border-2 border-border-light p-5 rounded-2xl cursor-pointer transition-all hover:shadow-md relative" data-code="FEATURED_7" onclick="selectPackage('FEATURED_7')">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="text-title-lg font-bold text-on-surface">Featured 7 Hari</h4>
-                                <p class="text-body-sm text-outline mt-1">Tampil menonjol & premium selama 7 hari.</p>
-                            </div>
-                            <span class="bg-primary text-on-primary font-bold text-label-xs px-2.5 py-1 rounded">Rp 50.000</span>
-                        </div>
-                        <ul class="text-body-sm text-on-surface-variant mt-4 space-y-1.5 border-t border-border-light pt-3">
-                            <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span> Muncul di banner slider utama</li>
-                            <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span> Lencana Premium khusus</li>
-                        </ul>
-                    </div>
-
-                    <!-- Card 3: Featured 30 Hari -->
-                    <div class="package-card border-2 border-border-light p-5 rounded-2xl cursor-pointer transition-all hover:shadow-md relative" data-code="FEATURED_30" onclick="selectPackage('FEATURED_30')">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="text-title-lg font-bold text-on-surface">Featured 30 Hari</h4>
-                                <p class="text-body-sm text-outline mt-1">Tampil di halaman teratas selama 30 hari.</p>
-                            </div>
-                            <span class="bg-primary text-on-primary font-bold text-label-xs px-2.5 py-1 rounded">Rp 150.000</span>
-                        </div>
-                        <ul class="text-body-sm text-on-surface-variant mt-4 space-y-1.5 border-t border-border-light pt-3">
-                            <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span> Prioritas di pencarian katalog</li>
-                            <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span> Support marketing khusus</li>
-                        </ul>
-                    </div>
-
-                    <!-- Card 4: Paket Agen Bulanan -->
-                    <div class="package-card border-2 border-border-light p-5 rounded-2xl cursor-pointer transition-all hover:shadow-md relative" data-code="AGEN_BULANAN" onclick="selectPackage('AGEN_BULANAN')">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="text-title-lg font-bold text-on-surface">Paket Agen Bulanan</h4>
-                                <p class="text-body-sm text-outline mt-1">Posting properti hingga 20 iklan selama 30 hari.</p>
-                            </div>
-                            <span class="bg-primary text-on-primary font-bold text-label-xs px-2.5 py-1 rounded">Rp 250.000</span>
-                        </div>
-                        <ul class="text-body-sm text-on-surface-variant mt-4 space-y-1.5 border-t border-border-light pt-3">
-                            <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span> Maksimal posting 20 properti</li>
-                            <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span> Label Agen Terverifikasi</li>
-                        </ul>
-                    </div>
+                    <% }) %>
                 </div>
             </div>
 

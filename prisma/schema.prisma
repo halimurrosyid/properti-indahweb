@@ -8,18 +8,21 @@ generator client {
 }
 
 model User {
-  id         Int        @id @default(autoincrement())
-  email      String?    @unique
-  password   String
-  name       String
-  whatsapp   String     @unique
-  role       String     @default("user") // super_admin, admin, agent, user
-  properties Property[]
-  invoices   Invoice[]
-  blogPosts  BlogPost[]
-  blogJobs   AiBlogJob[]
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+  id                Int         @id @default(autoincrement())
+  email             String?     @unique
+  password          String
+  name              String
+  whatsapp          String      @unique
+  role              String      @default("user") // super_admin, admin, agent, user
+  listingLimit      Int         @default(1)
+  agentUntil        DateTime?
+  activePackageCode String?
+  properties        Property[]
+  invoices          Invoice[]
+  blogPosts         BlogPost[]
+  blogJobs          AiBlogJob[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
 }
 
 model Category {
@@ -35,18 +38,18 @@ model Property {
   slug           String          @unique
   description    String          @db.Text
   price          Decimal         @db.Decimal(15, 2)
-  listingType    String          // SALE, RENT
+  listingType    String // SALE, RENT
   categoryId     Int
   category       Category        @relation(fields: [categoryId], references: [id])
   landSize       Int
   buildingSize   Int
   bedrooms       Int
   bathrooms      Int
-  certificate    String          // SHM, HGB, AJB, dll.
+  certificate    String // SHM, HGB, AJB, dll.
   electricity    String?
   waterSource    String?
   garage         Int             @default(0)
-  facilities     String?         // Comma separated e.g. "AC, Taman, Keamanan 24 Jam"
+  facilities     String? // Comma separated e.g. "AC, Taman, Keamanan 24 Jam"
   province       String
   city           String
   district       String
@@ -73,12 +76,12 @@ model Property {
 }
 
 model RegionProvince {
-  id        Int            @id @default(autoincrement())
-  code      String         @unique
+  id        Int          @id @default(autoincrement())
+  code      String       @unique
   name      String
   cities    RegionCity[]
-  createdAt DateTime       @default(now()) @map("created_at")
-  updatedAt DateTime       @updatedAt @map("updated_at")
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
 
   @@map("RegionProvince")
 }
@@ -114,7 +117,7 @@ model PropertyImage {
   id         Int      @id @default(autoincrement())
   propertyId Int
   property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  url        String   // Relative URL file path
+  url        String // Relative URL file path
   isMain     Boolean  @default(false)
 }
 
@@ -122,7 +125,7 @@ model WhatsappTrack {
   id         Int      @id @default(autoincrement())
   propertyId Int
   property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  ipHash     String   // SHA-256 IP hash
+  ipHash     String // SHA-256 IP hash
   userAgent  String?
   referrer   String?
   device     String?
@@ -130,37 +133,64 @@ model WhatsappTrack {
 }
 
 model Invoice {
-  id            Int       @id @default(autoincrement())
-  invoiceNumber String    @unique
-  userId        Int
-  user          User      @relation(fields: [userId], references: [id])
-  propertyId    Int?
-  property      Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  packageCode   String    // GRATIS, FEATURED_7, FEATURED_30, AGEN_BULANAN
-  packageName   String
-  amount        Decimal   @db.Decimal(15, 2)
-  status        String    @default("PENDING") // PENDING, PAID, REJECTED
-  paymentProof  String?   // Relative file path to uploaded payment proof image
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  paidAt        DateTime?
+  id                   Int       @id @default(autoincrement())
+  invoiceNumber        String    @unique
+  userId               Int
+  user                 User      @relation(fields: [userId], references: [id])
+  propertyId           Int?
+  property             Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  packageCode          String // GRATIS, FEATURED_7, FEATURED_30, AGEN_BULANAN
+  packageName          String
+  amount               Decimal   @db.Decimal(15, 2)
+  durationDays         Int?
+  listingLimit         Int?
+  featuredDurationDays Int?
+  grantsAgent          Boolean   @default(false)
+  packageSnapshot      String?   @db.Text
+  status               String    @default("PENDING") // PENDING, PAID, REJECTED
+  paymentProof         String? // Relative file path to uploaded payment proof image
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  paidAt               DateTime?
+}
+
+model AdPackage {
+  id                   Int      @id @default(autoincrement())
+  code                 String   @unique
+  name                 String
+  description          String?  @db.Text
+  price                Decimal  @default(0) @db.Decimal(15, 2)
+  durationDays         Int?
+  listingLimit         Int      @default(1)
+  isFeatured           Boolean  @default(false)
+  featuredDurationDays Int?
+  grantsAgent          Boolean  @default(false)
+  isPopular            Boolean  @default(false)
+  isActive             Boolean  @default(true)
+  sortOrder            Int      @default(0)
+  benefits             String?  @db.Text
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive, sortOrder])
+  @@map("AdPackage")
 }
 
 model BlogPost {
-  id               Int            @id @default(autoincrement())
+  id               Int             @id @default(autoincrement())
   title            String
-  slug             String         @unique
-  excerpt          String?        @db.Text
-  content          String         @db.Text
+  slug             String          @unique
+  excerpt          String?         @db.Text
+  content          String          @db.Text
   featured_image   String?
   category_id      Int?
-  category         BlogCategory?  @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  category         BlogCategory?   @relation(fields: [category_id], references: [id], onDelete: SetNull)
   author_id        Int
-  author           User           @relation(fields: [author_id], references: [id])
-  status           String         @default("draft") // draft, published, scheduled, archived, deleted
-  source           String         @default("manual") // manual, ai
+  author           User            @relation(fields: [author_id], references: [id])
+  status           String          @default("draft") // draft, published, scheduled, archived, deleted
+  source           String          @default("manual") // manual, ai
   meta_title       String?
-  meta_description String?        @db.Text
+  meta_description String?         @db.Text
   focus_keyword    String?
   canonical_url    String?
   scheduled_at     DateTime?
@@ -168,10 +198,10 @@ model BlogPost {
   archived_at      DateTime?
   deleted_at       DateTime?
   ai_job_id        Int?
-  ai_job           AiBlogJob?     @relation(fields: [ai_job_id], references: [id], onDelete: SetNull)
+  ai_job           AiBlogJob?      @relation(fields: [ai_job_id], references: [id], onDelete: SetNull)
   job_items        AiBlogJobItem[]
-  created_at       DateTime       @default(now())
-  updated_at       DateTime       @updatedAt
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
 
   @@index([status])
   @@index([scheduled_at])
@@ -191,17 +221,17 @@ model BlogCategory {
 }
 
 model PopularCity {
-  id            Int      @id @default(autoincrement())
-  name          String
-  province      String
-  imageUrl      String?  @map("image_url")
-  displayOrder  Int      @default(0) @map("display_order")
-  isActive      Boolean  @default(true) @map("is_active")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id           Int      @id @default(autoincrement())
+  name         String
+  province     String
+  imageUrl     String?  @map("image_url")
+  displayOrder Int      @default(0) @map("display_order")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
-  @@map("PopularCity")
   @@index([isActive, displayOrder])
+  @@map("PopularCity")
 }
 
 model AiBlogJob {

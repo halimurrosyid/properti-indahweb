@@ -1,5 +1,11 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const {
+  findActivePackages,
+  parseBenefits,
+  serializeBenefits,
+  formatPackagePrice
+} = require('../services/adPackageService');
 
 const escapeXml = (value) => String(value || '')
   .replace(/&/g, '&amp;')
@@ -306,11 +312,18 @@ exports.getPropertyDetail = async (req, res, next) => {
 
 exports.getPasangIklan = async (req, res, next) => {
   try {
-    const categories = await prisma.category.findMany();
+    const [categories, adPackages] = await Promise.all([
+      prisma.category.findMany(),
+      findActivePackages(prisma)
+    ]);
     res.render('pages/pasang-iklan', {
       title: 'Pasang Iklan Properti Gratis',
       description: 'Pasang iklan rumah, ruko, tanah, atau apartemen Anda secara gratis dan langsung terhubung dengan peminat via WhatsApp.',
-      categories
+      categories,
+      adPackages,
+      parseBenefits,
+      formatPackagePrice,
+      selectedPackageCode: req.query.package || 'GRATIS'
     });
   } catch (error) {
     next(error);
@@ -465,6 +478,97 @@ exports.postDeleteAdminLocation = async (req, res, next) => {
     });
 
     res.redirect('/admin/locations?msg=Lokasi populer berhasil dihapus.');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const parseOptionalInt = (value) => {
+  if (value === undefined || value === null || String(value).trim() === '') {
+    return null;
+  }
+  const parsed = parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+exports.getAdminPackages = async (req, res, next) => {
+  try {
+    const packages = await prisma.adPackage.findMany({
+      orderBy: [
+        { sortOrder: 'asc' },
+        { id: 'asc' }
+      ]
+    });
+
+    res.render('pages/admin-packages', {
+      title: 'Kelola Paket Iklan',
+      packages,
+      parseBenefits,
+      message: req.query.msg || null,
+      error: req.query.err || null
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.postUpdateAdminPackage = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const {
+      name,
+      description,
+      price,
+      durationDays,
+      listingLimit,
+      featuredDurationDays,
+      sortOrder,
+      benefits,
+      isFeatured,
+      grantsAgent,
+      isPopular,
+      isActive
+    } = req.body;
+
+    if (!name || String(name).trim().length < 3) {
+      return res.redirect('/admin/packages?err=Nama paket minimal 3 karakter.');
+    }
+
+    const parsedPrice = Math.max(0, parseInt(price || '0', 10) || 0);
+    const parsedListingLimit = Math.max(1, parseInt(listingLimit || '1', 10) || 1);
+    const parsedDurationDays = parseOptionalInt(durationDays);
+    const parsedFeaturedDurationDays = parseOptionalInt(featuredDurationDays);
+    const parsedSortOrder = parseInt(sortOrder || '0', 10) || 0;
+    const shouldFeature = isFeatured === 'on';
+    const shouldGrantAgent = grantsAgent === 'on';
+
+    if (shouldFeature && (!parsedFeaturedDurationDays || parsedFeaturedDurationDays < 1)) {
+      return res.redirect('/admin/packages?err=Durasi featured wajib diisi minimal 1 hari untuk paket featured.');
+    }
+
+    if (shouldGrantAgent && (!parsedDurationDays || parsedDurationDays < 1)) {
+      return res.redirect('/admin/packages?err=Durasi paket wajib diisi minimal 1 hari untuk paket agen.');
+    }
+
+    await prisma.adPackage.update({
+      where: { id },
+      data: {
+        name: String(name).trim(),
+        description: String(description || '').trim() || null,
+        price: parsedPrice,
+        durationDays: parsedDurationDays,
+        listingLimit: parsedListingLimit,
+        isFeatured: shouldFeature,
+        featuredDurationDays: shouldFeature ? parsedFeaturedDurationDays : null,
+        grantsAgent: shouldGrantAgent,
+        isPopular: isPopular === 'on',
+        isActive: isActive === 'on',
+        sortOrder: parsedSortOrder,
+        benefits: serializeBenefits(benefits)
+      }
+    });
+
+    res.redirect('/admin/packages?msg=Paket iklan berhasil diperbarui.');
   } catch (error) {
     next(error);
   }
@@ -836,9 +940,19 @@ exports.getInvoiceDetail = async (req, res, next) => {
       return res.status(403).send('Akses Ditolak: Anda tidak berhak melihat invoice ini.');
     }
 
+    let packageDetails = null;
+    if (invoice.packageSnapshot) {
+      try {
+        packageDetails = JSON.parse(invoice.packageSnapshot);
+      } catch (error) {
+        packageDetails = null;
+      }
+    }
+
     res.render('pages/invoice-detail', {
       title: `Detail Invoice ${invoice.invoiceNumber}`,
       invoice,
+      packageDetails,
       message: req.query.msg || null,
       error: req.query.err || null
     });
@@ -849,9 +963,13 @@ exports.getInvoiceDetail = async (req, res, next) => {
 
 exports.getPackagesPage = async (req, res, next) => {
   try {
+    const adPackages = await findActivePackages(prisma);
     res.render('pages/packages', {
       title: 'Paket Iklan Premium',
-      description: 'Tingkatkan jangkauan promosi properti Anda dengan paket iklan premium dan lencana terverifikasi.'
+      description: 'Tingkatkan jangkauan promosi properti Anda dengan paket iklan premium dan lencana terverifikasi.',
+      adPackages,
+      parseBenefits,
+      formatPackagePrice
     });
   } catch (error) {
     next(error);

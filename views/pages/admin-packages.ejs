@@ -1,0 +1,101 @@
+<div class="max-w-6xl mx-auto px-container-margin md:px-stack-lg py-10 space-y-8">
+    <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <div>
+            <h1 class="text-headline-md font-bold text-on-surface">Kelola Paket Iklan</h1>
+            <p class="text-body-sm text-on-surface-variant mt-1">Atur harga, durasi, limit iklan aktif, dan benefit paket yang tampil ke pengguna.</p>
+        </div>
+        <a href="/admin/dashboard" class="text-on-surface-variant hover:text-primary transition-colors text-label-md font-bold px-4 py-2.5 rounded-xl border border-border-light bg-surface-container-lowest">
+            Kembali ke Panel Admin
+        </a>
+    </div>
+
+    <% if (message) { %>
+        <div class="bg-green-50 text-green-800 border border-green-200 p-4 rounded-xl text-body-md font-medium"><%= message %></div>
+    <% } %>
+    <% if (error) { %>
+        <div class="bg-red-50 text-red-800 border border-red-200 p-4 rounded-xl text-body-md font-medium"><%= error %></div>
+    <% } %>
+
+    <div class="grid grid-cols-1 gap-4">
+        <% packages.forEach(pkg => { %>
+            <form action="/admin/packages/<%= pkg.id %>" method="POST" class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-border-light bg-surface-container-low/50 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h2 class="text-title-md font-bold text-on-surface"><%= pkg.name %></h2>
+                            <span class="text-label-xs font-bold px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant border border-border-light"><%= pkg.code %></span>
+                            <% if (pkg.isPopular) { %>
+                                <span class="text-label-xs font-bold px-2 py-0.5 rounded bg-primary text-on-primary">Populer</span>
+                            <% } %>
+                            <% if (!pkg.isActive) { %>
+                                <span class="text-label-xs font-bold px-2 py-0.5 rounded bg-red-50 text-red-700 border border-red-200">Nonaktif</span>
+                            <% } %>
+                        </div>
+                        <p class="text-body-sm text-outline mt-1">Kode paket tidak diubah agar invoice lama tetap konsisten.</p>
+                    </div>
+                    <button type="submit" class="bg-primary hover:bg-surface-tint text-on-primary text-label-sm font-bold px-4 py-2.5 rounded-xl cursor-pointer">
+                        Simpan Paket
+                    </button>
+                </div>
+
+                <div class="p-5 grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-label-sm font-bold text-on-surface block">Nama Paket</label>
+                            <input type="text" name="name" value="<%= pkg.name %>" required class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-3 py-2.5 text-body-sm focus:border-primary focus:outline-none">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-label-sm font-bold text-on-surface block">Harga (Rp)</label>
+                            <input type="number" name="price" min="0" step="1000" value="<%= Number(pkg.price || 0) %>" required class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-3 py-2.5 text-body-sm focus:border-primary focus:outline-none">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-label-sm font-bold text-on-surface block">Durasi Paket (hari)</label>
+                            <input type="number" name="durationDays" min="1" value="<%= pkg.durationDays || '' %>" placeholder="Kosongkan untuk selamanya" class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-3 py-2.5 text-body-sm focus:border-primary focus:outline-none">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-label-sm font-bold text-on-surface block">Maksimal Iklan Aktif</label>
+                            <input type="number" name="listingLimit" min="1" value="<%= pkg.listingLimit %>" required class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-3 py-2.5 text-body-sm focus:border-primary focus:outline-none">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-label-sm font-bold text-on-surface block">Durasi Featured (hari)</label>
+                            <input type="number" name="featuredDurationDays" min="1" value="<%= pkg.featuredDurationDays || '' %>" placeholder="Isi jika paket featured" class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-3 py-2.5 text-body-sm focus:border-primary focus:outline-none">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-label-sm font-bold text-on-surface block">Urutan Tampil</label>
+                            <input type="number" name="sortOrder" value="<%= pkg.sortOrder %>" class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-3 py-2.5 text-body-sm focus:border-primary focus:outline-none">
+                        </div>
+                        <div class="space-y-1 md:col-span-2">
+                            <label class="text-label-sm font-bold text-on-surface block">Deskripsi Singkat</label>
+                            <input type="text" name="description" value="<%= pkg.description || '' %>" class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-3 py-2.5 text-body-sm focus:border-primary focus:outline-none">
+                        </div>
+                        <div class="space-y-1 md:col-span-2">
+                            <label class="text-label-sm font-bold text-on-surface block">Benefit Paket</label>
+                            <textarea name="benefits" rows="5" class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-3 py-2.5 text-body-sm focus:border-primary focus:outline-none"><%= parseBenefits(pkg.benefits).join('\n') %></textarea>
+                            <p class="text-label-xs text-outline">Tulis satu benefit per baris.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-surface-subtle border border-border-light rounded-2xl p-4 space-y-4 self-start">
+                        <h3 class="text-title-sm font-bold text-on-surface">Efek Paket</h3>
+                        <label class="flex items-center gap-2 text-label-sm font-bold text-on-surface">
+                            <input type="checkbox" name="isFeatured" <%= pkg.isFeatured ? 'checked' : '' %> class="accent-primary">
+                            Jadikan listing featured
+                        </label>
+                        <label class="flex items-center gap-2 text-label-sm font-bold text-on-surface">
+                            <input type="checkbox" name="grantsAgent" <%= pkg.grantsAgent ? 'checked' : '' %> class="accent-primary">
+                            Upgrade user menjadi agen
+                        </label>
+                        <label class="flex items-center gap-2 text-label-sm font-bold text-on-surface">
+                            <input type="checkbox" name="isPopular" <%= pkg.isPopular ? 'checked' : '' %> class="accent-primary">
+                            Tandai sebagai populer
+                        </label>
+                        <label class="flex items-center gap-2 text-label-sm font-bold text-on-surface">
+                            <input type="checkbox" name="isActive" <%= pkg.isActive ? 'checked' : '' %> class="accent-primary">
+                            Paket aktif
+                        </label>
+                    </div>
+                </div>
+            </form>
+        <% }) %>
+    </div>
+</div>

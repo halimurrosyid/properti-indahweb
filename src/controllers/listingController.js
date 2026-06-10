@@ -2,8 +2,60 @@ const { PrismaClient } = require('@prisma/client');
 const slugify = require('slugify');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const {
+  findPackageForCheckout,
+  packageSnapshot
+} = require('../services/adPackageService');
 
 const prisma = new PrismaClient();
+
+function addDays(date, days) {
+  const result = new Date(date.getTime());
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+function legacyFeaturedDays(packageCode) {
+  if (packageCode === 'FEATURED_7') return 7;
+  if (packageCode === 'FEATURED_30') return 30;
+  return null;
+}
+
+function legacyAgentPackage(packageCode) {
+  return packageCode === 'AGEN_BULANAN';
+}
+
+async function applyPaidPackageBenefits(invoice, options = {}) {
+  const now = new Date();
+  const publishProperty = options.publishProperty !== false;
+  const featuredDays = invoice.featuredDurationDays || legacyFeaturedDays(invoice.packageCode);
+  const grantsAgent = invoice.grantsAgent || legacyAgentPackage(invoice.packageCode);
+  const durationDays = invoice.durationDays || (grantsAgent ? 30 : null);
+  const listingLimit = invoice.listingLimit || (grantsAgent ? 20 : 1);
+
+  if (invoice.propertyId) {
+    await prisma.property.update({
+      where: { id: invoice.propertyId },
+      data: {
+        ...(publishProperty ? { status: 'AVAILABLE' } : {}),
+        isFeatured: Boolean(featuredDays),
+        featuredUntil: featuredDays ? addDays(now, featuredDays) : null
+      }
+    });
+  }
+
+  if (grantsAgent) {
+    await prisma.user.update({
+      where: { id: invoice.userId },
+      data: {
+        role: 'agent',
+        listingLimit,
+        agentUntil: durationDays ? addDays(now, durationDays) : null,
+        activePackageCode: invoice.packageCode
+      }
+    });
+  }
+}
 
 async function resolveRegionSelection({ provinceCode, cityCode, districtCode }) {
   if (!provinceCode || !cityCode || !districtCode) {
@@ -53,6 +105,11 @@ exports.postQuickPost = async (req, res, next) => {
     let userId = req.session.user ? req.session.user.id : null;
     let authorName = '';
     let authorWhatsapp = '';
+    const selectedPackage = await findPackageForCheckout(prisma, req.body.packageCode || 'GRATIS');
+
+    if (!selectedPackage) {
+      return res.status(400).send('Paket iklan tidak tersedia.');
+    }
 
     // 1. Guest Registration if not logged in
     if (!userId) {
@@ -127,15 +184,13 @@ exports.postQuickPost = async (req, res, next) => {
       where: { id: userId }
     });
 
-    if (currentUser && currentUser.role === 'user') {
-      if (activeCount >= 1) {
-        return res.status(400).send('Batas posting tercapai: Akun gratis dibatasi maksimal 1 iklan aktif. Silakan hubungi admin atau aktifkan Paket Agen untuk menambah properti.');
-      }
-    } else if (currentUser && currentUser.role === 'agent') {
-      const agentLimit = 20;
-      if (activeCount >= agentLimit) {
-        return res.status(400).send(`Batas posting tercapai: Paket Agen dibatasi maksimal ${agentLimit} iklan aktif untuk mencegah spam.`);
-      }
+    const currentLimit = currentUser ? (currentUser.listingLimit || (currentUser.role === 'agent' ? 20 : 1)) : 1;
+    const selectedLimit = selectedPackage.listingLimit || 1;
+    const effectiveLimit = Math.max(currentLimit, selectedLimit);
+
+    const isPrivilegedUser = currentUser && (currentUser.role === 'super_admin' || currentUser.role === 'admin');
+    if (!isPrivilegedUser && activeCount >= effectiveLimit) {
+      return res.status(400).send(`Batas posting tercapai: paket Anda saat ini membatasi maksimal ${effectiveLimit} iklan aktif. Pilih paket dengan limit lebih besar atau nonaktifkan listing lama.`);
     }
 
     // 2. Parse listing metadata
@@ -238,39 +293,33 @@ exports.postQuickPost = async (req, res, next) => {
     }
 
     // Insert invoice for package selection
-    const packageCode = req.body.packageCode || 'GRATIS';
-    let packageName = 'Paket Gratis';
-    let amount = 0;
-
-    if (packageCode === 'FEATURED_7') {
-      packageName = 'Featured 7 Hari';
-      amount = 50000;
-    } else if (packageCode === 'FEATURED_30') {
-      packageName = 'Featured 30 Hari';
-      amount = 150000;
-    } else if (packageCode === 'AGEN_BULANAN') {
-      packageName = 'Paket Agen Bulanan';
-      amount = 250000;
-    }
+    const packageCode = selectedPackage.code;
+    const amount = Number(selectedPackage.price || 0);
 
     const invoiceNumber = 'INV-' + Date.now() + '-' + Math.floor(1000 + Math.random() * 9000);
 
-    await prisma.invoice.create({
+    const invoice = await prisma.invoice.create({
       data: {
         invoiceNumber,
         userId: userId,
         propertyId: newProperty.id,
         packageCode,
-        packageName,
+        packageName: selectedPackage.name,
         amount,
-        status: packageCode === 'GRATIS' ? 'PAID' : 'PENDING',
-        paidAt: packageCode === 'GRATIS' ? new Date() : null
+        durationDays: selectedPackage.durationDays || null,
+        listingLimit: selectedPackage.listingLimit || 1,
+        featuredDurationDays: selectedPackage.featuredDurationDays || null,
+        grantsAgent: selectedPackage.grantsAgent,
+        packageSnapshot: packageSnapshot(selectedPackage),
+        status: amount === 0 ? 'PAID' : 'PENDING',
+        paidAt: amount === 0 ? new Date() : null
       }
     });
 
     if (amount > 0) {
       res.redirect(`/invoice/${invoiceNumber}`);
     } else {
+      await applyPaidPackageBenefits(invoice, { publishProperty: false });
       res.redirect('/dashboard?submitted=1');
     }
   } catch (error) {
@@ -440,36 +489,7 @@ exports.approveInvoice = async (req, res, next) => {
       }
     });
 
-    // Activate Package Benefits
-    if (invoice.propertyId) {
-      let isFeatured = false;
-      let featuredUntil = null;
-
-      if (invoice.packageCode === 'FEATURED_7') {
-        isFeatured = true;
-        featuredUntil = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-      } else if (invoice.packageCode === 'FEATURED_30') {
-        isFeatured = true;
-        featuredUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-      }
-
-      await prisma.property.update({
-        where: { id: invoice.propertyId },
-        data: {
-          status: 'AVAILABLE', // Auto publish listing when paid
-          isFeatured,
-          featuredUntil
-        }
-      });
-    }
-
-    // If Package is AGEN_BULANAN, upgrade User Role to agent
-    if (invoice.packageCode === 'AGEN_BULANAN') {
-      await prisma.user.update({
-        where: { id: invoice.userId },
-        data: { role: 'agent' }
-      });
-    }
+    await applyPaidPackageBenefits(invoice);
 
     res.redirect('/admin/dashboard?msg=Invoice berhasil disetujui.');
   } catch (error) {

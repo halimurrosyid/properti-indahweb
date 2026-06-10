@@ -64,12 +64,40 @@ async function checkExpiredFeaturedProperties() {
   }
 }
 
+async function checkExpiredAgentPackages() {
+  const now = new Date();
+
+  try {
+    const expired = await prisma.user.updateMany({
+      where: {
+        role: 'agent',
+        agentUntil: {
+          lt: now
+        }
+      },
+      data: {
+        role: 'user',
+        listingLimit: 1,
+        agentUntil: null,
+        activePackageCode: null
+      }
+    });
+
+    if (expired.count > 0) {
+      console.log(`[Package Scheduler] Downgraded ${expired.count} expired agent subscriptions.`);
+    }
+  } catch (error) {
+    console.error('[Package Scheduler] Error checking expired agent packages:', error);
+  }
+}
+
 async function runScheduler() {
   console.log('[Blog Scheduler] Automated Publish & Premium Listing Scheduler started and polling database...');
   
   while (true) {
     await checkScheduledPosts();
     await checkExpiredFeaturedProperties();
+    await checkExpiredAgentPackages();
     // Check every 30 seconds
     await sleep(30000);
   }
