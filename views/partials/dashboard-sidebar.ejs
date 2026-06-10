@@ -35,15 +35,15 @@
                 <span class="material-symbols-outlined text-[20px]">dashboard</span>
                 <span>Dashboard</span>
             </a>
-            <a href="/pasang-iklan" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md font-bold transition-all <%= linkClass(false) %>">
+            <a href="/pasang-iklan" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md font-bold transition-all <%= linkClass(isActive('/pasang-iklan')) %>">
                 <span class="material-symbols-outlined text-[20px]">add_circle</span>
                 <span>Pasang Iklan</span>
             </a>
-            <a href="/packages" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md font-bold transition-all <%= linkClass(false) %>">
+            <a href="/packages" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md font-bold transition-all <%= linkClass(isActive('/packages')) %>">
                 <span class="material-symbols-outlined text-[20px]">workspace_premium</span>
                 <span>Paket Iklan</span>
             </a>
-            <a href="/catalog" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md font-bold transition-all <%= linkClass(false) %>">
+            <a href="/catalog" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md font-bold transition-all <%= linkClass(isActive('/catalog')) %>">
                 <span class="material-symbols-outlined text-[20px]">travel_explore</span>
                 <span>Katalog Publik</span>
             </a>

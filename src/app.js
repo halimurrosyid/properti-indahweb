@@ -103,6 +103,9 @@ app.use((req, res, next) => {
   res.locals.currentPath = req.path;
 
   const isDashboardPath = req.path === '/dashboard'
+    || req.path === '/pasang-iklan'
+    || req.path === '/packages'
+    || req.path === '/catalog'
     || req.path.startsWith('/admin')
     || req.path.startsWith('/invoice')
     || /^\/property\/\d+\/edit$/.test(req.path);
