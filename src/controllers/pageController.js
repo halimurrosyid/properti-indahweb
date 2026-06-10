@@ -612,7 +612,7 @@ exports.getSeoListingPage = async (req, res, next) => {
     if (baseSeo === 'kontrakan') pageLabel = 'Kontrakan';
     else if (baseSeo === 'kos') pageLabel = 'Kos';
 
-    const metaTitle = `${pageLabel}${locationLabel} Murah & Terbaru | Properti Indahweb`;
+    const metaTitle = `${pageLabel}${locationLabel} Murah & Terbaru | 1rumah.biz.id`;
     const metaDescription = `Temukan listing ${pageLabel.toLowerCase()}${locationLabel} terbaru dengan pilihan terlengkap, harga murah, langsung hubungi pemilik / agen via WhatsApp.`;
     
     const canonicalUrl = `${req.protocol}://${req.get('host')}/${baseSeo}` + 
@@ -850,7 +850,7 @@ exports.getInvoiceDetail = async (req, res, next) => {
 exports.getPackagesPage = async (req, res, next) => {
   try {
     res.render('pages/packages', {
-      title: 'Paket Iklan Premium Properti Indahweb',
+      title: 'Paket Iklan Premium',
       description: 'Tingkatkan jangkauan promosi properti Anda dengan paket iklan premium dan lencana terverifikasi.'
     });
   } catch (error) {
@@ -884,8 +884,8 @@ exports.getAgentProfile = async (req, res, next) => {
     });
 
     res.render('pages/agent-profile', {
-      title: `Profil Agen: ${agent.name} | Properti Indahweb`,
-      description: `Lihat listing properti aktif yang dipasarkan oleh ${agent.name} di Properti Indahweb.`,
+      title: `Profil Agen: ${agent.name}`,
+      description: `Lihat listing properti aktif yang dipasarkan oleh ${agent.name} di 1rumah.biz.id.`,
       agent,
       properties
     });
@@ -929,8 +929,8 @@ exports.getFavoritesApi = async (req, res, next) => {
 exports.getDisclaimer = async (req, res, next) => {
   try {
     res.render('pages/disclaimer', {
-      title: 'Pernyataan Penyangkal (Disclaimer) | Properti Indahweb',
-      description: 'Pernyataan Penyangkal (Disclaimer) penggunaan portal informasi Properti Indahweb.'
+      title: 'Pernyataan Penyangkal (Disclaimer)',
+      description: 'Pernyataan Penyangkal (Disclaimer) penggunaan portal informasi 1rumah.biz.id.'
     });
   } catch (error) {
     next(error);

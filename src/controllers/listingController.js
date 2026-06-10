@@ -306,7 +306,7 @@ exports.trackWaClick = async (req, res, next) => {
     // Redirect to WhatsApp chat link
     const cleanedPhone = property.whatsappNumber.replace(/\D/g, '');
     const propUrl = `${req.protocol}://${req.get('host')}/property/${property.slug}`;
-    const textMsg = `Halo ${property.contactName}, saya tertarik dengan properti "${property.title}" yang saya lihat di Properti Indahweb (${propUrl}). Apakah masih tersedia?`;
+    const textMsg = `Halo ${property.contactName}, saya tertarik dengan properti "${property.title}" yang saya lihat di 1rumah.biz.id (${propUrl}). Apakah masih tersedia?`;
     
     const waUrl = `https://wa.me/${cleanedPhone}?text=${encodeURIComponent(textMsg)}`;
     

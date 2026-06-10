@@ -116,8 +116,8 @@ exports.getBlogListByCategory = async (req, res, next) => {
     });
 
     res.render('pages/blog-list', {
-      title: `Kategori: ${category.name} | Blog Properti Indahweb`,
-      description: category.description || `Kumpulan artikel seputar ${category.name} di Properti Indahweb.`,
+      title: `Kategori: ${category.name}`,
+      description: category.description || `Kumpulan artikel seputar ${category.name} di 1rumah.biz.id.`,
       posts,
       categories,
       latestPosts,

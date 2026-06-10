@@ -3,7 +3,7 @@ const PORT = process.env.PORT || 3000;
 const shouldRunBackgroundJobs = process.env.RUN_BACKGROUND_JOBS !== 'false';
 
 app.listen(PORT, () => {
-  console.log(`Server properti-indahweb is running on http://localhost:${PORT}`);
+  console.log(`Server 1rumah.biz.id is running on http://localhost:${PORT}`);
 
   if (shouldRunBackgroundJobs) {
     const { runWorker: runAiBlogWorker } = require('./workers/aiBlogWorker');

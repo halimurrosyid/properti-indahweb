@@ -1,17 +1,18 @@
-# Panduan Deployment - Properti Indahweb
+# Panduan Deployment - 1rumah.biz.id
 
-Dokumen ini menjelaskan langkah-langkah untuk mendeploy aplikasi Properti Indahweb ke **CloudPanel** (menggunakan PM2) dan **Dokploy** (menggunakan Docker / Docker Compose) secara otomatis.
+Dokumen ini menjelaskan langkah-langkah untuk mendeploy aplikasi 1rumah.biz.id ke **CloudPanel** (menggunakan PM2) dan **Dokploy** (menggunakan Docker / Docker Compose) secara otomatis.
 
 ---
 
 ## 1. Persiapan Database (Semua Platform)
 
-Pastikan variabel lingkungan `DATABASE_URL` pada `.env` telah disesuaikan dengan koneksi database MySQL/MariaDB produksi Anda:
+Pastikan variabel lingkungan `DATABASE_URL` pada `.env` telah disesuaikan dengan koneksi database PostgreSQL produksi Anda:
 ```env
-DATABASE_URL="mysql://username:password@host:3306/dbname"
+DATABASE_URL="postgresql://username:password@host:5432/dbname"
 SESSION_SECRET="gunakan_kunci_rahasia_acak_yang_panjang"
 NODE_ENV="production"
 PORT=3000
+SITE_URL="https://1rumah.biz.id"
 ```
 
 ---
@@ -23,10 +24,10 @@ CloudPanel mendukung penayangan Node.js di VPS secara langsung melalui Nginx rev
 ### Langkah-langkah:
 1. **Buat Situs Node.js Baru** di panel CloudPanel Anda:
    - Pilih menu **Add Site** > **Create a Node.js Site**.
-   - Masukkan Domain situs Anda (misal: `properti.indahweb.com`).
+   - Masukkan Domain situs Anda (misal: `1rumah.biz.id`).
    - Tentukan versi Node.js (direkomendasikan versi 18 atau 20 LTS).
 2. **Kirim/Clone Kode Sumber**:
-   - Hubungkan VPS Anda via SSH, masuk ke root folder situs Anda (biasanya di `/home/cloudpanel/htdocs/properti.indahweb.com/`).
+   - Hubungkan VPS Anda via SSH, masuk ke root folder situs Anda (biasanya di `/home/cloudpanel/htdocs/1rumah.biz.id/`).
    - Clone repositori Git Anda ke folder tersebut.
 3. **Konfigurasi Lingkungan (`.env`)**:
    - Salin file `.env` dan sesuaikan kredensial database produksi.
@@ -39,14 +40,17 @@ CloudPanel mendukung penayangan Node.js di VPS secara langsung melalui Nginx rev
    # 2. Generate Prisma Client local library
    npx prisma generate
 
-   # 3. Jalankan migrasi database ke MariaDB/MySQL produksi
+   # 3. Jalankan migrasi database ke PostgreSQL produksi
    npx prisma migrate deploy
+
+   # 3b. Isi master wilayah Indonesia sampai kecamatan
+   npm run seed:regions
 
    # 4. Compile utility stylesheet Tailwind CSS
    npm run build:css
 
    # 5. Jalankan aplikasi menggunakan PM2
-   pm2 start src/server.js --name properti-indahweb
+   pm2 start src/server.js --name 1rumah
    ```
 5. **Konfigurasi Auto-Restart PM2**:
    Agar aplikasi otomatis kembali menyala saat server restart, jalankan perintah berikut:
@@ -94,7 +98,8 @@ CMD npx prisma migrate deploy && npm start
 ```
 Dengan konfigurasi ini:
 - **TIDAK Perlu Membuka Terminal VPS** untuk menjalankan database migrasi setiap kali update.
-- Database MariaDB/MySQL akan selalu ter-update secara otomatis begitu Dokploy selesai mem-build kode terbaru dari GitHub.
+- Database PostgreSQL akan selalu ter-update secara otomatis begitu Dokploy selesai mem-build kode terbaru dari GitHub.
+- Jalankan `npm run seed:regions` sekali setelah migrasi pertama agar dropdown provinsi/kota/kecamatan terisi.
 
 ---
 
@@ -102,17 +107,17 @@ Dengan konfigurasi ini:
 
 *   **Menjalankan Aplikasi**:
     ```bash
-    pm2 start src/server.js --name properti-indahweb
+    pm2 start src/server.js --name 1rumah
     ```
 *   **Menghentikan Aplikasi**:
     ```bash
-    pm2 stop properti-indahweb
+    pm2 stop 1rumah
     ```
 *   **Restart Aplikasi**:
     ```bash
-    pm2 restart properti-indahweb
+    pm2 restart 1rumah
     ```
 *   **Melihat Log Aplikasi**:
     ```bash
-    pm2 logs properti-indahweb
+    pm2 logs 1rumah
     ```

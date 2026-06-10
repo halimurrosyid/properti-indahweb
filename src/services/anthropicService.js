@@ -37,7 +37,7 @@ exports.generateSeoArticle = async (title, knowledgeBase = '', options = {}) => 
 
   const anthropic = new Anthropic({ apiKey });
 
-  let prompt = `Tulis artikel SEO berbahasa Indonesia untuk website Properti Indahweb dengan judul: "${title}".
+  let prompt = `Tulis artikel SEO berbahasa Indonesia untuk website 1rumah.biz.id dengan judul: "${title}".
 
 Topik utama adalah properti lokal Indonesia, jual beli rumah, sewa rumah, tanah, kontrakan, kos, ruko, apartemen, atau tips properti.
 
@@ -54,12 +54,12 @@ Syarat artikel:
 - Buat pembukaan yang menarik
 - Buat pembahasan lengkap
 - Buat FAQ di akhir
-- Buat kesimpulan dan CTA halus ke Properti Indahweb
+- Buat kesimpulan dan CTA halus ke 1rumah.biz.id
 - Jangan membuat klaim palsu
 - Jangan mengarang data spesifik yang tidak tersedia
 - Jika membahas lokasi, gunakan bahasa umum dan aman
 - Output harus berupa JSON valid
-- meta_title cukup mengikuti judul artikel tanpa tambahan "| Properti Indahweb", karena nama situs ditambahkan otomatis oleh sistem
+- meta_title cukup mengikuti judul artikel tanpa tambahan "| 1rumah.biz.id", karena nama situs ditambahkan otomatis oleh sistem
 
 Format JSON:
 {

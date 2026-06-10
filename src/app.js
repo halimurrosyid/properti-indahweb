@@ -81,7 +81,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 // Session Configuration
 // ====================================================
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'properti_indahweb_session_secret_key_123456',
+  secret: process.env.SESSION_SECRET || '1rumah_session_secret_key_123456',
   resave: false,
   saveUninitialized: false,
   cookie: {

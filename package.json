@@ -1,7 +1,7 @@
 {
-  "name": "properti-indahweb",
+  "name": "1rumah-biz-id",
   "version": "1.0.0",
-  "description": "Portal Jual Beli Sewa Properti Indahweb",
+  "description": "Portal Jual Beli Sewa 1rumah.biz.id",
   "main": "src/app.js",
   "scripts": {
     "dev": "nodemon src/server.js",

@@ -3,7 +3,7 @@ version: '3.8'
 services:
   db:
     image: postgres:15-alpine
-    container_name: properti_indahweb_postgres
+    container_name: 1rumah_postgres
     restart: always
     environment:
       POSTGRES_USER: postgres
@@ -16,7 +16,7 @@ services:
 
   web:
     build: .
-    container_name: properti_indahweb_express
+    container_name: 1rumah_express
     restart: always
     ports:
       - '3000:3000'
@@ -24,18 +24,18 @@ services:
       - db
     environment:
       - DATABASE_URL=postgresql://postgres:password@db:5432/postgres
-      - SESSION_SECRET=properti_indahweb_session_secret_key_123456
+      - SESSION_SECRET=1rumah_session_secret_key_123456
       - NODE_ENV=production
       - PORT=3000
-      - SITE_URL=${SITE_URL:-https://properti.indahweb.com}
+      - SITE_URL=${SITE_URL:-https://1rumah.biz.id}
       - TZ=Asia/Jakarta
       - UPLOAD_DIR=/data/uploads
       - RUN_BACKGROUND_JOBS=true
       - AI_BLOG_SCHEDULED_PIPELINE_LIMIT=5
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - SUPER_ADMIN_EMAIL=admin@properti.indahweb.com
+      - SUPER_ADMIN_EMAIL=admin@1rumah.biz.id
       - SUPER_ADMIN_PASSWORD=adminindahweb
-      - SUPER_ADMIN_NAME=Super Admin Indahweb
+      - SUPER_ADMIN_NAME=Super Admin 1rumah.biz.id
       - SUPER_ADMIN_WHATSAPP=628123456789
     volumes:
       - uploads_data:/data/uploads

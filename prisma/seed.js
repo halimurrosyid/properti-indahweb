@@ -28,10 +28,10 @@ async function main() {
   }
 
   // 2. Create Default Admin User from Environment Variables
-  const adminEmail = process.env.SUPER_ADMIN_EMAIL || 'admin@properti.indahweb.com';
+  const adminEmail = process.env.SUPER_ADMIN_EMAIL || 'admin@1rumah.biz.id';
   const adminWhatsapp = process.env.SUPER_ADMIN_WHATSAPP || '628123456789';
   const adminPassword = process.env.SUPER_ADMIN_PASSWORD || 'adminindahweb';
-  const adminName = process.env.SUPER_ADMIN_NAME || 'Super Admin Indahweb';
+  const adminName = process.env.SUPER_ADMIN_NAME || 'Super Admin 1rumah.biz.id';
   const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
   const adminUser = await prisma.user.upsert({

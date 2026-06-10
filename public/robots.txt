@@ -9,4 +9,4 @@ Disallow: /property/*/approve
 Disallow: /property/*/reject
 Disallow: /go/whatsapp/
 
-Sitemap: https://properti.indahweb.com/sitemap.xml
+Sitemap: https://1rumah.biz.id/sitemap.xml

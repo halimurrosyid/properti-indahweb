@@ -1,10 +1,10 @@
-# Properti Indahweb
+# 1rumah.biz.id
 
-Portal Jual Beli Sewa Properti Indahweb adalah aplikasi berbasis web yang dirancang untuk mempermudah pencarian, pemasaran, dan manajemen properti.
+Portal Jual Beli Sewa 1rumah.biz.id adalah aplikasi berbasis web yang dirancang untuk mempermudah pencarian, pemasaran, dan manajemen properti.
 
 ## Teknologi Utama
 - **Backend**: Node.js & Express.js
-- **Database ORM**: Prisma (dengan database MySQL/MariaDB)
+- **Database ORM**: Prisma (dengan database PostgreSQL)
 - **Frontend / Templating**: EJS & Tailwind CSS
 - **Deployment**: PM2 (CloudPanel) & Docker (Dokploy)
 
@@ -17,14 +17,14 @@ Portal Jual Beli Sewa Properti Indahweb adalah aplikasi berbasis web yang diranc
 
 ## Deployment & Konfigurasi VPS
 Untuk panduan detail mengenai deployment menggunakan **Dokploy (Docker)** maupun **CloudPanel (Node.js + PM2)**, silakan baca dokumentasi lengkap di:
-👉 **[Panduan Deployment (README_DEPLOYMENT.md)](file:///c:/Users/Septiani%20Nurkamilah/Documents/properti-indahweb/README_DEPLOYMENT.md)**
+👉 **Panduan Deployment:** lihat `README_DEPLOYMENT.md`
 
 ## Cara Menjalankan Lokal
 
 1. Clone repositori ini.
 2. Salin file `.env.example` menjadi `.env` dan sesuaikan URL koneksi database:
    ```env
-   DATABASE_URL="mysql://root:password@localhost:3306/properti_indahweb"
+   DATABASE_URL="postgresql://postgres:password@localhost:5432/1rumah"
    SESSION_SECRET="rahasia-acak-anda"
    PORT=3000
    ```
