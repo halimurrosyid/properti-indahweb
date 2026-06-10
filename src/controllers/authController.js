@@ -77,12 +77,19 @@ exports.getRegister = (req, res) => {
 
 exports.postRegister = async (req, res, next) => {
   try {
-    const { name, whatsapp, email, password } = req.body;
+    const { name, whatsapp, email, password, passwordConfirmation } = req.body;
 
-    if (!name || !whatsapp || !password) {
+    if (!name || !whatsapp || !password || !passwordConfirmation) {
       return res.render('pages/register', {
         title: 'Daftar Akun Baru',
-        error: 'Lengkapi seluruh data pendaftaran utama (Nama, WhatsApp, Kata Sandi).'
+        error: 'Lengkapi seluruh data pendaftaran utama (Nama, WhatsApp, Kata Sandi, dan Konfirmasi Kata Sandi).'
+      });
+    }
+
+    if (password !== passwordConfirmation) {
+      return res.render('pages/register', {
+        title: 'Daftar Akun Baru',
+        error: 'Konfirmasi kata sandi tidak sama.'
       });
     }
 

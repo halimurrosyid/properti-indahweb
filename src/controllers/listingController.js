@@ -56,19 +56,29 @@ exports.postQuickPost = async (req, res, next) => {
 
     // 1. Guest Registration if not logged in
     if (!userId) {
-      const { guestName, guestWhatsapp, guestEmail, guestPassword } = req.body;
+      const { guestName, guestWhatsapp, guestEmail, guestPassword, guestPasswordConfirmation } = req.body;
 
-      if (!guestName || !guestWhatsapp || !guestEmail || !guestPassword) {
+      if (!guestName || !guestWhatsapp || !guestPassword || !guestPasswordConfirmation) {
         return res.status(400).send('Detail pendaftaran tamu tidak lengkap.');
       }
 
+      if (guestPassword !== guestPasswordConfirmation) {
+        return res.status(400).send('Konfirmasi kata sandi tidak sama.');
+      }
+
+      if (guestPassword.length < 6) {
+        return res.status(400).send('Kata sandi minimal berisi 6 karakter.');
+      }
+
       // Check if user already exists
+      const searchClauses = [{ whatsapp: guestWhatsapp }];
+      if (guestEmail && guestEmail.trim() !== '') {
+        searchClauses.push({ email: guestEmail.trim() });
+      }
+
       const existingUser = await prisma.user.findFirst({
         where: {
-          OR: [
-            { email: guestEmail },
-            { whatsapp: guestWhatsapp }
-          ]
+          OR: searchClauses
         }
       });
 
@@ -82,7 +92,7 @@ exports.postQuickPost = async (req, res, next) => {
         data: {
           name: guestName,
           whatsapp: guestWhatsapp,
-          email: guestEmail,
+          email: (guestEmail && guestEmail.trim() !== '') ? guestEmail.trim() : null,
           password: hashedPassword,
           role: 'user'
         }
@@ -379,6 +389,8 @@ exports.deleteProperty = async (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
     const userId = req.session.user.id;
+    const allowedRedirects = ['/dashboard', '/admin/dashboard'];
+    const requestedReturnTo = req.body.returnTo;
 
     const property = await prisma.property.findUnique({
       where: { id }
@@ -396,11 +408,12 @@ exports.deleteProperty = async (req, res, next) => {
       where: { id }
     });
 
-    if (req.session.user.role === 'super_admin' || req.session.user.role === 'admin') {
-      res.redirect('/admin/dashboard?msg=Properti berhasil dihapus.');
-    } else {
-      res.redirect('/dashboard?msg=Properti berhasil dihapus.');
-    }
+    const defaultReturnTo = (req.session.user.role === 'super_admin' || req.session.user.role === 'admin')
+      ? '/admin/dashboard'
+      : '/dashboard';
+    const returnTo = allowedRedirects.includes(requestedReturnTo) ? requestedReturnTo : defaultReturnTo;
+
+    res.redirect(`${returnTo}?msg=Properti berhasil dihapus.`);
   } catch (error) {
     next(error);
   }

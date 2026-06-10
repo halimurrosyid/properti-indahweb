@@ -115,6 +115,7 @@
 
                                         <!-- Delete form -->
                                         <form action="/property/<%= property.id %>/delete" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus properti ini secara permanen?')">
+                                            <input type="hidden" name="returnTo" value="/admin/dashboard">
                                             <button type="submit" class="text-outline hover:text-error p-2 rounded-lg border border-border-light hover:border-error/20 transition-all cursor-pointer flex items-center justify-center" title="Hapus Permanen">
                                                 <span class="material-symbols-outlined text-[18px]">delete</span>
                                             </button>
@@ -166,6 +167,7 @@
 
                             <!-- Delete -->
                             <form action="/property/<%= property.id %>/delete" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus properti ini secara permanen?')">
+                                <input type="hidden" name="returnTo" value="/admin/dashboard">
                                 <button type="submit" class="text-outline hover:text-error p-2 rounded-lg border border-border-light cursor-pointer flex items-center justify-center">
                                     <span class="material-symbols-outlined text-[16px]">delete</span>
                                 </button>

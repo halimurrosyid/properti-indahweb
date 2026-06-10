@@ -26,13 +26,19 @@
 
             <div class="space-y-1.5">
                 <label class="text-label-sm font-bold text-on-surface-variant">Kata Sandi</label>
-                <input 
-                    type="password" 
-                    name="password" 
-                    required 
-                    placeholder="Masukkan kata sandi..." 
-                    class="w-full px-4 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md"
-                />
+                <div class="relative">
+                    <input 
+                        type="password" 
+                        id="login-password"
+                        name="password" 
+                        required 
+                        placeholder="Masukkan kata sandi..." 
+                        class="w-full pl-4 pr-12 py-2.5 rounded-lg border border-border-light focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-bright text-body-md"
+                    />
+                    <button type="button" data-password-toggle="login-password" aria-label="Lihat kata sandi" class="absolute inset-y-0 right-0 px-3 text-outline hover:text-primary flex items-center">
+                        <span class="material-symbols-outlined text-[20px]">visibility</span>
+                    </button>
+                </div>
             </div>
 
             <button 
@@ -48,3 +54,5 @@
         </p>
     </div>
 </div>
+
+<script src="/js/password-toggle.js"></script>
