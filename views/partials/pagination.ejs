@@ -1,0 +1,93 @@
+<%
+const pager = typeof pagination !== 'undefined' ? pagination : null;
+if (pager && pager.totalItems > 0) {
+  const pageParam = pager.pageParam || 'page';
+  const perPageParam = pager.perPageParam || 'perPage';
+  const basePath = pager.basePath || currentPath || '';
+  const query = pager.query || {};
+  const perPageOptions = pager.perPageOptions || [10, 20, 50, 100];
+  const startItem = ((pager.currentPage - 1) * pager.perPage) + 1;
+  const endItem = Math.min(pager.totalItems, pager.currentPage * pager.perPage);
+
+  const buildUrl = (page) => {
+    const params = new URLSearchParams();
+    Object.entries(query).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === '') return;
+      if (Array.isArray(value)) {
+        value.forEach(item => params.append(key, item));
+        return;
+      }
+      params.set(key, value);
+    });
+    params.set(pageParam, String(page));
+    params.set(perPageParam, String(pager.perPage));
+    const qs = params.toString();
+    return qs ? `${basePath}?${qs}` : basePath;
+  };
+%>
+  <div class="border-t border-border-light bg-surface-subtle/70 px-4 py-3 md:px-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+    <div class="text-label-sm text-on-surface-variant">
+      Menampilkan <span class="font-bold text-on-surface"><%= startItem %>-<%= endItem %></span>
+      dari <span class="font-bold text-on-surface"><%= pager.totalItems %></span> data
+    </div>
+
+    <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+      <form method="GET" action="<%= basePath %>" class="flex items-center gap-2">
+        <% Object.entries(query).forEach(([key, value]) => { %>
+          <% if (key !== pageParam && key !== perPageParam && value !== undefined && value !== null && value !== '') { %>
+            <% if (Array.isArray(value)) { %>
+              <% value.forEach(item => { %>
+                <input type="hidden" name="<%= key %>" value="<%= item %>">
+              <% }) %>
+            <% } else { %>
+              <input type="hidden" name="<%= key %>" value="<%= value %>">
+            <% } %>
+          <% } %>
+        <% }) %>
+        <input type="hidden" name="<%= pageParam %>" value="1">
+        <label class="text-label-sm font-bold text-on-surface-variant" for="<%= perPageParam %>-select">Per halaman</label>
+        <select id="<%= perPageParam %>-select" name="<%= perPageParam %>" onchange="this.form.submit()" class="bg-surface-container-lowest border border-border-light rounded-lg px-2.5 py-1.5 text-label-sm font-bold text-on-surface focus:border-primary focus:outline-none">
+          <% perPageOptions.forEach(option => { %>
+            <option value="<%= option %>" <%= pager.perPage === option ? 'selected' : '' %>><%= option %></option>
+          <% }) %>
+        </select>
+      </form>
+
+      <% if (pager.totalPages > 1) { %>
+        <nav class="flex items-center gap-1" aria-label="Pagination">
+          <a href="<%= buildUrl(Math.max(1, pager.currentPage - 1)) %>" class="w-9 h-9 flex items-center justify-center rounded-lg border border-border-light bg-surface-container-lowest text-on-surface-variant hover:text-primary hover:border-primary/40 <%= !pager.hasPrevious ? 'pointer-events-none opacity-40' : '' %>" aria-label="Halaman sebelumnya">
+            <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+          </a>
+
+          <% 
+            const windowStart = Math.max(1, pager.currentPage - 2);
+            const windowEnd = Math.min(pager.totalPages, pager.currentPage + 2);
+          %>
+          <% if (windowStart > 1) { %>
+            <a href="<%= buildUrl(1) %>" class="w-9 h-9 flex items-center justify-center rounded-lg border border-border-light bg-surface-container-lowest text-label-sm font-bold text-on-surface-variant hover:text-primary hover:border-primary/40">1</a>
+            <% if (windowStart > 2) { %>
+              <span class="w-7 text-center text-outline">...</span>
+            <% } %>
+          <% } %>
+
+          <% for (let page = windowStart; page <= windowEnd; page++) { %>
+            <a href="<%= buildUrl(page) %>" class="w-9 h-9 flex items-center justify-center rounded-lg border text-label-sm font-bold <%= page === pager.currentPage ? 'bg-primary text-on-primary border-primary shadow-sm' : 'bg-surface-container-lowest text-on-surface-variant border-border-light hover:text-primary hover:border-primary/40' %>">
+              <%= page %>
+            </a>
+          <% } %>
+
+          <% if (windowEnd < pager.totalPages) { %>
+            <% if (windowEnd < pager.totalPages - 1) { %>
+              <span class="w-7 text-center text-outline">...</span>
+            <% } %>
+            <a href="<%= buildUrl(pager.totalPages) %>" class="w-9 h-9 flex items-center justify-center rounded-lg border border-border-light bg-surface-container-lowest text-label-sm font-bold text-on-surface-variant hover:text-primary hover:border-primary/40"><%= pager.totalPages %></a>
+          <% } %>
+
+          <a href="<%= buildUrl(Math.min(pager.totalPages, pager.currentPage + 1)) %>" class="w-9 h-9 flex items-center justify-center rounded-lg border border-border-light bg-surface-container-lowest text-on-surface-variant hover:text-primary hover:border-primary/40 <%= !pager.hasNext ? 'pointer-events-none opacity-40' : '' %>" aria-label="Halaman berikutnya">
+            <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+          </a>
+        </nav>
+      <% } %>
+    </div>
+  </div>
+<% } %>

@@ -57,7 +57,7 @@
                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                     <div class="absolute bottom-3 left-3 text-white">
                         <div class="font-bold text-body-md"><%= city.name %></div>
-                        <div class="text-label-xs"><%= city.province %> â€¢ <%= city.propertyCount || 0 %> properti aktif</div>
+                        <div class="text-label-xs"><%= city.province %> &bull; <%= city.propertyCount || 0 %> properti aktif</div>
                     </div>
                 </div>
 
@@ -92,5 +92,9 @@
                 </div>
             </form>
         <% }) %>
+    </div>
+
+    <div class="bg-surface-container-lowest rounded-lg border border-border-light shadow-sm overflow-hidden">
+        <%- include('../partials/pagination', { pagination }) %>
     </div>
 </div>

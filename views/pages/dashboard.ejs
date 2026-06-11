@@ -62,7 +62,7 @@
     <!-- Listings Table / Grid Section -->
     <div class="app-surface rounded-lg overflow-hidden">
         <div class="p-6 border-b border-border-light">
-            <h2 class="text-title-lg font-bold text-on-surface">Listing Properti Saya</h2>
+            <h2 class="text-title-lg font-bold text-on-surface">Listing Properti Saya (<%= totalProperties %>)</h2>
         </div>
 
         <% if (properties.length === 0) { %>
@@ -254,6 +254,7 @@
                 <% }) %>
             </div>
         <% } %>
+        <%- include('../partials/pagination', { pagination: propertyPagination }) %>
     </div>
 
     <!-- Properti Terfavorit Saya Section (Client-side rendered via LocalStorage API) -->
@@ -283,7 +284,7 @@
     <!-- Invoices & Tagihan Section -->
     <div class="app-surface rounded-lg overflow-hidden">
         <div class="p-6 border-b border-border-light">
-            <h2 class="text-title-lg font-bold text-on-surface">Invoice & Tagihan Saya</h2>
+            <h2 class="text-title-lg font-bold text-on-surface">Invoice & Tagihan Saya (<%= totalInvoices %>)</h2>
         </div>
 
         <% if (typeof invoices === 'undefined' || invoices.length === 0) { %>
@@ -375,6 +376,7 @@
                 <% }) %>
             </div>
         <% } %>
+        <%- include('../partials/pagination', { pagination: invoicePagination }) %>
     </div>
 </div>
 

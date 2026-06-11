@@ -1,29 +1,27 @@
 const { PrismaClient } = require('@prisma/client');
 const { normalizeMetaTitle } = require('../utils/seoMeta');
+const { buildPagination } = require('../utils/pagination');
 const prisma = new PrismaClient();
 
 // GET /artikel
 exports.getBlogList = async (req, res, next) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = 9;
-    const skip = (page - 1) * limit;
+    const totalCount = await prisma.blogPost.count({
+      where: { status: 'published' }
+    });
+    const pagination = buildPagination(req.query, totalCount, {
+      defaultPerPage: 9,
+      perPageOptions: [9, 18, 36, 72]
+    });
 
     // Fetch published posts
-    const [posts, totalCount] = await prisma.$transaction([
-      prisma.blogPost.findMany({
-        where: { status: 'published' },
-        include: { category: true, author: true },
-        orderBy: { published_at: 'desc' },
-        skip,
-        take: limit
-      }),
-      prisma.blogPost.count({
-        where: { status: 'published' }
-      })
-    ]);
-
-    const totalPages = Math.ceil(totalCount / limit);
+    const posts = await prisma.blogPost.findMany({
+      where: { status: 'published' },
+      include: { category: true, author: true },
+      orderBy: { published_at: 'desc' },
+      skip: pagination.skip,
+      take: pagination.perPage
+    });
 
     // Fetch all categories for sidebar/filter
     const categories = await prisma.blogCategory.findMany({
@@ -48,8 +46,9 @@ exports.getBlogList = async (req, res, next) => {
       posts,
       categories,
       latestPosts,
-      currentPage: page,
-      totalPages,
+      currentPage: pagination.currentPage,
+      totalPages: pagination.totalPages,
+      pagination,
       activeCategory: null
     });
   } catch (error) {
@@ -61,10 +60,6 @@ exports.getBlogList = async (req, res, next) => {
 exports.getBlogListByCategory = async (req, res, next) => {
   try {
     const { slug } = req.params;
-    const page = parseInt(req.query.page) || 1;
-    const limit = 9;
-    const skip = (page - 1) * limit;
-
     // Find category by slug
     const category = await prisma.blogCategory.findUnique({
       where: { slug }
@@ -76,27 +71,24 @@ exports.getBlogListByCategory = async (req, res, next) => {
       return next(err);
     }
 
-    // Fetch published posts in category
-    const [posts, totalCount] = await prisma.$transaction([
-      prisma.blogPost.findMany({
-        where: {
-          status: 'published',
-          category_id: category.id
-        },
-        include: { category: true, author: true },
-        orderBy: { published_at: 'desc' },
-        skip,
-        take: limit
-      }),
-      prisma.blogPost.count({
-        where: {
-          status: 'published',
-          category_id: category.id
-        }
-      })
-    ]);
+    const where = {
+      status: 'published',
+      category_id: category.id
+    };
+    const totalCount = await prisma.blogPost.count({ where });
+    const pagination = buildPagination(req.query, totalCount, {
+      defaultPerPage: 9,
+      perPageOptions: [9, 18, 36, 72]
+    });
 
-    const totalPages = Math.ceil(totalCount / limit);
+    // Fetch published posts in category
+    const posts = await prisma.blogPost.findMany({
+      where,
+      include: { category: true, author: true },
+      orderBy: { published_at: 'desc' },
+      skip: pagination.skip,
+      take: pagination.perPage
+    });
 
     // Fetch all categories for sidebar/filter
     const categories = await prisma.blogCategory.findMany({
@@ -121,8 +113,9 @@ exports.getBlogListByCategory = async (req, res, next) => {
       posts,
       categories,
       latestPosts,
-      currentPage: page,
-      totalPages,
+      currentPage: pagination.currentPage,
+      totalPages: pagination.totalPages,
+      pagination,
       activeCategory: category
     });
   } catch (error) {

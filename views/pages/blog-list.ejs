@@ -94,28 +94,7 @@
                     <% }) %>
                 </div>
 
-                <!-- Pagination controls -->
-                <% if (totalPages > 1) { %>
-                    <div class="flex items-center justify-center gap-2 pt-6">
-                        <% if (currentPage > 1) { %>
-                            <a href="?page=<%= currentPage - 1 %>" class="p-2 bg-surface-container-lowest hover:bg-surface-container-low border border-border-light rounded-lg text-on-surface transition-all flex items-center">
-                                <span class="material-symbols-outlined text-[20px]">chevron_left</span>
-                            </a>
-                        <% } %>
-
-                        <% for (let i = 1; i <= totalPages; i++) { %>
-                            <a href="?page=<%= i %>" class="w-10 h-10 flex items-center justify-center font-bold text-label-md rounded-lg border transition-all <%= currentPage === i ? 'bg-primary text-on-primary border-primary shadow-sm' : 'bg-surface-container-lowest hover:bg-surface-container-low border-border-light text-on-surface-variant' %>">
-                                <%= i %>
-                            </a>
-                        <% } %>
-
-                        <% if (currentPage < totalPages) { %>
-                            <a href="?page=<%= currentPage + 1 %>" class="p-2 bg-surface-container-lowest hover:bg-surface-container-low border border-border-light rounded-lg text-on-surface transition-all flex items-center">
-                                <span class="material-symbols-outlined text-[20px]">chevron_right</span>
-                            </a>
-                        <% } %>
-                    </div>
-                <% } %>
+                <%- include('../partials/pagination', { pagination }) %>
             <% } %>
         </div>
 

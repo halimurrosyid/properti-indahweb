@@ -26,7 +26,7 @@
                     <span class="material-symbols-outlined text-[20px]">chat</span> Chat WhatsApp
                 </a>
                 <span class="bg-surface-container-high border border-border-light text-on-surface font-semibold text-label-md px-5 py-3 rounded-xl flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-[20px] text-primary">house</span> <%= properties.length %> Properti Aktif
+                    <span class="material-symbols-outlined text-[20px] text-primary">house</span> <%= totalProperties %> Properti Aktif
                 </span>
             </div>
         </div>
@@ -34,7 +34,7 @@
 
     <!-- Agent Listings Grid -->
     <div class="space-y-6">
-        <h2 class="text-title-lg font-black text-on-surface border-b border-border-light pb-3">Daftar Properti Oleh <%= agent.name %></h2>
+        <h2 class="text-title-lg font-black text-on-surface border-b border-border-light pb-3">Daftar Properti Oleh <%= agent.name %> (<%= totalProperties %>)</h2>
         
         <% if (properties.length === 0) { %>
             <div class="bg-surface-container-lowest border border-border-light p-16 text-center rounded-lg">
@@ -95,6 +95,7 @@
                     </div>
                 <% }) %>
             </div>
+            <%- include('../partials/pagination', { pagination }) %>
         <% } %>
     </div>
 </div>

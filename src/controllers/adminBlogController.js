@@ -8,6 +8,7 @@ const {
 } = require('../utils/dateTime');
 const { normalizeMetaTitle } = require('../utils/seoMeta');
 const { resolveUploadedFilePath } = require('../config/uploadPath');
+const { buildPagination } = require('../utils/pagination');
 
 // Helper to generate URL slug
 const generateSlug = async (title, currentId = null) => {
@@ -85,10 +86,17 @@ exports.getBlogList = async (req, res, next) => {
       where.source = source;
     }
 
+    const totalPosts = await prisma.blogPost.count({ where });
+    const pagination = buildPagination(req.query, totalPosts, {
+      defaultPerPage: 10
+    });
+
     const posts = await prisma.blogPost.findMany({
       where,
       include: { category: true, author: true, ai_job: true },
-      orderBy: { created_at: 'desc' }
+      orderBy: { created_at: 'desc' },
+      skip: pagination.skip,
+      take: pagination.perPage
     });
     const categories = await prisma.blogCategory.findMany({ orderBy: { name: 'asc' } });
 
@@ -96,6 +104,8 @@ exports.getBlogList = async (req, res, next) => {
       title: 'Manajemen Artikel Blog',
       posts,
       categories,
+      pagination,
+      totalPosts,
       statusFilter: status || '',
       sourceFilter: source || '',
       message: req.query.msg || null,
@@ -436,16 +446,25 @@ exports.postBulkUpdateBlogs = async (req, res, next) => {
 // GET /admin/blog/categories
 exports.getBlogCategories = async (req, res, next) => {
   try {
+    const totalCategories = await prisma.blogCategory.count();
+    const pagination = buildPagination(req.query, totalCategories, {
+      defaultPerPage: 10
+    });
+
     const categories = await prisma.blogCategory.findMany({
       include: {
         _count: { select: { posts: true } }
       },
-      orderBy: { name: 'asc' }
+      orderBy: { name: 'asc' },
+      skip: pagination.skip,
+      take: pagination.perPage
     });
 
     res.render('pages/admin/blog-categories', {
       title: 'Kelola Kategori Blog',
       categories,
+      pagination,
+      totalCategories,
       message: req.query.msg || null,
       error: req.query.err || null
     });
@@ -625,6 +644,12 @@ exports.postAiGenerate = async (req, res, next) => {
 // GET /admin/blog/ai-jobs
 exports.getAiJobs = async (req, res, next) => {
   try {
+    const totalJobs = await prisma.aiBlogJob.count();
+    const pagination = buildPagination(req.query, totalJobs, {
+      defaultPerPage: 5,
+      perPageOptions: [5, 10, 20, 50]
+    });
+
     const jobs = await prisma.aiBlogJob.findMany({
       include: {
         creator: true,
@@ -632,12 +657,16 @@ exports.getAiJobs = async (req, res, next) => {
           orderBy: { id: 'asc' }
         }
       },
-      orderBy: { created_at: 'desc' }
+      orderBy: { created_at: 'desc' },
+      skip: pagination.skip,
+      take: pagination.perPage
     });
 
     res.render('pages/admin/blog-ai-jobs', {
       title: 'Monitoring Batch Pekerjaan AI',
       jobs,
+      pagination,
+      totalJobs,
       message: req.query.msg || null,
       error: req.query.err || null
     });

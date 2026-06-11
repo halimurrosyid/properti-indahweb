@@ -227,40 +227,9 @@
                     <% }) %>
                 </div>
 
-                <!-- Pagination -->
-                <% if (totalPages > 1) { %>
-                    <div class="pt-8 flex justify-center">
-                        <nav class="pagination-links">
-                            <ul>
-                                <% if (currentPage > 1) { %>
-                                    <li>
-                                        <a href="/catalog?<%= new URLSearchParams({...filters, page: currentPage - 1}).toString() %>">
-                                            <span class="material-symbols-outlined text-title-sm">chevron_left</span>
-                                        </a>
-                                    </li>
-                                <% } %>
-                                
-                                <% for (let i = 1; i <= totalPages; i++) { %>
-                                    <li>
-                                        <% if (i === currentPage) { %>
-                                            <span class="current"><%= i %></span>
-                                        <% } else { %>
-                                            <a href="/catalog?<%= new URLSearchParams({...filters, page: i}).toString() %>"><%= i %></a>
-                                        <% } %>
-                                    </li>
-                                <% } %>
-
-                                <% if (currentPage < totalPages) { %>
-                                    <li>
-                                        <a href="/catalog?<%= new URLSearchParams({...filters, page: currentPage + 1}).toString() %>">
-                                            <span class="material-symbols-outlined text-title-sm">chevron_right</span>
-                                        </a>
-                                    </li>
-                                <% } %>
-                            </ul>
-                        </nav>
-                    </div>
-                <% } %>
+                <div class="pt-4">
+                    <%- include('../partials/pagination', { pagination }) %>
+                </div>
             <% } %>
         </section>
     </div>

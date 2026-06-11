@@ -31,7 +31,7 @@
     <!-- Queue Summary Card -->
     <div class="bg-surface-container-lowest rounded-lg border border-border-light shadow-sm overflow-hidden">
         <div class="p-6 border-b border-border-light flex justify-between items-center bg-surface-container-low/50">
-            <h2 class="text-title-lg font-bold text-on-surface">Antrean Menunggu Persetujuan (<%= properties.length %>)</h2>
+            <h2 class="text-title-lg font-bold text-on-surface">Antrean Menunggu Persetujuan (<%= totalPendingProperties %>)</h2>
         </div>
 
         <% if (properties.length === 0) { %>
@@ -177,12 +177,13 @@
                 <% }) %>
             </div>
         <% } %>
+        <%- include('../partials/pagination', { pagination: pendingPagination }) %>
     </div>
 
     <!-- Admin Invoices Management Section -->
     <div class="bg-surface-container-lowest rounded-lg border border-border-light shadow-sm overflow-hidden">
         <div class="p-6 border-b border-border-light flex justify-between items-center bg-surface-container-low/50">
-            <h2 class="text-title-lg font-bold text-on-surface">Persetujuan Bukti Bayar & Paket Iklan</h2>
+            <h2 class="text-title-lg font-bold text-on-surface">Persetujuan Bukti Bayar & Paket Iklan (<%= totalInvoices %>)</h2>
         </div>
 
         <% if (typeof invoices === 'undefined' || invoices.length === 0) { %>
@@ -319,5 +320,6 @@
                 <% }) %>
             </div>
         <% } %>
+        <%- include('../partials/pagination', { pagination: invoicePagination }) %>
     </div>
 </div>

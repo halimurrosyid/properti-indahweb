@@ -41,7 +41,7 @@
         <!-- Categories Table (Left 2 Columns) -->
         <div class="lg:col-span-2 bg-surface-container-lowest rounded-lg border border-border-light shadow-sm overflow-hidden">
             <div class="p-6 border-b border-border-light bg-surface-container-low/50">
-                <h2 class="text-title-lg font-bold text-on-surface">Kategori Terdaftar</h2>
+                <h2 class="text-title-lg font-bold text-on-surface">Kategori Terdaftar (<%= totalCategories %>)</h2>
             </div>
             
             <% if (categories.length === 0) { %>
@@ -90,6 +90,7 @@
                     </table>
                 </div>
             <% } %>
+            <%- include('../../partials/pagination', { pagination }) %>
         </div>
 
         <!-- Add Category Form (Right 1 Column) -->

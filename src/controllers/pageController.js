@@ -11,6 +11,7 @@ const {
   getEmailSetting,
   setEmailSetting
 } = require('../services/emailService');
+const { buildPagination } = require('../utils/pagination');
 
 const escapeXml = (value) => String(value || '')
   .replace(/&/g, '&amp;')
@@ -148,11 +149,6 @@ exports.getCatalog = async (req, res, next) => {
   try {
     const categories = await prisma.category.findMany();
 
-    // Filters from query parameters
-    const page = parseInt(req.query.page) || 1;
-    const limit = 12;
-    const skip = (page - 1) * limit;
-
     const keyword = req.query.keyword || '';
     const listingType = req.query.listingType || '';
     const category = req.query.category || '';
@@ -210,7 +206,10 @@ exports.getCatalog = async (req, res, next) => {
 
     // Query DB
     const totalResults = await prisma.property.count({ where });
-    const totalPages = Math.ceil(totalResults / limit);
+    const pagination = buildPagination(req.query, totalResults, {
+      defaultPerPage: 12,
+      perPageOptions: [12, 24, 48, 96]
+    });
 
     const properties = await prisma.property.findMany({
       where,
@@ -218,8 +217,8 @@ exports.getCatalog = async (req, res, next) => {
         category: true,
         images: true
       },
-      skip,
-      take: limit,
+      skip: pagination.skip,
+      take: pagination.perPage,
       orderBy: [
         { isFeatured: 'desc' }, // Featured listings first
         { createdAt: 'desc' }  // Then newest
@@ -232,8 +231,9 @@ exports.getCatalog = async (req, res, next) => {
       properties,
       categories,
       totalResults,
-      totalPages,
-      currentPage: page,
+      totalPages: pagination.totalPages,
+      currentPage: pagination.currentPage,
+      pagination,
       filters: req.query,
       submitted_success: req.query.submitted === '1',
       breadcrumbs: [
@@ -338,8 +338,26 @@ exports.getPasangIklan = async (req, res, next) => {
 exports.getUserDashboard = async (req, res, next) => {
   try {
     const userId = req.session.user.id;
+
+    const propertyWhere = { userId };
+    const invoiceWhere = { userId };
+    const [totalProperties, totalInvoices] = await Promise.all([
+      prisma.property.count({ where: propertyWhere }),
+      prisma.invoice.count({ where: invoiceWhere })
+    ]);
+    const propertyPagination = buildPagination(req.query, totalProperties, {
+      pageParam: 'propertyPage',
+      perPageParam: 'propertyPerPage',
+      defaultPerPage: 10
+    });
+    const invoicePagination = buildPagination(req.query, totalInvoices, {
+      pageParam: 'invoicePage',
+      perPageParam: 'invoicePerPage',
+      defaultPerPage: 10
+    });
+
     const properties = await prisma.property.findMany({
-      where: { userId },
+      where: propertyWhere,
       include: {
         category: true,
         images: true,
@@ -349,19 +367,27 @@ exports.getUserDashboard = async (req, res, next) => {
       },
       orderBy: {
         createdAt: 'desc'
-      }
+      },
+      skip: propertyPagination.skip,
+      take: propertyPagination.perPage
     });
 
     const invoices = await prisma.invoice.findMany({
-      where: { userId },
+      where: invoiceWhere,
       include: { property: true },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      skip: invoicePagination.skip,
+      take: invoicePagination.perPage
     });
 
     res.render('pages/dashboard', {
       title: 'Dasbor Agen Anda',
       properties,
       invoices,
+      propertyPagination,
+      invoicePagination,
+      totalProperties,
+      totalInvoices,
       message: req.query.msg || null
     });
   } catch (error) {
@@ -371,8 +397,24 @@ exports.getUserDashboard = async (req, res, next) => {
 
 exports.getAdminDashboard = async (req, res, next) => {
   try {
+    const pendingWhere = { status: 'PENDING' };
+    const [totalPendingProperties, totalInvoices] = await Promise.all([
+      prisma.property.count({ where: pendingWhere }),
+      prisma.invoice.count()
+    ]);
+    const pendingPagination = buildPagination(req.query, totalPendingProperties, {
+      pageParam: 'pendingPage',
+      perPageParam: 'pendingPerPage',
+      defaultPerPage: 10
+    });
+    const invoicePagination = buildPagination(req.query, totalInvoices, {
+      pageParam: 'invoicePage',
+      perPageParam: 'invoicePerPage',
+      defaultPerPage: 10
+    });
+
     const properties = await prisma.property.findMany({
-      where: { status: 'PENDING' },
+      where: pendingWhere,
       include: {
         category: true,
         images: true,
@@ -380,18 +422,26 @@ exports.getAdminDashboard = async (req, res, next) => {
       },
       orderBy: {
         createdAt: 'desc'
-      }
+      },
+      skip: pendingPagination.skip,
+      take: pendingPagination.perPage
     });
 
     const invoices = await prisma.invoice.findMany({
       include: { user: true, property: true },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      skip: invoicePagination.skip,
+      take: invoicePagination.perPage
     });
 
     res.render('pages/admin-dashboard', {
       title: 'Panel Peninjauan Admin',
       properties,
       invoices,
+      pendingPagination,
+      invoicePagination,
+      totalPendingProperties,
+      totalInvoices,
       message: req.query.msg || null
     });
   } catch (error) {
@@ -401,6 +451,10 @@ exports.getAdminDashboard = async (req, res, next) => {
 
 exports.getAdminLocations = async (req, res, next) => {
   try {
+    const totalCities = await prisma.popularCity.count();
+    const pagination = buildPagination(req.query, totalCities, {
+      defaultPerPage: 10
+    });
     let cities = await prisma.popularCity.findMany({
       orderBy: [
         { name: 'asc' }
@@ -410,7 +464,9 @@ exports.getAdminLocations = async (req, res, next) => {
 
     res.render('pages/admin-locations', {
       title: 'Kelola Lokasi Populer',
-      cities,
+      cities: cities.slice(pagination.skip, pagination.skip + pagination.perPage),
+      pagination,
+      totalCities,
       message: req.query.msg || null,
       error: req.query.err || null
     });
@@ -597,9 +653,16 @@ exports.getAdminEmails = async (req, res, next) => {
       settings[key] = await getEmailSetting(prisma, key, '');
     }
 
+    const totalLogs = await prisma.emailLog.count();
+    const pagination = buildPagination(req.query, totalLogs, {
+      defaultPerPage: 20,
+      perPageOptions: [20, 50, 100]
+    });
+
     const logs = await prisma.emailLog.findMany({
       orderBy: { createdAt: 'desc' },
-      take: 100,
+      skip: pagination.skip,
+      take: pagination.perPage,
       include: { user: true }
     });
 
@@ -607,6 +670,8 @@ exports.getAdminEmails = async (req, res, next) => {
       title: 'Kelola Email',
       settings,
       logs,
+      pagination,
+      totalLogs,
       smtpConfigured: isSmtpConfigured(),
       message: req.query.msg || null,
       error: req.query.err || null
@@ -694,11 +759,6 @@ exports.getSeoListingPage = async (req, res, next) => {
       breadcrumbs.push({ label: districtFilter, url: `/${baseSeo}/${cityParam}/${districtParam}` });
     }
 
-    // Build filters for view state pre-population
-    const page = parseInt(req.query.page) || 1;
-    const limit = 12;
-    const skip = (page - 1) * limit;
-
     const keyword = req.query.keyword || '';
     const minPrice = req.query.minPrice ? parseFloat(req.query.minPrice) : null;
     const maxPrice = req.query.maxPrice ? parseFloat(req.query.maxPrice) : null;
@@ -743,7 +803,10 @@ exports.getSeoListingPage = async (req, res, next) => {
 
     // Query DB
     const totalResults = await prisma.property.count({ where });
-    const totalPages = Math.ceil(totalResults / limit);
+    const pagination = buildPagination(req.query, totalResults, {
+      defaultPerPage: 12,
+      perPageOptions: [12, 24, 48, 96]
+    });
 
     const properties = await prisma.property.findMany({
       where,
@@ -751,8 +814,8 @@ exports.getSeoListingPage = async (req, res, next) => {
         category: true,
         images: true
       },
-      skip,
-      take: limit,
+      skip: pagination.skip,
+      take: pagination.perPage,
       orderBy: [
         { isFeatured: 'desc' },
         { createdAt: 'desc' }
@@ -787,8 +850,9 @@ exports.getSeoListingPage = async (req, res, next) => {
       properties,
       categories,
       totalResults,
-      totalPages,
-      currentPage: page,
+      totalPages: pagination.totalPages,
+      currentPage: pagination.currentPage,
+      pagination,
       filters: {
         keyword,
         listingType,
@@ -1049,20 +1113,31 @@ exports.getAgentProfile = async (req, res, next) => {
       return res.status(404).send('Agen tidak ditemukan.');
     }
 
+    const propertyWhere = {
+      userId: id,
+      status: 'AVAILABLE'
+    };
+    const totalProperties = await prisma.property.count({ where: propertyWhere });
+    const pagination = buildPagination(req.query, totalProperties, {
+      defaultPerPage: 12,
+      perPageOptions: [12, 24, 48, 96]
+    });
+
     const properties = await prisma.property.findMany({
-      where: {
-        userId: id,
-        status: 'AVAILABLE'
-      },
+      where: propertyWhere,
       include: { category: true, images: true },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      skip: pagination.skip,
+      take: pagination.perPage
     });
 
     res.render('pages/agent-profile', {
       title: `Profil Agen: ${agent.name}`,
       description: `Lihat listing properti aktif yang dipasarkan oleh ${agent.name} di 1rumah.biz.id.`,
       agent,
-      properties
+      properties,
+      pagination,
+      totalProperties
     });
   } catch (error) {
     next(error);

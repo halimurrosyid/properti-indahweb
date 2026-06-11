@@ -47,7 +47,7 @@
 
     <div class="bg-surface-container-lowest rounded-lg border border-border-light shadow-sm overflow-hidden">
         <div class="p-5 border-b border-border-light bg-surface-container-low/50">
-            <h2 class="text-title-md font-bold text-on-surface">Email Log Terbaru</h2>
+            <h2 class="text-title-md font-bold text-on-surface">Email Log (<%= totalLogs %>)</h2>
         </div>
         <% if (!logs || logs.length === 0) { %>
             <div class="p-8 text-center text-body-md text-on-surface-variant">Belum ada log email.</div>
@@ -84,5 +84,6 @@
                 </table>
             </div>
         <% } %>
+        <%- include('../partials/pagination', { pagination }) %>
     </div>
 </div>

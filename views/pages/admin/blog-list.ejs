@@ -1,4 +1,7 @@
 <div class="max-w-7xl mx-auto px-container-margin md:px-stack-lg py-10 space-y-8">
+    <%
+      const perPageSuffix = pagination ? `&${pagination.perPageParam}=${pagination.perPage}` : '';
+    %>
     <!-- Header Section -->
     <div class="bg-surface-container-lowest p-6 rounded-lg border border-border-light shadow-sm flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <div>
@@ -37,17 +40,17 @@
 
     <!-- Filter Buttons -->
     <div class="flex flex-wrap gap-2">
-        <a href="/admin/blog" class="px-4 py-2 rounded-full font-bold text-label-sm border transition-all <%= !statusFilter && !sourceFilter ? 'bg-primary text-on-primary border-primary' : 'bg-surface-container-lowest text-on-surface-variant border-border-light hover:bg-surface-container-low' %>">Semua</a>
-        <a href="/admin/blog?status=draft" class="px-4 py-2 rounded-full font-bold text-label-sm border transition-all <%= statusFilter === 'draft' ? 'bg-primary text-on-primary border-primary' : 'bg-surface-container-lowest text-on-surface-variant border-border-light hover:bg-surface-container-low' %>">Draft</a>
-        <a href="/admin/blog?status=published" class="px-4 py-2 rounded-full font-bold text-label-sm border transition-all <%= statusFilter === 'published' ? 'bg-primary text-on-primary border-primary' : 'bg-surface-container-lowest text-on-surface-variant border-border-light hover:bg-surface-container-low' %>">Published</a>
-        <a href="/admin/blog?status=scheduled" class="px-4 py-2 rounded-full font-bold text-label-sm border transition-all <%= statusFilter === 'scheduled' ? 'bg-primary text-on-primary border-primary' : 'bg-surface-container-lowest text-on-surface-variant border-border-light hover:bg-surface-container-low' %>">Scheduled</a>
-        <a href="/admin/blog?status=archived" class="px-4 py-2 rounded-full font-bold text-label-sm border transition-all <%= statusFilter === 'archived' ? 'bg-primary text-on-primary border-primary' : 'bg-surface-container-lowest text-on-surface-variant border-border-light hover:bg-surface-container-low' %>">Archived</a>
-        <a href="/admin/blog?status=deleted" class="px-4 py-2 rounded-full font-bold text-label-sm border transition-all <%= statusFilter === 'deleted' ? 'bg-primary text-on-primary border-primary' : 'bg-surface-container-lowest text-on-surface-variant border-border-light hover:bg-surface-container-low' %>">Deleted (Soft Delete)</a>
+        <a href="/admin/blog?<%= pagination.perPageParam %>=<%= pagination.perPage %>" class="px-4 py-2 rounded-full font-bold text-label-sm border transition-all <%= !statusFilter && !sourceFilter ? 'bg-primary text-on-primary border-primary' : 'bg-surface-container-lowest text-on-surface-variant border-border-light hover:bg-surface-container-low' %>">Semua</a>
+        <a href="/admin/blog?status=draft<%= perPageSuffix %>" class="px-4 py-2 rounded-full font-bold text-label-sm border transition-all <%= statusFilter === 'draft' ? 'bg-primary text-on-primary border-primary' : 'bg-surface-container-lowest text-on-surface-variant border-border-light hover:bg-surface-container-low' %>">Draft</a>
+        <a href="/admin/blog?status=published<%= perPageSuffix %>" class="px-4 py-2 rounded-full font-bold text-label-sm border transition-all <%= statusFilter === 'published' ? 'bg-primary text-on-primary border-primary' : 'bg-surface-container-lowest text-on-surface-variant border-border-light hover:bg-surface-container-low' %>">Published</a>
+        <a href="/admin/blog?status=scheduled<%= perPageSuffix %>" class="px-4 py-2 rounded-full font-bold text-label-sm border transition-all <%= statusFilter === 'scheduled' ? 'bg-primary text-on-primary border-primary' : 'bg-surface-container-lowest text-on-surface-variant border-border-light hover:bg-surface-container-low' %>">Scheduled</a>
+        <a href="/admin/blog?status=archived<%= perPageSuffix %>" class="px-4 py-2 rounded-full font-bold text-label-sm border transition-all <%= statusFilter === 'archived' ? 'bg-primary text-on-primary border-primary' : 'bg-surface-container-lowest text-on-surface-variant border-border-light hover:bg-surface-container-low' %>">Archived</a>
+        <a href="/admin/blog?status=deleted<%= perPageSuffix %>" class="px-4 py-2 rounded-full font-bold text-label-sm border transition-all <%= statusFilter === 'deleted' ? 'bg-primary text-on-primary border-primary' : 'bg-surface-container-lowest text-on-surface-variant border-border-light hover:bg-surface-container-low' %>">Deleted (Soft Delete)</a>
         
         <span class="border-l border-border-light mx-2 my-1"></span>
         
-        <a href="/admin/blog?source=manual" class="px-4 py-2 rounded-full font-bold text-label-sm border transition-all <%= sourceFilter === 'manual' ? 'bg-secondary text-on-secondary border-secondary' : 'bg-surface-container-lowest text-on-surface-variant border-border-light hover:bg-surface-container-low' %>">Manual</a>
-        <a href="/admin/blog?source=ai" class="px-4 py-2 rounded-full font-bold text-label-sm border transition-all <%= sourceFilter === 'ai' ? 'bg-secondary text-on-secondary border-secondary' : 'bg-surface-container-lowest text-on-surface-variant border-border-light hover:bg-surface-container-low' %>">AI Generated</a>
+        <a href="/admin/blog?source=manual<%= perPageSuffix %>" class="px-4 py-2 rounded-full font-bold text-label-sm border transition-all <%= sourceFilter === 'manual' ? 'bg-secondary text-on-secondary border-secondary' : 'bg-surface-container-lowest text-on-surface-variant border-border-light hover:bg-surface-container-low' %>">Manual</a>
+        <a href="/admin/blog?source=ai<%= perPageSuffix %>" class="px-4 py-2 rounded-full font-bold text-label-sm border transition-all <%= sourceFilter === 'ai' ? 'bg-secondary text-on-secondary border-secondary' : 'bg-surface-container-lowest text-on-surface-variant border-border-light hover:bg-surface-container-low' %>">AI Generated</a>
     </div>
 
     <form id="bulk-action-form" action="/admin/blog/bulk-update" method="POST" class="bg-surface-container-lowest rounded-lg border border-border-light shadow-sm p-4 flex flex-col lg:flex-row lg:items-end gap-3">
@@ -93,7 +96,7 @@
     <!-- Table Container -->
     <div class="bg-surface-container-lowest rounded-lg border border-border-light shadow-sm overflow-hidden">
         <div class="p-6 border-b border-border-light flex justify-between items-center bg-surface-container-low/50">
-            <h2 class="text-title-lg font-bold text-on-surface font-display-md">Daftar Artikel (<%= posts.length %>)</h2>
+            <h2 class="text-title-lg font-bold text-on-surface font-display-md">Daftar Artikel (<%= totalPosts %>)</h2>
         </div>
 
         <% if (posts.length === 0) { %>
@@ -151,11 +154,11 @@
                                 <td class="p-4 text-body-sm">
                                     <% if (post.source === 'ai') { %>
                                         <span class="bg-purple-100 text-purple-800 text-[11px] font-bold px-2 py-0.5 rounded border border-purple-200" title="Generated by Job Batch ID: <%= post.ai_job_id || '-' %>">
-                                            ðŸ¤– AI: Batch <%= post.ai_job?.batch_name || post.ai_job_id || '-' %>
+                                            AI: Batch <%= post.ai_job?.batch_name || post.ai_job_id || '-' %>
                                         </span>
                                     <% } else { %>
                                         <span class="bg-gray-100 text-gray-800 text-[11px] font-bold px-2 py-0.5 rounded border border-gray-200">
-                                            âœï¸ Manual
+                                            Manual
                                         </span>
                                     <% } %>
                                 </td>
@@ -263,7 +266,7 @@
 
                         <div class="bg-surface-subtle p-3 rounded-lg border border-border-light/50 space-y-1 text-body-sm text-on-surface-variant">
                             <div><strong>Kategori:</strong> <%= post.category ? post.category.name : '-' %></div>
-                            <div><strong>Sumber:</strong> <%= post.source === 'ai' ? `ðŸ¤– AI (Batch ${post.ai_job?.batch_name || post.ai_job_id || '-'})` : 'âœï¸ Manual' %></div>
+                            <div><strong>Sumber:</strong> <%= post.source === 'ai' ? `AI (Batch ${post.ai_job?.batch_name || post.ai_job_id || '-'})` : 'Manual' %></div>
                             <% if (post.status === 'scheduled') { %>
                                 <div><strong>Jadwal Publish:</strong> <span class="text-blue-600 font-semibold"><%= formatJakartaDateTime(post.scheduled_at, { dateStyle: 'short', timeStyle: 'short' }) %></span></div>
                             <% } else if (post.status === 'published') { %>
@@ -311,6 +314,7 @@
                 <% }) %>
             </div>
         <% } %>
+        <%- include('../../partials/pagination', { pagination }) %>
     </div>
 </div>
 

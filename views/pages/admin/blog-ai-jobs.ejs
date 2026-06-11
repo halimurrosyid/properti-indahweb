@@ -68,7 +68,7 @@
                                 <% } %>
                             </div>
                             <p class="text-body-xs text-outline font-semibold">
-                                Dibuat oleh: <%= job.creator?.name %> â€¢ Waktu: <%= formatJakartaDateTime(job.created_at, { dateStyle: 'short', timeStyle: 'medium' }) %>
+                                Dibuat oleh: <%= job.creator?.name %> &bull; Waktu: <%= formatJakartaDateTime(job.created_at, { dateStyle: 'short', timeStyle: 'medium' }) %>
                             </p>
                         </div>
 
@@ -125,7 +125,7 @@
                                                 <% } %>
                                                 <% if (item.status === 'failed' && item.error_message) { %>
                                                     <span class="text-body-xs text-error block mt-0.5 italic">
-                                                        âš ï¸ Gagal: <%= item.error_message %>
+                                                        Gagal: <%= item.error_message %>
                                                     </span>
                                                 <% } %>
                                             </td>
@@ -169,6 +169,9 @@
                     </div>
                 </div>
             <% }) %>
+        </div>
+        <div class="bg-surface-container-lowest rounded-lg border border-border-light shadow-sm overflow-hidden">
+            <%- include('../../partials/pagination', { pagination }) %>
         </div>
     <% } %>
 </div>
