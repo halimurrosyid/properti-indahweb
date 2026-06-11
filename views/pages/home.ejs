@@ -1,17 +1,17 @@
 <div class="space-y-section-gap pb-12">
     <!-- Hero Search Section -->
-    <section class="relative bg-gradient-to-br from-primary/10 via-primary/5 to-surface-subtle py-16 md:py-24 px-container-margin md:px-stack-lg border-b border-border-light">
+    <section class="relative overflow-hidden bg-surface py-16 md:py-24 px-container-margin md:px-stack-lg border-b border-border-light">
         <div class="max-w-4xl mx-auto text-center space-y-6">
-            <span class="text-primary text-label-md font-bold tracking-widest uppercase">Portal Properti Terlengkap</span>
-            <h1 class="text-headline-lg font-bold text-on-background leading-tight font-display-lg">
-                Temukan Rumah Impian Anda di 1rumah.biz.id
+            <span class="section-eyebrow">Portal Properti Indonesia</span>
+            <h1 class="text-headline-lg font-black text-on-background leading-tight">
+                Temukan properti terbaik di seluruh Indonesia
             </h1>
             <p class="text-body-lg text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
-                Portal terpercaya untuk membeli, menjual, dan menyewa properti di seluruh Indonesia. Cepat, ringan, dan gratis biaya pasang iklan.
+                Cari rumah, tanah, ruko, apartemen, dan properti sewa dari berbagai kota. 1rumah.biz.id dibuat ringan, jelas, dan mudah dipakai.
             </p>
 
             <!-- Search Form Card -->
-            <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-lg border border-border-light max-w-3xl mx-auto animate-fade-in text-left">
+            <div class="app-surface p-5 md:p-6 rounded-lg max-w-3xl mx-auto animate-fade-in text-left">
                 <form action="/catalog" method="GET" class="space-y-4">
                     <!-- Tipe Toggle: Jual or Sewa -->
                     <div class="flex gap-2 border-b border-border-light pb-4">
@@ -65,7 +65,7 @@
 
                     <button 
                         type="submit" 
-                        class="w-full bg-primary text-on-primary py-3 rounded-lg text-label-md font-semibold hover:bg-surface-tint transition-all shadow-sm flex justify-center items-center gap-2 cursor-pointer"
+                        class="primary-action w-full py-3 text-label-md cursor-pointer"
                     >
                         Temukan Properti <span class="material-symbols-outlined text-[18px]">search</span>
                     </button>
@@ -78,13 +78,13 @@
     <% if (typeof featuredProperties !== 'undefined' && featuredProperties.length > 0) { %>
         <section class="max-w-7xl mx-auto px-container-margin md:px-stack-lg space-y-6">
             <div class="mb-6">
-                <span class="text-primary text-label-sm font-bold tracking-wider uppercase">Pilihan Premium</span>
-                <h2 class="text-headline-md font-bold text-on-surface">Properti Unggulan Rekomendasi</h2>
+                <span class="section-eyebrow">Pilihan Premium</span>
+                <h2 class="text-headline-md font-black text-on-surface">Properti Unggulan Rekomendasi</h2>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <% featuredProperties.forEach(prop => { %>
-                    <div class="border-2 border-primary bg-primary/[0.01] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col relative">
+                    <div class="property-card border-2 border-primary bg-primary/[0.01] overflow-hidden flex flex-col relative">
                         <div class="absolute top-3 right-3 bg-primary text-white text-[11px] font-bold px-2 py-0.5 rounded-md shadow-sm flex items-center gap-0.5 z-20">
                             <span class="material-symbols-outlined text-[12px] font-bold">star</span> Premium
                         </div>
@@ -132,8 +132,8 @@
     <!-- Popular Locations Directory -->
     <section class="max-w-7xl mx-auto px-container-margin md:px-stack-lg space-y-6">
         <div class="mb-6">
-            <span class="text-primary text-label-sm font-bold tracking-wider uppercase">Jelajahi Lokasi</span>
-            <h2 class="text-headline-md font-bold text-on-surface">Cari Properti di Kota Populer</h2>
+            <span class="section-eyebrow">Jelajahi Lokasi</span>
+            <h2 class="text-headline-md font-black text-on-surface">Cari Properti di Kota Populer</h2>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -141,7 +141,7 @@
                 <% popularCities.forEach(city => { %>
                     <a 
                         href="/catalog?city=<%= city.name %>" 
-                        class="relative rounded-2xl h-40 overflow-hidden shadow-sm hover:shadow-md transition-all group block bg-surface-container"
+                        class="relative rounded-lg h-40 overflow-hidden shadow-sm hover:shadow-md transition-all group block bg-surface-container border border-border-light"
                     >
                         <!-- Dark gradient overlay for text readability -->
                         <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent z-10"></div>
@@ -172,8 +172,8 @@
     <section class="max-w-7xl mx-auto px-container-margin md:px-stack-lg space-y-6">
         <div class="flex justify-between items-end mb-4">
             <div>
-                <span class="text-primary text-label-sm font-bold tracking-wider uppercase">Terbaru</span>
-                <h2 class="text-headline-md font-bold text-on-surface">Properti Pilihan Terbaru</h2>
+                <span class="section-eyebrow">Terbaru</span>
+                <h2 class="text-headline-md font-black text-on-surface">Properti Pilihan Terbaru</h2>
             </div>
             <a href="/catalog" class="text-label-md font-bold text-primary flex items-center gap-1 hover:underline">
                 Lihat Semua Properti <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
@@ -181,14 +181,14 @@
         </div>
 
         <% if (typeof latestProperties === 'undefined' || latestProperties.length === 0) { %>
-            <div class="bg-surface-container-lowest border border-border-light p-12 text-center rounded-2xl">
+            <div class="bg-surface-container-lowest border border-border-light p-12 text-center rounded-lg">
                 <span class="material-symbols-outlined text-outline text-[48px] mb-2">house</span>
                 <p class="text-body-md text-on-surface-variant">Belum ada properti terdaftar.</p>
             </div>
         <% } else { %>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <% latestProperties.forEach(prop => { %>
-                    <div class="<%= prop.isFeatured ? 'border-2 border-primary bg-primary/[0.01]' : 'border border-border-light bg-surface-container-lowest' %> rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col relative">
+                    <div class="property-card <%= prop.isFeatured ? 'border-2 border-primary bg-primary/[0.01]' : '' %> overflow-hidden flex flex-col relative">
                         <% if (prop.isFeatured) { %>
                             <div class="absolute top-3 right-3 bg-primary text-white text-[11px] font-bold px-2 py-0.5 rounded-md shadow-sm flex items-center gap-0.5 z-20">
                                 <span class="material-symbols-outlined text-[12px] font-bold">star</span> Premium

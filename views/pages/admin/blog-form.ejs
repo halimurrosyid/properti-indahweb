@@ -15,7 +15,7 @@
     </nav>
 
     <!-- Header Section -->
-    <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm flex justify-between items-center">
+    <div class="bg-surface-container-lowest p-6 rounded-lg border border-border-light shadow-sm flex justify-between items-center">
         <div>
             <h1 class="text-headline-md font-bold text-on-surface"><%= pageTitle %></h1>
             <p class="text-body-sm text-on-surface-variant mt-1">Publikasikan konten yang informatif untuk meningkatkan jangkauan SEO organik portal properti Anda.</p>
@@ -31,7 +31,7 @@
     <% } %>
 
     <!-- Form -->
-    <div class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm overflow-hidden p-6 md:p-8">
+    <div class="bg-surface-container-lowest rounded-lg border border-border-light shadow-sm overflow-hidden p-6 md:p-8">
         <form action="<%= formAction %>" method="POST" enctype="multipart/form-data" class="space-y-6" id="blog-form">
             <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
 
@@ -147,7 +147,7 @@
                     <input type="text" id="meta_title" name="meta_title" placeholder="Maksimal 60 karakter agar optimal di mesin pencari Google" 
                            value="<%= isEdit ? post.meta_title : '' %>"
                            class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all">
-                    <span id="meta-title-warning" class="text-body-xs text-error hidden font-bold">⚠️ Panjang Meta Title melebihi batas ideal 60 karakter! Terpotong di Google SERP.</span>
+                    <span id="meta-title-warning" class="text-body-xs text-error hidden font-bold">âš ï¸ Panjang Meta Title melebihi batas ideal 60 karakter! Terpotong di Google SERP.</span>
                 </div>
 
                 <!-- Meta Description (with counter validation) -->
@@ -158,7 +158,7 @@
                     </div>
                     <textarea id="meta_description" name="meta_description" rows="3" placeholder="Tulis deskripsi rangkuman artikel maksimal 160 karakter untuk snippet hasil pencarian Google..."
                               class="w-full bg-surface-container-low text-on-surface border border-border-light rounded-xl px-4 py-3 text-body-md focus:border-primary focus:bg-surface-bright focus:outline-none transition-all"><%= isEdit ? post.meta_description : '' %></textarea>
-                    <span id="meta-description-warning" class="text-body-xs text-error hidden font-bold">⚠️ Panjang Meta Description melebihi batas ideal 160 karakter! Terpotong di Google SERP.</span>
+                    <span id="meta-description-warning" class="text-body-xs text-error hidden font-bold">âš ï¸ Panjang Meta Description melebihi batas ideal 160 karakter! Terpotong di Google SERP.</span>
                 </div>
             </div>
 

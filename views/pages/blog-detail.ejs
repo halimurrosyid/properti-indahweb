@@ -20,7 +20,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         
         <!-- Post Reader Container -->
-        <article class="lg:col-span-2 bg-surface-container-lowest rounded-3xl border border-border-light shadow-sm overflow-hidden p-6 md:p-10 space-y-6">
+        <article class="lg:col-span-2 bg-surface-container-lowest rounded-lg border border-border-light shadow-sm overflow-hidden p-6 md:p-10 space-y-6">
             
             <!-- Metadata & Status -->
             <div class="space-y-4">
@@ -44,12 +44,12 @@
                         <span class="material-symbols-outlined text-[16px]">calendar_today</span>
                         <%= new Date(post.published_at || post.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) %>
                     </span>
-                    <span>•</span>
+                    <span>â€¢</span>
                     <span class="flex items-center gap-1">
                         <span class="material-symbols-outlined text-[16px]">schedule</span>
                         <%= Math.max(2, Math.ceil((post.content || '').split(' ').length / 200)) %> mnt baca
                     </span>
-                    <span>•</span>
+                    <span>â€¢</span>
                     <span class="flex items-center gap-1">
                         <span class="material-symbols-outlined text-[16px]">person</span>
                         Oleh: Redaksi 1rumah.biz.id
@@ -66,7 +66,7 @@
 
             <!-- Featured Image -->
             <% if (post.featured_image) { %>
-                <div class="aspect-[16/9] w-full rounded-2xl overflow-hidden border border-border-light bg-surface-container-low shadow-sm">
+                <div class="aspect-[16/9] w-full rounded-lg overflow-hidden border border-border-light bg-surface-container-low shadow-sm">
                     <img loading="lazy" decoding="async" src="<%= post.featured_image %>" alt="<%= post.title %> - 1rumah.biz.id" title="<%= post.title %>" class="w-full h-full object-cover">
                 </div>
             <% } %>
@@ -94,7 +94,7 @@
         <aside class="space-y-6">
             
             <!-- CTA: Search Listings -->
-            <div class="bg-gradient-to-br from-primary to-primary/80 text-on-primary p-6 rounded-3xl border border-primary-variant/20 shadow-md space-y-4">
+            <div class="bg-gradient-to-br from-primary to-primary/80 text-on-primary p-6 rounded-lg border border-primary-variant/20 shadow-md space-y-4">
                 <span class="material-symbols-outlined text-[48px]">home_work</span>
                 <h3 class="text-title-lg font-extrabold tracking-tight">Cari Properti Impian Anda</h3>
                 <p class="text-body-sm opacity-90 leading-relaxed">
@@ -106,7 +106,7 @@
             </div>
 
             <!-- CTA: Quick Post Ad -->
-            <div class="bg-surface-container-lowest border border-border-light p-6 rounded-3xl shadow-sm space-y-4">
+            <div class="bg-surface-container-lowest border border-border-light p-6 rounded-lg shadow-sm space-y-4">
                 <span class="material-symbols-outlined text-primary text-[40px]">add_circle</span>
                 <h3 class="text-title-md font-extrabold text-on-surface">Ingin Pasang Iklan Properti?</h3>
                 <p class="text-body-sm text-on-surface-variant leading-relaxed">
@@ -118,7 +118,7 @@
             </div>
 
             <!-- Back Link -->
-            <a href="/artikel" class="flex items-center justify-center gap-1 py-3 px-4 bg-surface-container-lowest hover:bg-surface-container-low text-on-surface-variant hover:text-primary border border-border-light rounded-2xl text-label-sm font-bold transition-all shadow-sm">
+            <a href="/artikel" class="flex items-center justify-center gap-1 py-3 px-4 bg-surface-container-lowest hover:bg-surface-container-low text-on-surface-variant hover:text-primary border border-border-light rounded-lg text-label-sm font-bold transition-all shadow-sm">
                 <span class="material-symbols-outlined text-[16px]">arrow_back</span> Kembali ke Blog
             </a>
         </aside>
@@ -132,7 +132,7 @@
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <% relatedPosts.forEach(rp => { %>
-                    <a href="/artikel/<%= rp.slug %>" class="group bg-surface-container-lowest rounded-2xl border border-border-light overflow-hidden shadow-sm hover:shadow-md hover:border-primary/20 transition-all flex flex-col">
+                    <a href="/artikel/<%= rp.slug %>" class="group bg-surface-container-lowest rounded-lg border border-border-light overflow-hidden shadow-sm hover:shadow-md hover:border-primary/20 transition-all flex flex-col">
                         <% if (rp.featured_image) { %>
                             <img loading="lazy" decoding="async" src="<%= rp.featured_image %>" alt="<%= rp.title %> - 1rumah.biz.id" title="<%= rp.title %>" class="aspect-[16/10] w-full object-cover group-hover:scale-105 transition-transform duration-300">
                         <% } else { %>

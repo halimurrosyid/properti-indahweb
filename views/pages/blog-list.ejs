@@ -1,6 +1,6 @@
 <div class="max-w-7xl mx-auto px-container-margin md:px-stack-lg py-12 space-y-12">
     <!-- Hero Banner Section -->
-    <div class="relative bg-gradient-to-br from-primary/10 via-surface-container-low to-secondary/10 p-8 md:p-12 rounded-3xl border border-border-light shadow-sm overflow-hidden text-center space-y-4">
+    <div class="relative bg-gradient-to-br from-primary/10 via-surface-container-low to-secondary/10 p-8 md:p-12 rounded-lg border border-border-light shadow-sm overflow-hidden text-center space-y-4">
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_70%_120%,rgba(var(--color-primary-rgb),0.08),transparent_50%)]"></div>
         <span class="bg-primary/10 text-primary font-bold text-label-sm px-3.5 py-1.5 rounded-full uppercase tracking-wider">Blog 1rumah.biz.id</span>
         
@@ -27,7 +27,7 @@
         <!-- Posts List (Left 2 Columns) -->
         <div class="lg:col-span-2 space-y-8">
             <% if (posts.length === 0) { %>
-                <div class="bg-surface-container-lowest rounded-2xl border border-border-light p-12 text-center space-y-4 shadow-sm">
+                <div class="bg-surface-container-lowest rounded-lg border border-border-light p-12 text-center space-y-4 shadow-sm">
                     <span class="material-symbols-outlined text-[64px] text-outline">description_off</span>
                     <h3 class="text-title-lg font-bold text-on-surface">Belum Ada Artikel</h3>
                     <p class="text-body-md text-on-surface-variant max-w-xs mx-auto">
@@ -40,7 +40,7 @@
             <% } else { %>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <% posts.forEach(post => { %>
-                        <article class="group bg-surface-container-lowest rounded-2xl border border-border-light overflow-hidden shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-300 flex flex-col">
+                        <article class="group bg-surface-container-lowest rounded-lg border border-border-light overflow-hidden shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-300 flex flex-col">
                             
                             <!-- Featured Image -->
                             <a href="/artikel/<%= post.slug %>" class="block aspect-[16/10] overflow-hidden bg-surface-container-high relative">
@@ -67,7 +67,7 @@
                                             <span class="material-symbols-outlined text-[13px]">calendar_today</span>
                                             <%= new Date(post.published_at || post.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) %>
                                         </span>
-                                        <span>•</span>
+                                        <span>â€¢</span>
                                         <span class="flex items-center gap-0.5">
                                             <span class="material-symbols-outlined text-[13px]">schedule</span>
                                             <%= Math.max(2, Math.ceil((post.content || '').split(' ').length / 200)) %> mnt baca
@@ -123,7 +123,7 @@
         <aside class="space-y-8">
             
             <!-- Categories Widget -->
-            <div class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm p-6 space-y-4">
+            <div class="bg-surface-container-lowest rounded-lg border border-border-light shadow-sm p-6 space-y-4">
                 <h3 class="text-title-md font-bold text-on-surface border-b border-border-light pb-2 flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-primary text-[20px]">category</span> Kategori
                 </h3>
@@ -141,7 +141,7 @@
             </div>
 
             <!-- Recent Posts Widget -->
-            <div class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm p-6 space-y-4">
+            <div class="bg-surface-container-lowest rounded-lg border border-border-light shadow-sm p-6 space-y-4">
                 <h3 class="text-title-md font-bold text-on-surface border-b border-border-light pb-2 flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-primary text-[20px]">history</span> Artikel Terbaru
                 </h3>
@@ -165,7 +165,7 @@
             </div>
 
             <!-- Promotion Widget -->
-            <div class="bg-gradient-to-br from-primary to-primary/80 text-on-primary p-6 rounded-2xl border border-primary-variant/20 shadow-md space-y-4 text-center">
+            <div class="bg-gradient-to-br from-primary to-primary/80 text-on-primary p-6 rounded-lg border border-primary-variant/20 shadow-md space-y-4 text-center">
                 <span class="material-symbols-outlined text-[48px]">campaign</span>
                 <h3 class="text-title-md font-extrabold tracking-tight">Ingin Menjual Properti Lebih Cepat?</h3>
                 <p class="text-body-xs opacity-90 leading-relaxed">

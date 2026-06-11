@@ -1,5 +1,5 @@
 <div class="max-w-6xl mx-auto px-container-margin md:px-stack-lg py-10 space-y-8">
-    <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+    <div class="bg-surface-container-lowest p-6 rounded-lg border border-border-light shadow-sm flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <div>
             <h1 class="text-headline-md font-bold text-on-surface">Kelola Lokasi Populer</h1>
             <p class="text-body-sm text-on-surface-variant mt-1">Atur gambar kota pada bagian Jelajahi Lokasi. Urutan tampil otomatis mengikuti jumlah properti aktif terbanyak.</p>
@@ -16,7 +16,7 @@
         <div class="bg-red-50 text-red-800 border border-red-200 p-4 rounded-xl text-body-md font-medium"><%= error %></div>
     <% } %>
 
-    <div class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm overflow-hidden">
+    <div class="bg-surface-container-lowest rounded-lg border border-border-light shadow-sm overflow-hidden">
         <div class="p-5 border-b border-border-light bg-surface-container-low/50">
             <h2 class="text-title-md font-bold text-on-surface">Tambah Lokasi Baru</h2>
         </div>
@@ -45,7 +45,7 @@
 
     <div class="grid grid-cols-1 gap-4">
         <% cities.forEach(city => { %>
-            <form action="/admin/locations/<%= city.id %>" method="POST" enctype="multipart/form-data" class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm p-4 grid grid-cols-1 lg:grid-cols-[180px_1fr_auto] gap-4 items-center">
+            <form action="/admin/locations/<%= city.id %>" method="POST" enctype="multipart/form-data" class="bg-surface-container-lowest rounded-lg border border-border-light shadow-sm p-4 grid grid-cols-1 lg:grid-cols-[180px_1fr_auto] gap-4 items-center">
                 <div class="relative h-28 rounded-xl overflow-hidden bg-surface-container border border-border-light">
                     <% if (city.imageUrl) { %>
                         <img loading="lazy" decoding="async" src="<%= city.imageUrl %>" alt="Properti di <%= city.name %>" title="Properti di <%= city.name %>" class="absolute inset-0 w-full h-full object-cover">
@@ -57,7 +57,7 @@
                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                     <div class="absolute bottom-3 left-3 text-white">
                         <div class="font-bold text-body-md"><%= city.name %></div>
-                        <div class="text-label-xs"><%= city.province %> • <%= city.propertyCount || 0 %> properti aktif</div>
+                        <div class="text-label-xs"><%= city.province %> â€¢ <%= city.propertyCount || 0 %> properti aktif</div>
                     </div>
                 </div>
 

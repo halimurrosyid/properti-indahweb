@@ -14,12 +14,12 @@
     </nav>
 
     <!-- Header Info -->
-    <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+    <div class="quiet-surface rounded-lg p-5 md:p-6 flex flex-col md:flex-row justify-between items-start gap-4">
         <div>
             <span class="bg-primary/10 text-primary text-label-md font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                 <%= property.listingType === 'RENT' ? 'DISEWA' : 'DIJUAL' %>
             </span>
-            <h1 class="text-headline-md md:text-headline-lg font-bold text-on-surface mt-2 font-display-lg">
+            <h1 class="text-headline-md md:text-headline-lg font-black text-on-surface mt-2">
                 <%= property.title %>
             </h1>
             <p class="text-body-md text-outline mt-1.5 flex items-center gap-1">
@@ -43,7 +43,7 @@
     <!-- Image Gallery Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <!-- Large Main Photo -->
-        <div class="md:col-span-2 relative h-96 md:h-[480px] rounded-2xl overflow-hidden bg-surface-container shadow-sm">
+        <div class="md:col-span-2 relative h-96 md:h-[480px] rounded-lg overflow-hidden bg-surface-container shadow-sm border border-border-light">
             <% if (property.images && property.images.length > 0) { %>
                 <img loading="lazy" decoding="async" src="<%= property.images.find(img => img.isMain)?.url || property.images[0].url %>" alt="<%= property.title %> - 1rumah.biz.id" title="<%= property.title %>" class="object-cover w-full h-full" />
             <% } else { %>
@@ -65,11 +65,11 @@
             for (let i = 0; i < 4; i++) {
                 if (supports[i]) { 
             %>
-                    <div class="relative h-44 md:h-auto rounded-xl overflow-hidden bg-surface-container shadow-sm">
+                    <div class="relative h-44 md:h-auto rounded-lg overflow-hidden bg-surface-container shadow-sm border border-border-light">
                         <img loading="lazy" decoding="async" src="<%= supports[i].url %>" alt="<%= property.title %> - Foto <%= i + 1 %>" title="<%= property.title %> - Foto <%= i + 1 %>" class="object-cover w-full h-full hover:scale-105 transition-all duration-300" />
                     </div>
                 <% } else { %>
-                    <div class="hidden md:flex bg-surface-container-low rounded-xl border border-dashed border-border-light items-center justify-center text-outline">
+                    <div class="hidden md:flex bg-surface-container-low rounded-lg border border-dashed border-border-light items-center justify-center text-outline">
                         <span class="material-symbols-outlined text-[32px]">image</span>
                     </div>
                 <% } 
@@ -85,7 +85,7 @@
         <div class="md:col-span-2 space-y-8">
             
             <!-- Summary Details Grid Card -->
-            <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="app-surface p-6 rounded-lg grid grid-cols-2 md:grid-cols-4 gap-6">
                 <div class="flex gap-3 items-center">
                     <span class="material-symbols-outlined text-primary text-[32px] bg-primary/5 p-2 rounded-xl">square_foot</span>
                     <div>
@@ -117,7 +117,7 @@
             </div>
 
             <!-- Full Specifications Section -->
-            <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm space-y-4">
+            <div class="app-surface p-6 rounded-lg space-y-4">
                 <h2 class="text-title-lg font-bold text-on-surface pb-3 border-b border-border-light">Spesifikasi Detail</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-8 text-body-md">
                     <div class="flex justify-between py-1 border-b border-surface-subtle">
@@ -144,7 +144,7 @@
             </div>
 
             <!-- Description Body -->
-            <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm space-y-4">
+            <div class="app-surface p-6 rounded-lg space-y-4">
                 <h2 class="text-title-lg font-bold text-on-surface pb-3 border-b border-border-light">Deskripsi Properti</h2>
                 <div class="text-body-md text-on-surface-variant whitespace-pre-line leading-relaxed">
                     <%= property.description %>
@@ -153,7 +153,7 @@
 
             <!-- Facilities List Grid -->
             <% if (facilities && facilities.length > 0) { %>
-                <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm space-y-4">
+                <div class="app-surface p-6 rounded-lg space-y-4">
                     <h2 class="text-title-lg font-bold text-on-surface pb-3 border-b border-border-light">Fasilitas Properti</h2>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <% facilities.forEach(fac => { %>
@@ -168,7 +168,7 @@
 
             <!-- KPR Simulation Calculator (Only for Dijual/SALE) -->
             <% if (property.listingType === 'SALE') { %>
-                <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm space-y-6">
+                <div class="app-surface p-6 rounded-lg space-y-6">
                     <h2 class="text-title-lg font-bold text-on-surface pb-3 border-b border-border-light flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">calculate</span> Simulasi KPR Interaktif
                     </h2>
@@ -213,7 +213,7 @@
                         </div>
 
                         <!-- Right results card -->
-                        <div class="bg-primary/5 p-6 rounded-2xl border border-primary/10 flex flex-col justify-center items-center text-center space-y-4">
+                        <div class="bg-primary/5 p-6 rounded-lg border border-primary/10 flex flex-col justify-center items-center text-center space-y-4">
                             <span class="material-symbols-outlined text-[48px] text-primary">analytics</span>
                             <div>
                                 <p class="text-body-sm text-on-surface-variant font-bold uppercase tracking-wider">Estimasi Angsuran / Bulan</p>
@@ -287,7 +287,7 @@
         <!-- Sidebar info (Right Column) -->
         <aside class="space-y-6">
             <!-- Agent Info card -->
-            <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm text-center space-y-4">
+            <div class="app-surface p-6 rounded-lg text-center space-y-4 sticky top-24">
                 <div class="w-20 h-20 bg-primary/5 text-primary rounded-full flex items-center justify-center mx-auto border border-border-light">
                     <span class="material-symbols-outlined text-[40px]" style="font-variation-settings: 'FILL' 1;">account_circle</span>
                 </div>
@@ -370,7 +370,7 @@
             </div>
 
             <!-- Safety Tips Card -->
-            <div class="bg-primary/5 p-6 rounded-2xl border border-primary/10 space-y-3">
+            <div class="bg-primary/5 p-6 rounded-lg border border-primary/10 space-y-3">
                 <h4 class="text-title-md font-bold text-primary flex items-center gap-1.5">
                     <span class="material-symbols-outlined">security</span> Tips Keamanan Transaksi
                 </h4>

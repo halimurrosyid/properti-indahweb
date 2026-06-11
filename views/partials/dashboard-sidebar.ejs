@@ -17,10 +17,12 @@
 
 <div id="dashboard-sidebar-overlay" class="fixed inset-0 bg-black/40 z-40 hidden lg:hidden"></div>
 
-<aside id="dashboard-sidebar" class="fixed lg:sticky top-0 left-0 z-50 h-screen w-[280px] -translate-x-full lg:translate-x-0 bg-surface-container-lowest border-r border-border-light shadow-xl lg:shadow-none transition-transform duration-200 flex flex-col">
-    <div class="h-16 px-5 border-b border-border-light flex items-center justify-between">
+<aside id="dashboard-sidebar" class="fixed lg:sticky top-0 left-0 z-50 h-screen w-[280px] -translate-x-full lg:translate-x-0 bg-surface-container-lowest/95 backdrop-blur-xl border-r border-border-light shadow-xl lg:shadow-none transition-transform duration-200 flex flex-col">
+    <div class="h-[68px] px-5 border-b border-border-light flex items-center justify-between">
         <a href="/dashboard" class="text-title-lg font-black text-primary flex items-center gap-2 min-w-0">
-            <span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">real_estate_agent</span>
+            <span class="w-9 h-9 rounded-lg bg-primary text-on-primary flex items-center justify-center shadow-sm">
+                <span class="material-symbols-outlined text-[22px]" style="font-variation-settings: 'FILL' 1;">real_estate_agent</span>
+            </span>
             <span class="truncate">1rumah.biz.id</span>
         </a>
         <button type="button" id="dashboard-sidebar-close" class="lg:hidden w-9 h-9 rounded-lg border border-border-light text-on-surface-variant flex items-center justify-center">
@@ -28,7 +30,7 @@
         </button>
     </div>
 
-    <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+    <nav class="flex-1 overflow-y-auto px-3 py-5 space-y-6">
         <div class="space-y-1">
             <p class="px-3 pb-2 text-label-xs font-bold text-outline uppercase tracking-wider">Workspace</p>
             <a href="/dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md font-bold transition-all <%= linkClass(isActive('/dashboard')) %>">
@@ -98,7 +100,7 @@
         </div>
     </nav>
 
-    <div class="border-t border-border-light p-4">
+    <div class="border-t border-border-light p-4 bg-surface-subtle/70">
         <div class="flex items-center gap-3 min-w-0">
             <div class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-black">
                 <%= currentUser && currentUser.name ? currentUser.name.trim().charAt(0).toUpperCase() : 'U' %>

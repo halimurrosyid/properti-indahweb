@@ -1,13 +1,13 @@
 <% 
 const isLoggedIn = typeof user !== 'undefined' && user;
 %>
-<div class="max-w-3xl mx-auto px-container-margin md:px-stack-lg py-12">
-    <div class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm p-6 md:p-8 space-y-8">
+<div class="max-w-4xl mx-auto px-container-margin md:px-stack-lg py-12">
+    <div class="app-surface rounded-lg p-6 md:p-8 space-y-8">
         
         <!-- Header Title -->
         <div class="text-center space-y-2">
-            <span class="text-primary text-label-md font-bold tracking-widest uppercase">Gratis Tanpa Biaya</span>
-            <h1 class="text-headline-md md:text-headline-lg font-bold text-on-surface">Pasang Iklan Properti Anda</h1>
+            <span class="section-eyebrow">Gratis Tanpa Biaya</span>
+            <h1 class="text-headline-md md:text-headline-lg font-black text-on-surface">Pasang Iklan Properti Anda</h1>
             <p class="text-body-sm md:text-body-md text-on-surface-variant max-w-lg mx-auto">
                 Isi detail properti Anda secara lengkap. Iklan Anda akan langsung ditinjau oleh Admin dan tayang secara luas.
             </p>
@@ -189,7 +189,7 @@ const isLoggedIn = typeof user !== 'undefined' && user;
                 <h3 class="text-headline-sm font-bold text-on-surface">Langkah 5: Informasi Akun Anda</h3>
 
                 <% if (isLoggedIn) { %>
-                    <div class="bg-primary/5 border border-primary/10 rounded-xl p-5 space-y-2">
+                <div class="bg-primary/5 border border-primary/10 rounded-lg p-5 space-y-2">
                         <p class="text-body-md text-on-surface font-semibold">Anda terdaftar sebagai:</p>
                         <div class="flex items-center gap-3">
                             <span class="material-symbols-outlined text-[36px] text-primary">account_circle</span>
@@ -201,7 +201,7 @@ const isLoggedIn = typeof user !== 'undefined' && user;
                         <p class="text-body-xs text-outline pt-2 border-t border-border-light">Properti ini akan dipasang langsung di bawah akun aktif Anda.</p>
                     </div>
                 <% } else { %>
-                    <div class="bg-surface-subtle p-5 rounded-xl border border-border-light space-y-4">
+                    <div class="bg-surface-subtle p-5 rounded-lg border border-border-light space-y-4">
                         <div class="flex items-center gap-2 text-primary font-bold text-title-md">
                             <span class="material-symbols-outlined">person_add</span> Buat Akun Agen Baru
                         </div>
@@ -263,7 +263,7 @@ const isLoggedIn = typeof user !== 'undefined' && user;
                         const price = Number(pkg.price || 0);
                         const benefits = parseBenefits(pkg.benefits).slice(0, 3);
                     %>
-                        <div class="package-card border-2 <%= isSelected ? 'border-primary bg-primary/5' : 'border-border-light' %> p-5 rounded-2xl cursor-pointer transition-all hover:shadow-md relative" data-code="<%= pkg.code %>" onclick="selectPackage('<%= pkg.code %>')">
+                        <div class="package-card property-card border-2 <%= isSelected ? 'border-primary bg-primary/5' : 'border-border-light' %> p-5 cursor-pointer relative" data-code="<%= pkg.code %>" onclick="selectPackage('<%= pkg.code %>')">
                             <% if (pkg.isPopular) { %>
                                 <span class="absolute top-3 right-3 bg-primary text-on-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Populer</span>
                             <% } %>

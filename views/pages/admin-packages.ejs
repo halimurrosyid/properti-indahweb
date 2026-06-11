@@ -1,5 +1,5 @@
 <div class="max-w-6xl mx-auto px-container-margin md:px-stack-lg py-10 space-y-8">
-    <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+    <div class="bg-surface-container-lowest p-6 rounded-lg border border-border-light shadow-sm flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <div>
             <h1 class="text-headline-md font-bold text-on-surface">Kelola Paket Iklan</h1>
             <p class="text-body-sm text-on-surface-variant mt-1">Atur harga, durasi, limit iklan aktif, dan benefit paket yang tampil ke pengguna.</p>
@@ -18,7 +18,7 @@
 
     <div class="grid grid-cols-1 gap-4">
         <% packages.forEach(pkg => { %>
-            <form action="/admin/packages/<%= pkg.id %>" method="POST" class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm overflow-hidden">
+            <form action="/admin/packages/<%= pkg.id %>" method="POST" class="bg-surface-container-lowest rounded-lg border border-border-light shadow-sm overflow-hidden">
                 <div class="p-5 border-b border-border-light bg-surface-container-low/50 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                     <div>
                         <div class="flex items-center gap-2 flex-wrap">
@@ -75,7 +75,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-surface-subtle border border-border-light rounded-2xl p-4 space-y-4 self-start">
+                    <div class="bg-surface-subtle border border-border-light rounded-lg p-4 space-y-4 self-start">
                         <h3 class="text-title-sm font-bold text-on-surface">Efek Paket</h3>
                         <label class="flex items-center gap-2 text-label-sm font-bold text-on-surface">
                             <input type="checkbox" name="isFeatured" <%= pkg.isFeatured ? 'checked' : '' %> class="accent-primary">

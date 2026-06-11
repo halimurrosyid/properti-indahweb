@@ -1,6 +1,6 @@
 <div class="max-w-3xl mx-auto px-container-margin md:px-stack-lg py-12 space-y-8">
     <!-- Invoice Card -->
-    <div class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm overflow-hidden">
+    <div class="bg-surface-container-lowest rounded-lg border border-border-light shadow-sm overflow-hidden">
         <!-- Invoice Header -->
         <div class="p-6 md:p-8 bg-surface-container-low border-b border-border-light flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
@@ -90,7 +90,7 @@
             </div>
 
             <% if (packageDetails || invoice.durationDays || invoice.listingLimit || invoice.featuredDurationDays || invoice.grantsAgent) { %>
-                <div class="bg-surface-subtle border border-border-light rounded-2xl p-5 space-y-4">
+                <div class="bg-surface-subtle border border-border-light rounded-lg p-5 space-y-4">
                     <h3 class="text-title-md font-bold text-on-surface flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">workspace_premium</span>
                         Detail Benefit Paket
@@ -193,7 +193,7 @@
                     </div>
                 </div>
             <% } else if (invoice.status === 'PAID') { %>
-                <div class="bg-green-500/5 p-6 rounded-2xl border border-green-500/10 flex items-start gap-4">
+                <div class="bg-green-500/5 p-6 rounded-lg border border-green-500/10 flex items-start gap-4">
                     <span class="material-symbols-outlined text-[36px] text-green-600">verified_user</span>
                     <div>
                         <h4 class="text-title-md font-bold text-green-800">Pembayaran Terverifikasi</h4>
@@ -209,7 +209,7 @@
                     </div>
                 </div>
             <% } else if (invoice.status === 'REJECTED') { %>
-                <div class="bg-red-500/5 p-6 rounded-2xl border border-red-500/10 flex items-start gap-4">
+                <div class="bg-red-500/5 p-6 rounded-lg border border-red-500/10 flex items-start gap-4">
                     <span class="material-symbols-outlined text-[36px] text-red-600">error</span>
                     <div>
                         <h4 class="text-title-md font-bold text-red-800">Bukti Pembayaran Ditolak</h4>

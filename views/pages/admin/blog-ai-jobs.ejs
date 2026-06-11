@@ -9,7 +9,7 @@
     </nav>
 
     <!-- Header Section -->
-    <div class="bg-surface-container-lowest p-6 rounded-2xl border border-border-light shadow-sm flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+    <div class="bg-surface-container-lowest p-6 rounded-lg border border-border-light shadow-sm flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <div>
             <h1 class="text-headline-md font-bold text-on-surface">Monitoring Batch Pekerjaan AI</h1>
             <p class="text-body-sm text-on-surface-variant mt-1">Pantau status generate artikel masal secara langsung, batalkan pekerjaan, atau coba ulang artikel yang gagal.</p>
@@ -40,14 +40,14 @@
 
     <!-- Jobs Monitor List -->
     <% if (jobs.length === 0) { %>
-        <div class="bg-surface-container-lowest rounded-2xl border border-border-light p-12 text-center space-y-4 shadow-sm">
+        <div class="bg-surface-container-lowest rounded-lg border border-border-light p-12 text-center space-y-4 shadow-sm">
             <span class="material-symbols-outlined text-[64px] text-outline">dns</span>
             <p class="text-body-md text-on-surface-variant max-w-sm mx-auto">Tidak ada riwayat pekerjaan AI yang terdaftar di sistem. Silakan buat batch baru.</p>
         </div>
     <% } else { %>
         <div class="space-y-8">
             <% jobs.forEach((job, index) => { %>
-                <div class="bg-surface-container-lowest rounded-3xl border border-border-light shadow-sm overflow-hidden">
+                <div class="bg-surface-container-lowest rounded-lg border border-border-light shadow-sm overflow-hidden">
                     
                     <!-- Job Header info bar -->
                     <div class="p-6 border-b border-border-light bg-surface-container-low/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -68,7 +68,7 @@
                                 <% } %>
                             </div>
                             <p class="text-body-xs text-outline font-semibold">
-                                Dibuat oleh: <%= job.creator?.name %> • Waktu: <%= formatJakartaDateTime(job.created_at, { dateStyle: 'short', timeStyle: 'medium' }) %>
+                                Dibuat oleh: <%= job.creator?.name %> â€¢ Waktu: <%= formatJakartaDateTime(job.created_at, { dateStyle: 'short', timeStyle: 'medium' }) %>
                             </p>
                         </div>
 
@@ -125,7 +125,7 @@
                                                 <% } %>
                                                 <% if (item.status === 'failed' && item.error_message) { %>
                                                     <span class="text-body-xs text-error block mt-0.5 italic">
-                                                        ⚠️ Gagal: <%= item.error_message %>
+                                                        âš ï¸ Gagal: <%= item.error_message %>
                                                     </span>
                                                 <% } %>
                                             </td>

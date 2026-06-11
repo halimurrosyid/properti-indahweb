@@ -2,14 +2,14 @@
     <!-- Header -->
     <div class="text-center space-y-3">
         <span class="text-primary text-label-md font-bold tracking-widest uppercase">Paket & Layanan Iklan</span>
-        <h1 class="text-headline-md md:text-headline-lg font-bold text-on-surface font-display-lg">Maksimalkan Penjualan Properti Anda</h1>
+        <h1 class="text-headline-md md:text-headline-lg font-bold text-on-surface">Maksimalkan Penjualan Properti Anda</h1>
         <p class="text-body-sm md:text-body-md text-on-surface-variant max-w-xl mx-auto">
             Dapatkan eksposur dan jangkauan calon pembeli lebih tinggi dengan meletakkan properti Anda di slot Featured Premium kami.
         </p>
     </div>
 
     <!-- Alur Pemesanan Visual Guide -->
-    <div class="bg-primary/5 rounded-3xl border border-primary/10 p-6 md:p-8 max-w-4xl mx-auto">
+    <div class="bg-primary/5 rounded-lg border border-primary/10 p-6 md:p-8 max-w-4xl mx-auto">
         <h3 class="text-title-md font-bold text-primary text-center mb-6 uppercase tracking-wider">Alur Cara Pemasangan & Pemilihan Paket</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div class="space-y-2">
@@ -36,7 +36,7 @@
             const benefits = parseBenefits(pkg.benefits);
             const price = Number(pkg.price || 0);
         %>
-            <div class="bg-surface-container-lowest p-6 rounded-2xl <%= pkg.isPopular ? 'border-2 border-primary shadow-md' : 'border border-border-light shadow-sm' %> flex flex-col justify-between hover:shadow-md transition-all relative overflow-hidden">
+            <div class="bg-surface-container-lowest p-6 rounded-lg <%= pkg.isPopular ? 'border-2 border-primary shadow-md' : 'border border-border-light shadow-sm' %> flex flex-col justify-between hover:shadow-md transition-all relative overflow-hidden">
                 <% if (pkg.isPopular) { %>
                     <div class="absolute top-3 right-3 bg-primary text-on-primary font-bold text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">Terpopuler</div>
                 <% } %>
