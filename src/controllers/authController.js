@@ -1,5 +1,10 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
+const {
+  sendVerificationEmail,
+  sendPasswordResetEmail,
+  consumeEmailToken
+} = require('../services/emailService');
 
 const prisma = new PrismaClient();
 
@@ -132,6 +137,8 @@ exports.postRegister = async (req, res, next) => {
       }
     });
 
+    await sendVerificationEmail(prisma, user);
+
     // Auto-login after successful registration
     req.session.user = {
       id: user.id,
@@ -142,6 +149,133 @@ exports.postRegister = async (req, res, next) => {
     };
 
     res.redirect('/dashboard');
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getVerifyEmail = async (req, res, next) => {
+  try {
+    const user = await consumeEmailToken(prisma, req.query.token, 'verify_email');
+    if (!user) {
+      return res.render('pages/auth-message', {
+        title: 'Verifikasi Email Gagal',
+        heading: 'Link verifikasi tidak valid',
+        message: 'Link verifikasi mungkin sudah digunakan atau kedaluwarsa.',
+        actionHref: '/dashboard',
+        actionLabel: 'Kembali ke Dashboard'
+      });
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { emailVerifiedAt: new Date() }
+    });
+
+    res.render('pages/auth-message', {
+      title: 'Email Terverifikasi',
+      heading: 'Email berhasil diverifikasi',
+      message: 'Terima kasih, email akun Anda sudah aktif dan terverifikasi.',
+      actionHref: '/dashboard',
+      actionLabel: 'Buka Dashboard'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getForgotPassword = (req, res) => {
+  res.render('pages/forgot-password', {
+    title: 'Lupa Kata Sandi',
+    error: null,
+    message: null
+  });
+};
+
+exports.postForgotPassword = async (req, res, next) => {
+  try {
+    const identity = String(req.body.identity || '').trim();
+    if (!identity) {
+      return res.render('pages/forgot-password', {
+        title: 'Lupa Kata Sandi',
+        error: 'Masukkan email atau nomor WhatsApp akun Anda.',
+        message: null
+      });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: identity },
+          { whatsapp: identity }
+        ]
+      }
+    });
+
+    if (user && user.email) {
+      await sendPasswordResetEmail(prisma, user);
+    }
+
+    res.render('pages/forgot-password', {
+      title: 'Lupa Kata Sandi',
+      error: null,
+      message: 'Jika akun ditemukan dan memiliki email, link reset kata sandi sudah dikirim.'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getResetPassword = async (req, res) => {
+  res.render('pages/reset-password', {
+    title: 'Reset Kata Sandi',
+    token: req.query.token || '',
+    error: null
+  });
+};
+
+exports.postResetPassword = async (req, res, next) => {
+  try {
+    const { token, password, passwordConfirmation } = req.body;
+
+    if (!password || password.length < 6) {
+      return res.render('pages/reset-password', {
+        title: 'Reset Kata Sandi',
+        token,
+        error: 'Kata sandi minimal berisi 6 karakter.'
+      });
+    }
+
+    if (password !== passwordConfirmation) {
+      return res.render('pages/reset-password', {
+        title: 'Reset Kata Sandi',
+        token,
+        error: 'Konfirmasi kata sandi tidak sama.'
+      });
+    }
+
+    const user = await consumeEmailToken(prisma, token, 'reset_password');
+    if (!user) {
+      return res.render('pages/reset-password', {
+        title: 'Reset Kata Sandi',
+        token: '',
+        error: 'Link reset tidak valid atau sudah kedaluwarsa.'
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword }
+    });
+
+    res.render('pages/auth-message', {
+      title: 'Kata Sandi Diperbarui',
+      heading: 'Kata sandi berhasil diperbarui',
+      message: 'Silakan masuk menggunakan kata sandi baru Anda.',
+      actionHref: '/auth/login',
+      actionLabel: 'Masuk'
+    });
   } catch (error) {
     next(error);
   }

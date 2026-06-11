@@ -25,6 +25,8 @@ router.post('/admin/locations/:id', isAuthenticated, isSuperAdmin, ...locationUp
 router.post('/admin/locations/:id/delete', isAuthenticated, isSuperAdmin, pageController.postDeleteAdminLocation);
 router.get('/admin/packages', isAuthenticated, isSuperAdmin, pageController.getAdminPackages);
 router.post('/admin/packages/:id', isAuthenticated, isSuperAdmin, pageController.postUpdateAdminPackage);
+router.get('/admin/emails', isAuthenticated, isSuperAdmin, pageController.getAdminEmails);
+router.post('/admin/emails/settings', isAuthenticated, isSuperAdmin, pageController.postAdminEmailSettings);
 
 // Invoice & Packages Page
 router.get('/invoice/:invoiceNumber', isAuthenticated, pageController.getInvoiceDetail);

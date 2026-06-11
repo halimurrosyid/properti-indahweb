@@ -6,6 +6,11 @@ const {
   serializeBenefits,
   formatPackagePrice
 } = require('../services/adPackageService');
+const {
+  isSmtpConfigured,
+  getEmailSetting,
+  setEmailSetting
+} = require('../services/emailService');
 
 const escapeXml = (value) => String(value || '')
   .replace(/&/g, '&amp;')
@@ -569,6 +574,58 @@ exports.postUpdateAdminPackage = async (req, res, next) => {
     });
 
     res.redirect('/admin/packages?msg=Paket iklan berhasil diperbarui.');
+  } catch (error) {
+    next(error);
+  }
+};
+
+const emailSettingKeys = [
+  'admin_notification_email',
+  'email_verify_enabled',
+  'email_reset_enabled',
+  'email_listing_notifications_enabled',
+  'email_invoice_notifications_enabled',
+  'email_package_notifications_enabled',
+  'email_admin_notifications_enabled',
+  'email_lead_notifications_enabled'
+];
+
+exports.getAdminEmails = async (req, res, next) => {
+  try {
+    const settings = {};
+    for (const key of emailSettingKeys) {
+      settings[key] = await getEmailSetting(prisma, key, '');
+    }
+
+    const logs = await prisma.emailLog.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+      include: { user: true }
+    });
+
+    res.render('pages/admin-emails', {
+      title: 'Kelola Email',
+      settings,
+      logs,
+      smtpConfigured: isSmtpConfigured(),
+      message: req.query.msg || null,
+      error: req.query.err || null
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.postAdminEmailSettings = async (req, res, next) => {
+  try {
+    await setEmailSetting(prisma, 'admin_notification_email', String(req.body.admin_notification_email || '').trim());
+
+    const booleanKeys = emailSettingKeys.filter(key => key !== 'admin_notification_email');
+    for (const key of booleanKeys) {
+      await setEmailSetting(prisma, key, req.body[key] === 'on' ? 'true' : 'false');
+    }
+
+    res.redirect('/admin/emails?msg=Pengaturan email berhasil disimpan.');
   } catch (error) {
     next(error);
   }

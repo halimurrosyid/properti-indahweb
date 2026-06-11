@@ -8,21 +8,65 @@ generator client {
 }
 
 model User {
-  id                Int         @id @default(autoincrement())
-  email             String?     @unique
+  id                Int          @id @default(autoincrement())
+  email             String?      @unique
+  emailVerifiedAt   DateTime?
   password          String
   name              String
-  whatsapp          String      @unique
-  role              String      @default("user") // super_admin, admin, agent, user
-  listingLimit      Int         @default(1)
+  whatsapp          String       @unique
+  role              String       @default("user") // super_admin, admin, agent, user
+  listingLimit      Int          @default(1)
   agentUntil        DateTime?
   activePackageCode String?
   properties        Property[]
   invoices          Invoice[]
   blogPosts         BlogPost[]
   blogJobs          AiBlogJob[]
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  emailTokens       EmailToken[]
+  emailLogs         EmailLog[]
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+}
+
+model EmailToken {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, type])
+  @@index([expiresAt])
+}
+
+model EmailLog {
+  id           Int       @id @default(autoincrement())
+  userId       Int?
+  user         User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  recipient    String
+  subject      String
+  template     String
+  status       String    @default("pending")
+  eventKey     String?   @unique
+  errorMessage String?   @db.Text
+  metadata     String?   @db.Text
+  sentAt       DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([status])
+  @@index([template])
+  @@index([createdAt])
+}
+
+model EmailSetting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Category {

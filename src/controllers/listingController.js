@@ -6,6 +6,13 @@ const {
   findPackageForCheckout,
   packageSnapshot
 } = require('../services/adPackageService');
+const {
+  sendVerificationEmail,
+  notifyUser,
+  notifyAdmins,
+  isTemplateEnabled,
+  getSiteUrl
+} = require('../services/emailService');
 
 const prisma = new PrismaClient();
 
@@ -154,6 +161,7 @@ exports.postQuickPost = async (req, res, next) => {
           role: 'user'
         }
       });
+      await sendVerificationEmail(prisma, newUser);
 
       // Automatically sign in the user
       req.session.user = {
@@ -316,12 +324,50 @@ exports.postQuickPost = async (req, res, next) => {
       }
     });
 
-    if (amount > 0) {
-      res.redirect(`/invoice/${invoiceNumber}`);
-    } else {
+    let redirectTarget = `/invoice/${invoiceNumber}`;
+    if (amount === 0) {
       await applyPaidPackageBenefits(invoice, { publishProperty: false });
-      res.redirect('/dashboard?submitted=1');
+      redirectTarget = '/dashboard?submitted=1';
     }
+
+    const freshUser = await prisma.user.findUnique({ where: { id: userId } });
+    if (amount > 0 && freshUser && await isTemplateEnabled(prisma, 'email_invoice_notifications_enabled')) {
+      await notifyUser(
+        prisma,
+        freshUser,
+        'invoice_created',
+        `Invoice ${invoice.invoiceNumber} berhasil dibuat`,
+        'Invoice paket iklan dibuat',
+        `Invoice ${invoice.invoiceNumber} untuk ${selectedPackage.name} sudah dibuat. Silakan unggah bukti pembayaran agar paket diproses.`,
+        { label: 'Lihat Invoice', url: `${getSiteUrl()}/invoice/${invoice.invoiceNumber}` },
+        { invoiceId: invoice.id, propertyId: newProperty.id }
+      );
+    }
+
+    if (freshUser && await isTemplateEnabled(prisma, 'email_listing_notifications_enabled')) {
+      await notifyUser(
+        prisma,
+        freshUser,
+        'listing_submitted',
+        'Listing properti Anda masuk review',
+        'Listing masuk antrean review',
+        `Listing "${newProperty.title}" sudah kami terima dan sedang menunggu peninjauan admin.`,
+        { label: 'Buka Dashboard', url: `${getSiteUrl()}/dashboard` },
+        { propertyId: newProperty.id }
+      );
+    }
+
+    await notifyAdmins(
+      prisma,
+      'admin_listing_review',
+      'Listing baru perlu direview',
+      'Listing baru perlu direview',
+      `Listing "${newProperty.title}" baru dibuat dan menunggu persetujuan admin.`,
+      { label: 'Buka Panel Admin', url: `${getSiteUrl()}/admin/dashboard` },
+      { propertyId: newProperty.id }
+    );
+
+    res.redirect(redirectTarget);
   } catch (error) {
     next(error);
   }
@@ -331,7 +377,8 @@ exports.trackWaClick = async (req, res, next) => {
   try {
     const id = parseInt(req.params.id || req.params.listingId);
     const property = await prisma.property.findUnique({
-      where: { id }
+      where: { id },
+      include: { user: true }
     });
 
     if (!property) {
@@ -352,7 +399,7 @@ exports.trackWaClick = async (req, res, next) => {
       device = 'Tablet';
     }
 
-    await prisma.whatsappTrack.create({
+    const track = await prisma.whatsappTrack.create({
       data: {
         propertyId: id,
         ipHash,
@@ -361,6 +408,19 @@ exports.trackWaClick = async (req, res, next) => {
         device
       }
     });
+
+    if (await isTemplateEnabled(prisma, 'email_lead_notifications_enabled', false)) {
+      await notifyUser(
+        prisma,
+        property.user,
+        'lead_click',
+        'Ada calon pembeli membuka WhatsApp',
+        'Lead WhatsApp baru',
+        `Seseorang membuka chat WhatsApp dari listing "${property.title}".`,
+        { label: 'Lihat Listing', url: `${getSiteUrl()}/property/${property.slug}` },
+        { propertyId: property.id, trackId: track.id }
+      );
+    }
 
     // Redirect to WhatsApp chat link
     const cleanedPhone = property.whatsappNumber.replace(/\D/g, '');
@@ -378,10 +438,23 @@ exports.trackWaClick = async (req, res, next) => {
 exports.approveProperty = async (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
-    await prisma.property.update({
+    const property = await prisma.property.update({
       where: { id },
-      data: { status: 'AVAILABLE' }
+      data: { status: 'AVAILABLE' },
+      include: { user: true }
     });
+    if (await isTemplateEnabled(prisma, 'email_listing_notifications_enabled')) {
+      await notifyUser(
+        prisma,
+        property.user,
+        'listing_approved',
+        'Listing properti disetujui',
+        'Listing Anda sudah tayang',
+        `Listing "${property.title}" sudah disetujui dan tayang di 1rumah.biz.id.`,
+        { label: 'Lihat Listing', url: `${getSiteUrl()}/property/${property.slug}` },
+        { propertyId: property.id }
+      );
+    }
     res.redirect('/admin/dashboard?msg=Properti berhasil disetujui.');
   } catch (error) {
     next(error);
@@ -391,10 +464,23 @@ exports.approveProperty = async (req, res, next) => {
 exports.rejectProperty = async (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
-    await prisma.property.update({
+    const property = await prisma.property.update({
       where: { id },
-      data: { status: 'REJECTED' }
+      data: { status: 'REJECTED' },
+      include: { user: true }
     });
+    if (await isTemplateEnabled(prisma, 'email_listing_notifications_enabled')) {
+      await notifyUser(
+        prisma,
+        property.user,
+        'listing_rejected',
+        'Listing properti ditolak',
+        'Listing belum bisa ditayangkan',
+        `Listing "${property.title}" belum bisa ditayangkan. Silakan cek kembali data/foto listing atau hubungi admin.`,
+        { label: 'Buka Dashboard', url: `${getSiteUrl()}/dashboard` },
+        { propertyId: property.id }
+      );
+    }
     res.redirect('/admin/dashboard?msg=Properti berhasil ditolak.');
   } catch (error) {
     next(error);
@@ -491,6 +577,23 @@ exports.approveInvoice = async (req, res, next) => {
 
     await applyPaidPackageBenefits(invoice);
 
+    const paidInvoice = await prisma.invoice.findUnique({
+      where: { id },
+      include: { user: true, property: true }
+    });
+    if (paidInvoice && await isTemplateEnabled(prisma, 'email_invoice_notifications_enabled')) {
+      await notifyUser(
+        prisma,
+        paidInvoice.user,
+        'invoice_paid',
+        'Pembayaran paket diterima',
+        'Pembayaran terverifikasi',
+        `Pembayaran invoice ${paidInvoice.invoiceNumber} untuk ${paidInvoice.packageName} sudah diterima. Benefit paket sudah aktif.`,
+        paidInvoice.property ? { label: 'Lihat Listing', url: `${getSiteUrl()}/property/${paidInvoice.property.slug}` } : { label: 'Buka Dashboard', url: `${getSiteUrl()}/dashboard` },
+        { invoiceId: paidInvoice.id, propertyId: paidInvoice.propertyId }
+      );
+    }
+
     res.redirect('/admin/dashboard?msg=Invoice berhasil disetujui.');
   } catch (error) {
     next(error);
@@ -500,10 +603,23 @@ exports.approveInvoice = async (req, res, next) => {
 exports.rejectInvoice = async (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
-    await prisma.invoice.update({
+    const invoice = await prisma.invoice.update({
       where: { id },
-      data: { status: 'REJECTED' }
+      data: { status: 'REJECTED' },
+      include: { user: true }
     });
+    if (await isTemplateEnabled(prisma, 'email_invoice_notifications_enabled')) {
+      await notifyUser(
+        prisma,
+        invoice.user,
+        'invoice_rejected',
+        'Bukti pembayaran ditolak',
+        'Bukti pembayaran perlu diperbaiki',
+        `Bukti pembayaran invoice ${invoice.invoiceNumber} belum valid. Silakan unggah ulang bukti pembayaran yang benar.`,
+        { label: 'Lihat Invoice', url: `${getSiteUrl()}/invoice/${invoice.invoiceNumber}` },
+        { invoiceId: invoice.id }
+      );
+    }
     res.redirect('/admin/dashboard?msg=Invoice berhasil ditolak.');
   } catch (error) {
     next(error);
@@ -538,6 +654,15 @@ exports.postUploadProof = async (req, res, next) => {
         status: 'PENDING' // Keep/reset pending for admin approval
       }
     });
+    await notifyAdmins(
+      prisma,
+      'admin_payment_review',
+      'Bukti pembayaran baru perlu dicek',
+      'Bukti pembayaran baru',
+      `Bukti pembayaran untuk invoice ${invoice.invoiceNumber} sudah diunggah dan menunggu verifikasi.`,
+      { label: 'Buka Panel Admin', url: `${getSiteUrl()}/admin/dashboard` },
+      { invoiceId: invoice.id }
+    );
 
     res.redirect(`/invoice/${invoiceNumber}?msg=Bukti pembayaran berhasil diunggah. Menunggu konfirmasi admin.`);
   } catch (error) {
@@ -608,7 +733,7 @@ exports.postEditListing = async (req, res, next) => {
     const facilitiesStr = Array.isArray(facilities) ? facilities.join(', ') : (facilities || '');
     const region = await resolveRegionSelection({ provinceCode, cityCode, districtCode });
 
-    await prisma.property.update({
+    const updatedProperty = await prisma.property.update({
       where: { id },
       data: {
         title,
@@ -633,7 +758,8 @@ exports.postEditListing = async (req, res, next) => {
         districtCode: region.districtCode,
         shortAddress,
         status: 'PENDING'  // Back to review queue after edit
-      }
+      },
+      include: { user: true }
     });
 
     // Handle new image uploads
@@ -666,6 +792,28 @@ exports.postEditListing = async (req, res, next) => {
     const redirectTarget = (req.session.user.role === 'super_admin' || req.session.user.role === 'admin')
       ? '/admin/dashboard?msg=Listing berhasil diperbarui dan menunggu persetujuan ulang.'
       : '/dashboard?msg=Listing berhasil diperbarui dan menunggu persetujuan admin.';
+
+    if (await isTemplateEnabled(prisma, 'email_listing_notifications_enabled')) {
+      await notifyUser(
+        prisma,
+        updatedProperty.user,
+        'listing_updated_review',
+        'Listing Anda masuk review ulang',
+        'Listing diperbarui',
+        `Listing "${updatedProperty.title}" berhasil diperbarui dan masuk antrean review admin.`,
+        { label: 'Buka Dashboard', url: `${getSiteUrl()}/dashboard` },
+        { propertyId: updatedProperty.id }
+      );
+    }
+    await notifyAdmins(
+      prisma,
+      'admin_listing_updated_review',
+      'Listing diperbarui dan perlu review',
+      'Listing diperbarui',
+      `Listing "${updatedProperty.title}" diperbarui dan menunggu review ulang.`,
+      { label: 'Buka Panel Admin', url: `${getSiteUrl()}/admin/dashboard` },
+      { propertyId: updatedProperty.id }
+    );
 
     res.redirect(redirectTarget);
   } catch (error) {

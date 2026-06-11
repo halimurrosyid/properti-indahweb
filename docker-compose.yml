@@ -36,6 +36,13 @@ services:
       - RUN_BACKGROUND_JOBS=true
       - AI_BLOG_SCHEDULED_PIPELINE_LIMIT=5
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_SECURE=${SMTP_SECURE:-false}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - SMTP_FROM=${SMTP_FROM:-1rumah.biz.id <noreply@1rumah.biz.id>}
+      - ADMIN_NOTIFICATION_EMAIL=${ADMIN_NOTIFICATION_EMAIL:-admin@1rumah.biz.id}
       - SUPER_ADMIN_EMAIL=admin@1rumah.biz.id
       - SUPER_ADMIN_PASSWORD=adminindahweb
       - SUPER_ADMIN_NAME=Super Admin 1rumah.biz.id

@@ -1,0 +1,14 @@
+<div class="max-w-md mx-auto px-container-margin md:px-stack-lg py-12">
+    <div class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm p-6 md:p-8 space-y-6 text-center">
+        <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary mx-auto flex items-center justify-center">
+            <span class="material-symbols-outlined text-[32px]">mark_email_read</span>
+        </div>
+        <div class="space-y-2">
+            <h1 class="text-headline-sm font-bold text-on-surface"><%= heading %></h1>
+            <p class="text-body-md text-on-surface-variant"><%= message %></p>
+        </div>
+        <a href="<%= actionHref %>" class="inline-flex bg-primary text-on-primary py-3 px-5 rounded-lg text-label-md font-bold hover:bg-surface-tint transition-all shadow-sm">
+            <%= actionLabel %>
+        </a>
+    </div>
+</div>

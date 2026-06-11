@@ -2,6 +2,7 @@ require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const { seedDefaultPackages } = require('../src/services/adPackageService');
+const { setEmailSetting } = require('../src/services/emailService');
 
 const prisma = new PrismaClient();
 
@@ -54,6 +55,22 @@ async function main() {
     }
   });
   console.log(`Upserted admin user: ${adminUser.email}`);
+
+  const defaultEmailSettings = {
+    admin_notification_email: adminEmail,
+    email_verify_enabled: 'true',
+    email_reset_enabled: 'true',
+    email_listing_notifications_enabled: 'true',
+    email_invoice_notifications_enabled: 'true',
+    email_package_notifications_enabled: 'true',
+    email_admin_notifications_enabled: 'true',
+    email_lead_notifications_enabled: 'false'
+  };
+
+  for (const [key, value] of Object.entries(defaultEmailSettings)) {
+    await setEmailSetting(prisma, key, value);
+  }
+  console.log('Upserted default email settings.');
 
   // Find Category IDs
   const rumahCat = categories.find(c => c.slug === 'rumah');
