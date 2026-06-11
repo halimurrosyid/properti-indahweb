@@ -17,7 +17,7 @@
     const isLoginActive = pathNow.startsWith('/auth/login') || pathNow.startsWith('/auth/register');
 %>
 <header class="bg-surface-container-lowest/92 w-full border-b border-border-light/80 shadow-sm sticky top-0 z-50 backdrop-blur-xl">
-    <div class="flex justify-between items-center w-full px-container-margin md:px-stack-lg max-w-7xl mx-auto h-[68px]">
+    <div class="grid grid-cols-[auto_1fr_auto] items-center w-full px-container-margin md:px-stack-lg max-w-7xl mx-auto h-[72px] gap-6">
         <!-- Brand Logo -->
         <a href="/" class="text-headline-sm font-black text-primary flex items-center gap-2.5">
             <span class="w-9 h-9 rounded-lg bg-primary text-on-primary flex items-center justify-center shadow-sm">
@@ -27,7 +27,7 @@
         </a>
         
         <!-- Desktop Navigation Links -->
-        <nav class="hidden md:flex items-center gap-1">
+        <nav class="hidden md:flex items-center justify-center gap-2 min-w-0">
             <a href="/catalog?listingType=SALE" class="<%= navClass(isSaleActive) %>">Dijual</a>
             <a href="/catalog?listingType=RENT" class="<%= navClass(isRentActive) %>">Disewa</a>
             <a href="/catalog" class="<%= navClass(isCatalogActive) %>">Katalog</a>
@@ -36,15 +36,15 @@
         </nav>
 
         <!-- Action Controls -->
-        <div class="hidden md:flex items-center gap-3">
+        <div class="hidden md:flex items-center justify-end gap-3.5 min-w-max">
             <% if (isLoggedInHeader) { %>
                 <details class="account-menu relative">
-                    <summary class="list-none cursor-pointer border border-border-light bg-surface-container-lowest hover:bg-primary/5 hover:border-primary/20 text-on-surface-variant hover:text-primary transition-all rounded-full pl-2 pr-3 py-1.5 flex items-center gap-2 shadow-sm">
-                        <span class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-label-md font-black">
+                    <summary class="list-none cursor-pointer border border-border-light bg-surface-container-lowest hover:bg-primary/5 hover:border-primary/25 text-on-surface-variant hover:text-primary transition-all rounded-full pl-1.5 pr-3 py-1.5 flex items-center gap-2.5 shadow-sm">
+                        <span class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-label-md font-black shrink-0">
                             <%= user.name ? user.name.trim().charAt(0).toUpperCase() : 'U' %>
                         </span>
-                        <span class="max-w-36 truncate text-label-md font-bold"><%= user.name %></span>
-                        <span class="material-symbols-outlined text-[18px]">expand_more</span>
+                        <span class="max-w-40 truncate text-label-md font-bold"><%= user.name %></span>
+                        <span class="material-symbols-outlined text-[18px] shrink-0">expand_more</span>
                     </summary>
                     <div class="absolute right-0 mt-2 w-56 rounded-lg border border-border-light bg-surface-container-lowest shadow-xl overflow-hidden z-50">
                         <div class="px-4 py-3 border-b border-border-light bg-surface-subtle">
