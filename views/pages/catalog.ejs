@@ -183,7 +183,7 @@
                             <% } %>
                             <div class="relative h-48 w-full bg-surface-container">
                                 <% if (prop.images && prop.images.length > 0) { %>
-                                    <img src="<%= prop.images[0].url %>" alt="<%= prop.title %> - 1rumah.biz.id" title="<%= prop.title %>" class="object-cover w-full h-full" />
+                                    <img loading="lazy" decoding="async" src="<%= prop.images[0].url %>" alt="<%= prop.title %> - 1rumah.biz.id" title="<%= prop.title %>" class="object-cover w-full h-full" />
                                 <% } else { %>
                                     <div class="absolute inset-0 bg-primary/5 flex items-center justify-center text-primary/45">
                                         <span class="material-symbols-outlined text-[48px]">image</span>

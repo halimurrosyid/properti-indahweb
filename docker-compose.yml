@@ -30,6 +30,9 @@ services:
       - SITE_URL=${SITE_URL:-https://1rumah.biz.id}
       - TZ=Asia/Jakarta
       - UPLOAD_DIR=/data/uploads
+      - UPLOAD_MAX_SIZE_MB=${UPLOAD_MAX_SIZE_MB:-1}
+      - UPLOAD_RAW_MAX_SIZE_MB=${UPLOAD_RAW_MAX_SIZE_MB:-8}
+      - IMAGE_MAX_WIDTH=${IMAGE_MAX_WIDTH:-1920}
       - RUN_BACKGROUND_JOBS=true
       - AI_BLOG_SCHEDULED_PIPELINE_LIMIT=5
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}

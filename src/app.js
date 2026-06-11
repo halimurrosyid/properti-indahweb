@@ -13,6 +13,7 @@ const publicBlogRouter = require('./routers/publicBlogRouter');
 const adminBlogRouter = require('./routers/adminBlogRouter');
 const { formatJakartaDateTime, formatJakartaDateInputValue } = require('./utils/dateTime');
 const { ensureUploadDir } = require('./config/uploadPath');
+const { targetMB, rawMaxMB } = require('./middlewares/imageUploadMiddleware');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -74,8 +75,13 @@ app.set('layout', 'layout'); // views/layout.ejs
 // ====================================================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static(ensureUploadDir()));
-app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use('/uploads', express.static(ensureUploadDir(), {
+  maxAge: '30d',
+  immutable: true
+}));
+app.use(express.static(path.join(__dirname, '..', 'public'), {
+  maxAge: isProd ? '7d' : 0
+}));
 
 // ====================================================
 // Session Configuration
@@ -101,6 +107,8 @@ app.use((req, res, next) => {
   res.locals.formatJakartaDateTime = formatJakartaDateTime;
   res.locals.formatJakartaDateInputValue = formatJakartaDateInputValue;
   res.locals.currentPath = req.path;
+  res.locals.uploadTargetMB = targetMB;
+  res.locals.uploadRawMaxMB = rawMaxMB;
 
   const isDashboardPath = req.path === '/dashboard'
     || req.path === '/pasang-iklan'
@@ -153,6 +161,14 @@ app.use((req, res) => {
 // ====================================================
 app.use((err, req, res, next) => {
   console.error('[ERROR]', err.stack || err.message || err);
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).render('pages/500', {
+      title: 'Ukuran Gambar Terlalu Besar',
+      description: `Ukuran file mentah terlalu besar. Rekomendasi hasil akhir ${targetMB}MB, dan sistem menerima file mentah sampai ${rawMaxMB}MB untuk dikompres otomatis.`,
+      errorMessage: isProd ? null : err.message
+    });
+  }
+
   res.status(err.status || 500).render('pages/500', {
     title: 'Terjadi Kesalahan Server',
     description: 'Server mengalami masalah. Silakan coba lagi.',

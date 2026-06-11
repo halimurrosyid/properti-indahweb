@@ -32,6 +32,7 @@
             <div class="space-y-1">
                 <label class="text-label-sm font-bold text-on-surface block">Upload Gambar</label>
                 <input type="file" name="imageFile" accept="image/*" required class="w-full text-body-xs border border-border-light rounded-xl px-3 py-2 bg-surface-container-low">
+                <p class="text-label-xs text-outline mt-1">Rekomendasi maksimal <%= uploadTargetMB %>MB; dikompres otomatis.</p>
             </div>
             <div class="flex items-center gap-3">
                 <label class="flex items-center gap-1 text-label-sm font-bold text-on-surface">
@@ -47,7 +48,7 @@
             <form action="/admin/locations/<%= city.id %>" method="POST" enctype="multipart/form-data" class="bg-surface-container-lowest rounded-2xl border border-border-light shadow-sm p-4 grid grid-cols-1 lg:grid-cols-[180px_1fr_auto] gap-4 items-center">
                 <div class="relative h-28 rounded-xl overflow-hidden bg-surface-container border border-border-light">
                     <% if (city.imageUrl) { %>
-                        <img src="<%= city.imageUrl %>" alt="Properti di <%= city.name %>" title="Properti di <%= city.name %>" class="absolute inset-0 w-full h-full object-cover">
+                        <img loading="lazy" decoding="async" src="<%= city.imageUrl %>" alt="Properti di <%= city.name %>" title="Properti di <%= city.name %>" class="absolute inset-0 w-full h-full object-cover">
                     <% } else { %>
                         <div class="absolute inset-0 flex items-center justify-center text-outline">
                             <span class="material-symbols-outlined text-[36px]">image</span>
@@ -72,6 +73,7 @@
                     <div class="space-y-1">
                         <label class="text-label-sm font-bold text-on-surface block">Upload Gambar Pengganti</label>
                         <input type="file" name="imageFile" accept="image/*" class="w-full text-body-xs border border-border-light rounded-xl px-3 py-2 bg-surface-container-low">
+                        <p class="text-label-xs text-outline mt-1">Rekomendasi maksimal <%= uploadTargetMB %>MB; dikompres otomatis.</p>
                     </div>
                     <div class="flex items-center gap-3">
                         <div class="space-y-1 min-w-32">

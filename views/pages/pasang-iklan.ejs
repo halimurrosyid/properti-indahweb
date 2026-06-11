@@ -174,13 +174,13 @@ const isLoggedIn = typeof user !== 'undefined' && user;
                 <div class="space-y-1.5">
                     <label class="text-label-sm font-bold text-on-surface-variant">Foto Utama Properti <span class="text-error">*</span></label>
                     <input type="file" name="mainImage" accept="image/*" required class="w-full px-4 py-2.5 rounded-lg border border-border-light outline-none bg-surface-bright text-body-md">
-                    <p class="text-label-xs text-outline">Foto utama akan muncul sebagai thumbnail pencarian dan slider depan.</p>
+                    <p class="text-label-xs text-outline">Foto utama akan muncul sebagai thumbnail pencarian. Rekomendasi ukuran akhir maksimal <%= uploadTargetMB %>MB; file lebih besar akan dikompres otomatis ke WebP.</p>
                 </div>
 
                 <div class="space-y-1.5">
                     <label class="text-label-sm font-bold text-on-surface-variant">Foto Galeri Pendukung (Bisa pilih beberapa sekaligus)</label>
                     <input type="file" name="galleryImages" accept="image/*" multiple class="w-full px-4 py-2.5 rounded-lg border border-border-light outline-none bg-surface-bright text-body-md">
-                    <p class="text-label-xs text-outline">Unggah beberapa foto interior, toilet, garasi, maupun jalan depan rumah.</p>
+                    <p class="text-label-xs text-outline">Unggah beberapa foto interior, toilet, garasi, maupun jalan depan rumah. File mentah diterima sampai <%= uploadRawMaxMB %>MB dan dikompres otomatis.</p>
                 </div>
             </div>
 

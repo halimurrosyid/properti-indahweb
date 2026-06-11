@@ -1,33 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
 const pageController = require('../controllers/pageController');
 const listingController = require('../controllers/listingController');
 const regionController = require('../controllers/regionController');
 const { isAuthenticated, isAdmin, isSuperAdmin } = require('../middlewares/authMiddleware');
-const { ensureUploadDir } = require('../config/uploadPath');
+const { createImageUpload } = require('../middlewares/imageUploadMiddleware');
 
-const locationUpload = multer({
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => cb(null, ensureUploadDir()),
-    filename: (req, file, cb) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      cb(null, 'location-' + uniqueSuffix + path.extname(file.originalname));
-    }
-  }),
-  limits: { fileSize: (parseInt(process.env.UPLOAD_MAX_SIZE_MB) || 3) * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    const filetypes = /jpeg|jpg|png|webp/i;
-    const mimetype = filetypes.test(file.mimetype);
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-
-    if (mimetype && extname) {
-      return cb(null, true);
-    }
-    cb(new Error('Format file gambar lokasi tidak didukung. Gunakan jpg, jpeg, png, atau webp.'));
-  }
-});
+const locationUpload = createImageUpload();
 
 router.get('/', pageController.getHome);
 router.get('/catalog', pageController.getCatalog);
@@ -41,8 +20,8 @@ router.get('/api/regions/districts', regionController.getDistricts);
 router.get('/dashboard', isAuthenticated, pageController.getUserDashboard);
 router.get('/admin/dashboard', isAuthenticated, isAdmin, pageController.getAdminDashboard);
 router.get('/admin/locations', isAuthenticated, isSuperAdmin, pageController.getAdminLocations);
-router.post('/admin/locations', isAuthenticated, isSuperAdmin, locationUpload.single('imageFile'), pageController.postCreateAdminLocation);
-router.post('/admin/locations/:id', isAuthenticated, isSuperAdmin, locationUpload.single('imageFile'), pageController.postUpdateAdminLocation);
+router.post('/admin/locations', isAuthenticated, isSuperAdmin, ...locationUpload.single('imageFile'), pageController.postCreateAdminLocation);
+router.post('/admin/locations/:id', isAuthenticated, isSuperAdmin, ...locationUpload.single('imageFile'), pageController.postUpdateAdminLocation);
 router.post('/admin/locations/:id/delete', isAuthenticated, isSuperAdmin, pageController.postDeleteAdminLocation);
 router.get('/admin/packages', isAuthenticated, isSuperAdmin, pageController.getAdminPackages);
 router.post('/admin/packages/:id', isAuthenticated, isSuperAdmin, pageController.postUpdateAdminPackage);

@@ -192,7 +192,7 @@
                     <div class="flex gap-3 flex-wrap">
                         <% property.images.forEach((img, index) => { %>
                         <div class="relative">
-                            <img src="<%= img.url %>" alt="<%= property.title %> - Foto <%= index + 1 %>" title="<%= property.title %> - Foto <%= index + 1 %>" class="w-24 h-18 object-cover rounded-lg border border-border-light <%= img.isMain ? 'ring-2 ring-primary' : '' %>">
+                            <img loading="lazy" decoding="async" src="<%= img.url %>" alt="<%= property.title %> - Foto <%= index + 1 %>" title="<%= property.title %> - Foto <%= index + 1 %>" class="w-24 h-18 object-cover rounded-lg border border-border-light <%= img.isMain ? 'ring-2 ring-primary' : '' %>">
                             <% if (img.isMain) { %>
                             <span class="absolute -top-1.5 -right-1.5 bg-primary text-on-primary text-[9px] font-bold px-1 py-0.5 rounded">UTAMA</span>
                             <% } %>
@@ -206,12 +206,12 @@
                     <div class="space-y-1.5">
                         <label class="text-label-sm font-bold text-on-surface-variant">Ganti Foto Utama</label>
                         <input type="file" name="mainImage" accept="image/*" class="w-full px-3 py-2 rounded-lg border border-border-light text-body-sm outline-none bg-surface-bright">
-                        <p class="text-label-xs text-outline">JPG/PNG/WebP, maks <%= process.env.UPLOAD_MAX_SIZE_MB || 5 %>MB.</p>
+                        <p class="text-label-xs text-outline">Rekomendasi ukuran akhir maksimal <%= uploadTargetMB %>MB. File lebih besar akan dikompres otomatis ke WebP.</p>
                     </div>
                     <div class="space-y-1.5">
                         <label class="text-label-sm font-bold text-on-surface-variant">Ganti Foto Galeri (maks 6)</label>
                         <input type="file" name="galleryImages" accept="image/*" multiple class="w-full px-3 py-2 rounded-lg border border-border-light text-body-sm outline-none bg-surface-bright">
-                        <p class="text-label-xs text-outline">JPG/PNG/WebP, maks <%= process.env.UPLOAD_MAX_SIZE_MB || 5 %>MB per foto.</p>
+                        <p class="text-label-xs text-outline">Sistem menerima file mentah sampai <%= uploadRawMaxMB %>MB per foto dan mengompres hasilnya otomatis.</p>
                     </div>
                 </div>
             </div>

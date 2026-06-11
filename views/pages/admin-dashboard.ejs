@@ -62,7 +62,7 @@
                                         <% 
                                         const mainImg = property.images.find(img => img.isMain)?.url || (property.images[0]?.url || '/images/placeholder.jpg'); 
                                         %>
-                                        <img src="<%= mainImg %>" alt="<%= property.title %> - 1rumah.biz.id" title="<%= property.title %>" class="w-16 h-12 object-cover rounded-lg border border-border-light flex-shrink-0">
+                                        <img loading="lazy" decoding="async" src="<%= mainImg %>" alt="<%= property.title %> - 1rumah.biz.id" title="<%= property.title %>" class="w-16 h-12 object-cover rounded-lg border border-border-light flex-shrink-0">
                                         <div class="max-w-[220px]">
                                             <a href="/property/<%= property.slug %>" target="_blank" class="font-semibold text-primary hover:underline block truncate" title="Buka Detail (Tab Baru)"><%= property.title %></a>
                                             <span class="text-label-xs text-outline block mt-0.5"><%= property.category.name %> | <%= property.listingType === 'SALE' ? 'Dijual' : 'Disewa' %></span>
@@ -136,7 +136,7 @@
                             <% 
                             const mainImg = property.images.find(img => img.isMain)?.url || (property.images[0]?.url || '/images/placeholder.jpg'); 
                             %>
-                            <img src="<%= mainImg %>" alt="<%= property.title %> - 1rumah.biz.id" title="<%= property.title %>" class="w-20 h-16 object-cover rounded-lg border border-border-light flex-shrink-0">
+                            <img loading="lazy" decoding="async" src="<%= mainImg %>" alt="<%= property.title %> - 1rumah.biz.id" title="<%= property.title %>" class="w-20 h-16 object-cover rounded-lg border border-border-light flex-shrink-0">
                             <div class="min-w-0 flex-grow">
                                 <a href="/property/<%= property.slug %>" target="_blank" class="font-semibold text-primary hover:underline block truncate text-body-md"><%= property.title %></a>
                                 <span class="text-label-xs text-outline block truncate mt-0.5"><%= property.category.name %> | <%= property.listingType === 'SALE' ? 'Dijual' : 'Disewa' %></span>
@@ -221,7 +221,7 @@
                                 <td class="p-4">
                                     <% if (inv.paymentProof) { %>
                                         <a href="<%= inv.paymentProof %>" target="_blank" class="inline-block relative group">
-                                            <img src="<%= inv.paymentProof %>" alt="Bukti transfer invoice <%= inv.invoiceNumber %>" title="Bukti transfer invoice <%= inv.invoiceNumber %>" class="w-16 h-12 object-cover rounded border border-border-light hover:scale-105 transition-all">
+                                            <img loading="lazy" decoding="async" src="<%= inv.paymentProof %>" alt="Bukti transfer invoice <%= inv.invoiceNumber %>" title="Bukti transfer invoice <%= inv.invoiceNumber %>" class="w-16 h-12 object-cover rounded border border-border-light hover:scale-105 transition-all">
                                             <span class="absolute bottom-0 right-0 bg-ink-dark/60 text-white text-[9px] p-0.5 rounded">Zoom</span>
                                         </a>
                                     <% } else { %>

@@ -128,7 +128,7 @@
                                 <!-- Featured Image thumbnail -->
                                 <td class="p-4">
                                     <% if (post.featured_image) { %>
-                                        <img src="<%= post.featured_image %>" alt="<%= post.title %> - 1rumah.biz.id" title="<%= post.title %>" class="w-16 h-10 object-cover rounded border border-border-light">
+                                        <img loading="lazy" decoding="async" src="<%= post.featured_image %>" alt="<%= post.title %> - 1rumah.biz.id" title="<%= post.title %>" class="w-16 h-10 object-cover rounded border border-border-light">
                                     <% } else { %>
                                         <div class="w-16 h-10 bg-surface-container-high rounded border border-border-light flex items-center justify-center text-outline">
                                             <span class="material-symbols-outlined text-[18px]">image</span>
@@ -249,7 +249,7 @@
                         <div class="flex gap-3">
                             <input type="checkbox" name="selected_post_ids" value="<%= post.id %>" form="bulk-action-form" class="bulk-post-checkbox mt-4 w-4 h-4 accent-primary cursor-pointer flex-shrink-0" aria-label="Pilih artikel <%= post.title %>">
                             <% if (post.featured_image) { %>
-                                <img src="<%= post.featured_image %>" alt="<%= post.title %> - 1rumah.biz.id" title="<%= post.title %>" class="w-16 h-12 object-cover rounded border border-border-light flex-shrink-0 bg-surface-container-low">
+                                <img loading="lazy" decoding="async" src="<%= post.featured_image %>" alt="<%= post.title %> - 1rumah.biz.id" title="<%= post.title %>" class="w-16 h-12 object-cover rounded border border-border-light flex-shrink-0 bg-surface-container-low">
                             <% } else { %>
                                 <div class="w-16 h-12 bg-surface-container-high rounded border border-border-light flex items-center justify-center text-outline flex-shrink-0">
                                     <span class="material-symbols-outlined text-[20px]">image</span>

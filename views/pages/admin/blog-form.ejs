@@ -93,12 +93,12 @@
                 <% if (isEdit && post.featured_image) { %>
                     <div class="mb-3 space-y-2">
                         <span class="text-body-xs text-outline block">Gambar Saat Ini:</span>
-                        <img src="<%= post.featured_image %>" alt="<%= post.title %> - 1rumah.biz.id" title="<%= post.title %>" class="w-48 aspect-[16/10] object-cover rounded-lg border border-border-light bg-surface-container-low">
+                        <img loading="lazy" decoding="async" src="<%= post.featured_image %>" alt="<%= post.title %> - 1rumah.biz.id" title="<%= post.title %>" class="w-48 aspect-[16/10] object-cover rounded-lg border border-border-light bg-surface-container-low">
                     </div>
                 <% } %>
                 <input type="file" id="featured_image" name="featured_image" accept="image/*"
                        class="w-full text-body-sm text-outline border border-border-light rounded-xl px-4 py-3 bg-surface-container-low focus:outline-none file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-label-sm file:font-semibold file:bg-primary file:text-on-primary hover:file:bg-surface-tint file:cursor-pointer transition-all">
-                <span class="text-body-xs text-outline block">Format file: JPG, JPEG, PNG, WEBP. Maksimal ukuran file 3MB.</span>
+                <span class="text-body-xs text-outline block">Format file: JPG, PNG, WEBP. Rekomendasi ukuran akhir maksimal <%= uploadTargetMB %>MB; file lebih besar akan dikompres otomatis.</span>
             </div>
 
             <!-- Excerpt -->

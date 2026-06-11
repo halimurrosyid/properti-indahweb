@@ -1,27 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
 const listingController = require('../controllers/listingController');
-const { ensureUploadDir } = require('../config/uploadPath');
+const { createImageUpload } = require('../middlewares/imageUploadMiddleware');
 
-const uploadDir = ensureUploadDir();
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const maxMB = parseInt(process.env.UPLOAD_MAX_SIZE_MB) || 5;
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: maxMB * 1024 * 1024 }
-});
+const upload = createImageUpload();
 
 // Configure Multer fields
 const uploadFields = upload.fields([
@@ -31,7 +13,7 @@ const uploadFields = upload.fields([
 
 const { isAuthenticated, isAdmin } = require('../middlewares/authMiddleware');
 
-router.post('/quick-post', uploadFields, listingController.postQuickPost);
+router.post('/quick-post', ...uploadFields, listingController.postQuickPost);
 router.get('/track-wa/:id', listingController.trackWaClick);
 
 // Admin listing review actions
@@ -43,12 +25,12 @@ router.post('/:id/status', isAuthenticated, listingController.updatePropertyStat
 router.post('/:id/delete', isAuthenticated, listingController.deleteProperty);
 
 // Invoice actions
-router.post('/invoice/:invoiceNumber/upload-proof', isAuthenticated, upload.single('paymentProof'), listingController.postUploadProof);
+router.post('/invoice/:invoiceNumber/upload-proof', isAuthenticated, ...upload.single('paymentProof'), listingController.postUploadProof);
 router.post('/invoice/:id/approve', isAuthenticated, isAdmin, listingController.approveInvoice);
 router.post('/invoice/:id/reject', isAuthenticated, isAdmin, listingController.rejectInvoice);
 
 // Edit Listing (by owner or admin)
 router.get('/:id/edit', isAuthenticated, listingController.getEditListing);
-router.post('/:id/edit', isAuthenticated, uploadFields, listingController.postEditListing);
+router.post('/:id/edit', isAuthenticated, ...uploadFields, listingController.postEditListing);
 
 module.exports = router;
