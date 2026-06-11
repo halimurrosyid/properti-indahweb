@@ -1,3 +1,21 @@
+<%
+    const pathNow = typeof currentPath !== 'undefined' ? currentPath : '';
+    const queryNow = typeof currentQuery !== 'undefined' ? currentQuery : {};
+    const isLoggedInHeader = typeof user !== 'undefined' && user;
+    const isAdminHeader = isLoggedInHeader && (user.role === 'super_admin' || user.role === 'admin');
+    const navClass = (active) => `nav-link text-label-md ${active ? 'nav-link-active' : ''}`;
+    const mobileNavClass = (active) => `text-body-md font-bold py-2 px-3 rounded-lg transition-colors ${active ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:text-primary hover:bg-primary/5'}`;
+    const isCatalog = pathNow === '/catalog';
+    const isSaleActive = isCatalog && queryNow.listingType === 'SALE';
+    const isRentActive = isCatalog && queryNow.listingType === 'RENT';
+    const isCatalogActive = isCatalog && !queryNow.listingType;
+    const isPackageActive = pathNow === '/packages';
+    const isArticleActive = pathNow === '/artikel' || pathNow.startsWith('/artikel/');
+    const isPostActive = pathNow === '/pasang-iklan';
+    const isDashboardActive = pathNow === '/dashboard';
+    const isAdminActive = pathNow.startsWith('/admin');
+    const isLoginActive = pathNow.startsWith('/auth/login') || pathNow.startsWith('/auth/register');
+%>
 <header class="bg-surface-container-lowest/92 w-full border-b border-border-light/80 shadow-sm sticky top-0 z-50 backdrop-blur-xl">
     <div class="flex justify-between items-center w-full px-container-margin md:px-stack-lg max-w-7xl mx-auto h-[68px]">
         <!-- Brand Logo -->
@@ -10,25 +28,46 @@
         
         <!-- Desktop Navigation Links -->
         <nav class="hidden md:flex items-center gap-1">
-            <a href="/catalog?listingType=SALE" class="nav-link text-label-md">Dijual</a>
-            <a href="/catalog?listingType=RENT" class="nav-link text-label-md">Disewa</a>
-            <a href="/catalog" class="nav-link text-label-md">Katalog</a>
-            <a href="/packages" class="nav-link text-label-md">Paket Iklan</a>
-            <a href="/artikel" class="nav-link text-label-md">Artikel</a>
+            <a href="/catalog?listingType=SALE" class="<%= navClass(isSaleActive) %>">Dijual</a>
+            <a href="/catalog?listingType=RENT" class="<%= navClass(isRentActive) %>">Disewa</a>
+            <a href="/catalog" class="<%= navClass(isCatalogActive) %>">Katalog</a>
+            <a href="/packages" class="<%= navClass(isPackageActive) %>">Paket Iklan</a>
+            <a href="/artikel" class="<%= navClass(isArticleActive) %>">Artikel</a>
         </nav>
 
         <!-- Action Controls -->
         <div class="hidden md:flex items-center gap-3">
-            <% if (typeof user !== 'undefined' && user) { %>
-                <% if (user.role === 'super_admin' || user.role === 'admin') { %>
-                    <a href="/admin/dashboard" class="nav-link text-label-md">Panel Admin</a>
-                <% } %>
-                <a href="/dashboard" class="nav-link text-label-md">Dashboard</a>
-                <a href="/auth/logout" class="text-on-surface-variant hover:text-error transition-colors text-label-md font-bold px-3 py-2 rounded-lg">Keluar</a>
+            <% if (isLoggedInHeader) { %>
+                <details class="account-menu relative">
+                    <summary class="list-none cursor-pointer border border-border-light bg-surface-container-lowest hover:bg-primary/5 hover:border-primary/20 text-on-surface-variant hover:text-primary transition-all rounded-full pl-2 pr-3 py-1.5 flex items-center gap-2 shadow-sm">
+                        <span class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-label-md font-black">
+                            <%= user.name ? user.name.trim().charAt(0).toUpperCase() : 'U' %>
+                        </span>
+                        <span class="max-w-36 truncate text-label-md font-bold"><%= user.name %></span>
+                        <span class="material-symbols-outlined text-[18px]">expand_more</span>
+                    </summary>
+                    <div class="absolute right-0 mt-2 w-56 rounded-lg border border-border-light bg-surface-container-lowest shadow-xl overflow-hidden z-50">
+                        <div class="px-4 py-3 border-b border-border-light bg-surface-subtle">
+                            <p class="text-label-sm font-black text-on-surface truncate"><%= user.name %></p>
+                            <p class="text-label-xs text-outline truncate"><%= user.role %></p>
+                        </div>
+                        <a href="/dashboard" class="flex items-center gap-2 px-4 py-3 text-label-sm font-bold transition-colors <%= isDashboardActive ? 'text-primary bg-primary/10' : 'text-on-surface-variant hover:bg-primary/5 hover:text-primary' %>">
+                            <span class="material-symbols-outlined text-[18px]">dashboard</span> Dashboard
+                        </a>
+                        <% if (isAdminHeader) { %>
+                            <a href="/admin/dashboard" class="flex items-center gap-2 px-4 py-3 text-label-sm font-bold transition-colors <%= isAdminActive ? 'text-primary bg-primary/10' : 'text-on-surface-variant hover:bg-primary/5 hover:text-primary' %>">
+                                <span class="material-symbols-outlined text-[18px]">admin_panel_settings</span> Panel Admin
+                            </a>
+                        <% } %>
+                        <a href="/auth/logout" class="flex items-center gap-2 px-4 py-3 text-label-sm font-bold text-error hover:bg-error/5 transition-colors border-t border-border-light">
+                            <span class="material-symbols-outlined text-[18px]">logout</span> Keluar
+                        </a>
+                    </div>
+                </details>
             <% } else { %>
-                <a href="/auth/login" class="nav-link text-label-md">Masuk / Daftar</a>
+                <a href="/auth/login" class="<%= navClass(isLoginActive) %>">Masuk / Daftar</a>
             <% } %>
-            <a href="/pasang-iklan" class="primary-action text-label-md px-5 py-2.5">
+            <a href="/pasang-iklan" class="primary-action text-label-md px-5 py-2.5 <%= isPostActive ? 'ring-4 ring-primary/15' : '' %>">
                 <span class="material-symbols-outlined text-[18px]">add_circle</span> Pasang Iklan Gratis
             </a>
         </div>
@@ -44,22 +83,26 @@
     <!-- Mobile Drawer Menu -->
     <div id="mobile-menu" class="hidden md:hidden border-t border-border-light bg-surface-container-lowest py-4 px-container-margin space-y-4 shadow-md">
         <nav class="flex flex-col gap-3">
-            <a href="/catalog?listingType=SALE" class="text-on-surface-variant hover:text-primary text-body-md font-semibold py-1">Dijual</a>
-            <a href="/catalog?listingType=RENT" class="text-on-surface-variant hover:text-primary text-body-md font-semibold py-1">Disewa</a>
-            <a href="/catalog" class="text-on-surface-variant hover:text-primary text-body-md font-semibold py-1">Katalog</a>
-            <a href="/packages" class="text-on-surface-variant hover:text-primary text-body-md font-semibold py-1">Paket Iklan</a>
-            <a href="/artikel" class="text-on-surface-variant hover:text-primary text-body-md font-semibold py-1">Artikel</a>
+            <a href="/catalog?listingType=SALE" class="<%= mobileNavClass(isSaleActive) %>">Dijual</a>
+            <a href="/catalog?listingType=RENT" class="<%= mobileNavClass(isRentActive) %>">Disewa</a>
+            <a href="/catalog" class="<%= mobileNavClass(isCatalogActive) %>">Katalog</a>
+            <a href="/packages" class="<%= mobileNavClass(isPackageActive) %>">Paket Iklan</a>
+            <a href="/artikel" class="<%= mobileNavClass(isArticleActive) %>">Artikel</a>
             <hr class="border-border-light my-1" />
-            <% if (typeof user !== 'undefined' && user) { %>
-                <% if (user.role === 'super_admin' || user.role === 'admin') { %>
-                    <a href="/admin/dashboard" class="text-on-surface-variant hover:text-primary text-body-md font-semibold py-1">Panel Admin</a>
+            <% if (isLoggedInHeader) { %>
+                <div class="bg-surface-subtle border border-border-light rounded-lg p-3">
+                    <p class="text-label-sm font-black text-on-surface truncate"><%= user.name %></p>
+                    <p class="text-label-xs text-outline truncate"><%= user.role %></p>
+                </div>
+                <% if (isAdminHeader) { %>
+                    <a href="/admin/dashboard" class="<%= mobileNavClass(isAdminActive) %>">Panel Admin</a>
                 <% } %>
-                <a href="/dashboard" class="text-on-surface-variant hover:text-primary text-body-md font-semibold py-1">Dashboard (<%= user.name %>)</a>
-                <a href="/auth/logout" class="text-on-surface-variant hover:text-error text-body-md font-semibold py-1">Keluar</a>
+                <a href="/dashboard" class="<%= mobileNavClass(isDashboardActive) %>">Dashboard</a>
+                <a href="/auth/logout" class="text-error hover:bg-error/5 text-body-md font-bold py-2 px-3 rounded-lg">Keluar</a>
             <% } else { %>
-                <a href="/auth/login" class="text-on-surface-variant hover:text-primary text-body-md font-semibold py-1">Masuk / Daftar</a>
+                <a href="/auth/login" class="<%= mobileNavClass(isLoginActive) %>">Masuk / Daftar</a>
             <% } %>
-            <a href="/pasang-iklan" class="primary-action text-label-md px-4 py-2.5 w-full">
+            <a href="/pasang-iklan" class="primary-action text-label-md px-4 py-2.5 w-full <%= isPostActive ? 'ring-4 ring-primary/15' : '' %>">
                 <span class="material-symbols-outlined text-[18px]">add_circle</span> Pasang Iklan Gratis
             </a>
         </nav>

@@ -107,6 +107,7 @@ app.use((req, res, next) => {
   res.locals.formatJakartaDateTime = formatJakartaDateTime;
   res.locals.formatJakartaDateInputValue = formatJakartaDateInputValue;
   res.locals.currentPath = req.path;
+  res.locals.currentQuery = req.query || {};
   res.locals.uploadTargetMB = targetMB;
   res.locals.uploadRawMaxMB = rawMaxMB;
 
