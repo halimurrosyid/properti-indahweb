@@ -4,7 +4,9 @@ const {
   findActivePackages,
   parseBenefits,
   serializeBenefits,
-  formatPackagePrice
+  formatPackagePrice,
+  sortPackagesForDisplay,
+  packageDurationLabel
 } = require('../services/adPackageService');
 const {
   isSmtpConfigured,
@@ -328,6 +330,7 @@ exports.getPasangIklan = async (req, res, next) => {
       adPackages,
       parseBenefits,
       formatPackagePrice,
+      packageDurationLabel,
       selectedPackageCode: req.query.package || 'GRATIS'
     });
   } catch (error) {
@@ -554,17 +557,13 @@ const parseOptionalInt = (value) => {
 
 exports.getAdminPackages = async (req, res, next) => {
   try {
-    const packages = await prisma.adPackage.findMany({
-      orderBy: [
-        { sortOrder: 'asc' },
-        { id: 'asc' }
-      ]
-    });
+    const packages = sortPackagesForDisplay(await prisma.adPackage.findMany());
 
     res.render('pages/admin-packages', {
       title: 'Kelola Paket Iklan',
       packages,
       parseBenefits,
+      packageDurationLabel,
       message: req.query.msg || null,
       error: req.query.err || null
     });
@@ -583,7 +582,6 @@ exports.postUpdateAdminPackage = async (req, res, next) => {
       durationDays,
       listingLimit,
       featuredDurationDays,
-      sortOrder,
       benefits,
       isFeatured,
       grantsAgent,
@@ -599,7 +597,6 @@ exports.postUpdateAdminPackage = async (req, res, next) => {
     const parsedListingLimit = Math.max(1, parseInt(listingLimit || '1', 10) || 1);
     const parsedDurationDays = parseOptionalInt(durationDays);
     const parsedFeaturedDurationDays = parseOptionalInt(featuredDurationDays);
-    const parsedSortOrder = parseInt(sortOrder || '0', 10) || 0;
     const shouldFeature = isFeatured === 'on';
     const shouldGrantAgent = grantsAgent === 'on';
 
@@ -617,14 +614,13 @@ exports.postUpdateAdminPackage = async (req, res, next) => {
         name: String(name).trim(),
         description: String(description || '').trim() || null,
         price: parsedPrice,
-        durationDays: parsedDurationDays,
+        durationDays: shouldGrantAgent ? parsedDurationDays : null,
         listingLimit: parsedListingLimit,
         isFeatured: shouldFeature,
         featuredDurationDays: shouldFeature ? parsedFeaturedDurationDays : null,
         grantsAgent: shouldGrantAgent,
         isPopular: isPopular === 'on',
         isActive: isActive === 'on',
-        sortOrder: parsedSortOrder,
         benefits: serializeBenefits(benefits)
       }
     });
@@ -1090,7 +1086,8 @@ exports.getPackagesPage = async (req, res, next) => {
       description: 'Tingkatkan jangkauan promosi properti Anda dengan paket iklan premium dan lencana terverifikasi.',
       adPackages,
       parseBenefits,
-      formatPackagePrice
+      formatPackagePrice,
+      packageDurationLabel
     });
   } catch (error) {
     next(error);

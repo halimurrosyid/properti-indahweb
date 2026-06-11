@@ -249,7 +249,7 @@ const isLoggedIn = typeof user !== 'undefined' && user;
             <!-- STEP 6: Paket Iklan -->
             <div class="form-step hidden space-y-4" data-step="6">
                 <h3 class="text-headline-sm font-bold text-on-surface">Langkah 6: Pilih Paket Iklan</h3>
-                <p class="text-body-sm text-on-surface-variant">Pilih jenis paket tayang untuk memaksimalkan penjualan properti Anda.</p>
+                <p class="text-body-sm text-on-surface-variant">Pilih jenis paket tayang. Featured hanya menaikkan prioritas listing sementara; paket akun/agen mengatur kuota dan masa aktif akun.</p>
                 
                 <% 
                     const packageCodes = adPackages.map(pkg => pkg.code);
@@ -271,6 +271,7 @@ const isLoggedIn = typeof user !== 'undefined' && user;
                                 <div class="pr-16">
                                     <h4 class="text-title-lg font-bold text-on-surface"><%= pkg.name %></h4>
                                     <p class="text-body-sm text-outline mt-1"><%= pkg.description || 'Paket iklan properti' %></p>
+                                    <p class="text-label-xs text-primary font-bold mt-2"><%= packageDurationLabel(pkg) %></p>
                                 </div>
                                 <span class="<%= price > 0 ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant' %> font-bold text-label-xs px-2.5 py-1 rounded whitespace-nowrap">Rp <%= formatPackagePrice(pkg.price) %></span>
                             </div>

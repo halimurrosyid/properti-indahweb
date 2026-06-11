@@ -4,7 +4,7 @@
         <span class="text-primary text-label-md font-bold tracking-widest uppercase">Paket & Layanan Iklan</span>
         <h1 class="text-headline-md md:text-headline-lg font-bold text-on-surface">Maksimalkan Penjualan Properti Anda</h1>
         <p class="text-body-sm md:text-body-md text-on-surface-variant max-w-xl mx-auto">
-            Dapatkan eksposur dan jangkauan calon pembeli lebih tinggi dengan meletakkan properti Anda di slot Featured Premium kami.
+            Pilih paket sesuai kebutuhan: featured untuk menonjolkan listing, atau paket agen untuk menambah kuota iklan aktif.
         </p>
     </div>
 
@@ -47,7 +47,16 @@
                     </div>
                     <div class="pt-2">
                         <span class="text-headline-sm font-bold <%= price > 0 ? 'text-primary' : 'text-on-surface' %>">Rp <%= formatPackagePrice(pkg.price) %></span>
-                        <span class="text-body-sm text-outline">/ <%= pkg.durationDays ? `${pkg.durationDays} hari` : 'selamanya' %></span>
+                        <span class="text-body-sm text-outline">/ <%= packageDurationLabel(pkg) %></span>
+                    </div>
+                    <div class="bg-surface-subtle border border-border-light rounded-lg p-3 text-body-xs text-on-surface-variant leading-relaxed">
+                        <% if (pkg.isFeatured && pkg.featuredDurationDays) { %>
+                            Setelah masa featured habis, listing tetap tayang normal dan hanya status unggulannya yang berhenti.
+                        <% } else if (pkg.grantsAgent && pkg.durationDays) { %>
+                            Setelah masa aktif paket habis, akun kembali ke kuota gratis/default tanpa menghapus listing.
+                        <% } else { %>
+                            Paket gratis berlaku tanpa masa kedaluwarsa selama mengikuti batas listing aktif.
+                        <% } %>
                     </div>
                     <hr class="border-border-light" />
                     <ul class="text-body-sm text-on-surface-variant space-y-3">

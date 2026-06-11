@@ -24,7 +24,7 @@ const DEFAULT_PACKAGES = [
     name: 'Featured 7 Hari',
     description: 'Promosi cepat untuk listing yang ingin lebih menonjol.',
     price: 50000,
-    durationDays: 7,
+    durationDays: null,
     listingLimit: 1,
     isFeatured: true,
     featuredDurationDays: 7,
@@ -44,7 +44,7 @@ const DEFAULT_PACKAGES = [
     name: 'Featured 30 Hari',
     description: 'Exposure lebih lama untuk listing prioritas.',
     price: 150000,
-    durationDays: 30,
+    durationDays: null,
     listingLimit: 1,
     isFeatured: true,
     featuredDurationDays: 30,
@@ -99,6 +99,39 @@ function formatPackagePrice(price) {
   return Number(price || 0).toLocaleString('id-ID');
 }
 
+function sortPackagesForDisplay(packages) {
+  return [...packages].sort((a, b) => {
+    if (a.isActive !== b.isActive) return a.isActive ? -1 : 1;
+    if (a.isPopular !== b.isPopular) return a.isPopular ? -1 : 1;
+
+    const aPaid = Number(a.price || 0) > 0;
+    const bPaid = Number(b.price || 0) > 0;
+    if (aPaid !== bPaid) return aPaid ? -1 : 1;
+
+    if (aPaid && bPaid && Number(a.price || 0) !== Number(b.price || 0)) {
+      return Number(a.price || 0) - Number(b.price || 0);
+    }
+
+    const aCreated = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const bCreated = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    if (aCreated !== bCreated) return bCreated - aCreated;
+
+    return (a.id || 0) - (b.id || 0);
+  });
+}
+
+function packageDurationLabel(pkg) {
+  if (pkg.grantsAgent && pkg.durationDays) {
+    return `Masa aktif akun ${pkg.durationDays} hari`;
+  }
+
+  if (pkg.isFeatured && pkg.featuredDurationDays) {
+    return `Featured ${pkg.featuredDurationDays} hari`;
+  }
+
+  return 'Berlaku selamanya';
+}
+
 function packageSnapshot(pkg) {
   return JSON.stringify({
     code: pkg.code,
@@ -133,25 +166,18 @@ async function seedDefaultPackages(prisma) {
 
 async function findActivePackages(prisma) {
   const packages = await prisma.adPackage.findMany({
-    where: { isActive: true },
-    orderBy: [
-      { sortOrder: 'asc' },
-      { id: 'asc' }
-    ]
+    where: { isActive: true }
   });
 
   if (packages.length > 0) {
-    return packages;
+    return sortPackagesForDisplay(packages);
   }
 
   await seedDefaultPackages(prisma);
-  return prisma.adPackage.findMany({
+  const seededPackages = await prisma.adPackage.findMany({
     where: { isActive: true },
-    orderBy: [
-      { sortOrder: 'asc' },
-      { id: 'asc' }
-    ]
   });
+  return sortPackagesForDisplay(seededPackages);
 }
 
 async function findPackageForCheckout(prisma, code) {
@@ -190,6 +216,8 @@ module.exports = {
   serializeBenefits,
   parseBenefits,
   formatPackagePrice,
+  sortPackagesForDisplay,
+  packageDurationLabel,
   packageSnapshot,
   seedDefaultPackages,
   findActivePackages,

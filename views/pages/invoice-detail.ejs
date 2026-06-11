@@ -97,18 +97,21 @@
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-body-sm">
                         <div class="bg-surface-container-lowest border border-border-light rounded-xl p-3">
-                            <span class="block text-label-xs text-outline font-bold uppercase">Durasi Paket</span>
-                            <span class="font-bold text-on-surface"><%= invoice.durationDays || (packageDetails && packageDetails.durationDays) || 'Selamanya' %><%= (invoice.durationDays || (packageDetails && packageDetails.durationDays)) ? ' hari' : '' %></span>
+                            <span class="block text-label-xs text-outline font-bold uppercase">Masa Aktif Akun/Paket</span>
+                            <span class="font-bold text-on-surface"><%= invoice.grantsAgent ? `${invoice.durationDays || (packageDetails && packageDetails.durationDays) || 0} hari` : 'Tidak mengubah akun' %></span>
                         </div>
                         <div class="bg-surface-container-lowest border border-border-light rounded-xl p-3">
                             <span class="block text-label-xs text-outline font-bold uppercase">Limit Iklan Aktif</span>
                             <span class="font-bold text-on-surface"><%= invoice.listingLimit || (packageDetails && packageDetails.listingLimit) || 1 %> iklan</span>
                         </div>
                         <div class="bg-surface-container-lowest border border-border-light rounded-xl p-3">
-                            <span class="block text-label-xs text-outline font-bold uppercase">Featured</span>
+                            <span class="block text-label-xs text-outline font-bold uppercase">Masa Featured Listing</span>
                             <span class="font-bold text-on-surface"><%= invoice.featuredDurationDays || (packageDetails && packageDetails.featuredDurationDays) ? `${invoice.featuredDurationDays || packageDetails.featuredDurationDays} hari` : 'Tidak' %></span>
                         </div>
                     </div>
+                    <p class="text-label-xs text-outline leading-relaxed">
+                        Saat masa aktif akun habis, akun kembali ke paket gratis/default. Saat masa featured habis, listing tetap tayang normal dan hanya status unggulannya yang berhenti.
+                    </p>
                     <% const snapshotBenefits = packageDetails && Array.isArray(packageDetails.benefits) ? packageDetails.benefits : []; %>
                     <% if (snapshotBenefits.length > 0) { %>
                         <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-body-sm text-on-surface-variant">
